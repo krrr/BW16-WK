@@ -1,0 +1,19 @@
+.pio/
+.pioenvs/
+.piolibdeps/
+__pycache__/
+*.o
+*.d
+*.elf
+*.axf
+*.bin
+*.map
+.sconsign.dblite
+lib
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+include/webpage.h
+
+.vscode

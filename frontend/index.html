@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN" x-data="app">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BW16 Test</title>
+  <link rel="stylesheet" href="/src/main.js">
+</head>
+<body>
+  <main class="container" style="margin-top: 2rem;">
+    <article>
+      <header>
+        <h1 x-text="message"></h1>
+      </header>
+      <p>Pico CSS + Alpine.js + Brotli</p>
+      <button @click="count++" x-text="'点击: ' + count" class="contrast"></button>
+      <button @click="reset" class="secondary">重置</button>
+      <footer>
+        <small x-text="'运行时间: ' + uptime + 's'"></small>
+      </footer>
+    </article>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
