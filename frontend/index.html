@@ -3,23 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BW16 Test</title>
+  <title>BW16 WiFi Killer</title>
   <link rel="stylesheet" href="/src/main.js">
 </head>
 <body>
-  <main class="container" style="margin-top: 2rem;">
-    <article>
-      <header>
-        <h1 x-text="message"></h1>
-      </header>
-      <p>Pico CSS + Alpine.js + Brotli</p>
-      <button @click="count++" x-text="'点击: ' + count" class="contrast"></button>
-      <button @click="reset" class="secondary">重置</button>
-      <footer>
-        <small x-text="'运行时间: ' + uptime + 's'"></small>
-      </footer>
-    </article>
+  <nav class="container-fluid" style="margin-top: 1rem;">
+    <ul>
+      <li><strong>BW16 WiFi Killer</strong></li>
+    </ul>
+    <ul>
+      <li><a href="#" @click.prevent="currentTab='home'" :class="{contrast: currentTab==='home'}">首页</a></li>
+      <li><a href="#" @click.prevent="currentTab='scan'" :class="{contrast: currentTab==='scan'}">扫描</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <!-- Home Tab -->
+    <section x-show="currentTab==='home'">
+      <article>
+        <header>
+          <h1 x-text="message"></h1>
+        </header>
+        <p>Pico CSS + Alpine.js</p>
+        <button @click="count++" x-text="'点击: ' + count" class="contrast"></button>
+        <button @click="reset" class="secondary">重置</button>
+        <footer>
+          <small x-text="'运行时间: ' + uptime + 's'"></small>
+        </footer>
+      </article>
+    </section>
+
+    <!-- Scan Tab -->
+    <section x-show="currentTab==='scan'">
+      <article>
+        <header>
+          <h1>WiFi 扫描</h1>
+        </header>
+        <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+          <button @click="startScan" :disabled="scanning" class="contrast" style="min-width:10rem;">
+            <span x-show="!scanning">开始扫描</span>
+            <span x-show="scanning">扫描中...</span>
+          </button>
+          <small x-show="scanResultCount !== null" x-text="'发现 ' + scanResultCount + ' 个网络'"></small>
+        </div>
+
+        <p x-show="scanError" role="alert" class="error" x-text="scanError"></p>
+
+        <div x-show="scanResults.length > 0" style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>SSID</th>
+                <th>BSSID</th>
+                <th>信号</th>
+                <th>信道</th>
+                <th>频段</th>
+                <th>加密</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="ap in scanResults" :key="ap.bssid">
+                <tr>
+                  <td x-text="ap.ssid || '(隐藏)'"></td>
+                  <td style="font-family:monospace;font-size:0.85em;" x-text="ap.bssid"></td>
+                  <td x-text="ap.rssi + ' dBm'" :style="'color:' + rssiColor(ap.rssi) + ';font-weight:bold;'"></td>
+                  <td x-text="ap.channel"></td>
+                  <td x-text="ap.band"></td>
+                  <td x-text="ap.security"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <footer>
+          <small>扫描使用低层 wifi_scan_networks API，结果实时返回</small>
+        </footer>
+      </article>
+    </section>
   </main>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

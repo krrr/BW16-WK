@@ -2,6 +2,8 @@
 #include <WiFi.h>
 #include "webpage.h"
 
+extern void handleScanApi(WiFiClient& client);
+
 char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
 char ap_channel[] = "1";
@@ -35,6 +37,7 @@ static constexpr uint32_t djb2_hash(const char* s, uint32_t h = 5381) {
 
 static constexpr uint32_t HASH_ROOT       = djb2_hash("/");
 static constexpr uint32_t HASH_INDEX_HTML = djb2_hash("/index.html");
+static constexpr uint32_t HASH_API_SCAN   = djb2_hash("/api/scan");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
     int s = req.indexOf(' ') + 1;
@@ -46,6 +49,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
         case HASH_ROOT:
         case HASH_INDEX_HTML:
             handleRoot(client);
+            break;
+        case HASH_API_SCAN:
+            handleScanApi(client);
             break;
         default:
             handleNotFound(client);
@@ -62,7 +68,8 @@ void setup() {
     IPAddress gw(192, 168, 4, 1);
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gw, gw, subnet);
-    WiFi.apbegin(ap_ssid, ap_pass, ap_channel, 0);
+    WiFi.enableConcurrent();
+    WiFi.apbegin(ap_ssid, ap_pass, ap_channel, FALSE);
 
     Serial.print("SSID: ");
     Serial.println(ap_ssid);
