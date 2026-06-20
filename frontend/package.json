@@ -12,10 +12,13 @@
     "alpinejs": "^3"
   },
   "devDependencies": {
+    "sass-embedded": "^1.100.0",
     "vite": "^6",
     "vite-plugin-singlefile": "^2"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

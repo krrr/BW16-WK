@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "webpage.h"
+#include "favicon.h"
 
 extern void handleScanApi(WiFiClient& client);
 
@@ -23,6 +24,16 @@ static void handleRoot(WiFiClient& client) {
     client.write((const uint8_t*)webpage_gz, webpage_gz_len);
 }
 
+static void handleFavicon(WiFiClient& client) {
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: image/x-icon");
+    client.print("Content-Length: ");
+    client.println(favicon_ico_len);
+    client.println("Connection: close");
+    client.println();
+    client.write((const uint8_t*)favicon_ico, favicon_ico_len);
+}
+
 static void handleNotFound(WiFiClient& client) {
     client.println("HTTP/1.1 404 Not Found");
     client.println("Connection: close");
@@ -37,6 +48,7 @@ static constexpr uint32_t djb2_hash(const char* s, uint32_t h = 5381) {
 
 static constexpr uint32_t HASH_ROOT       = djb2_hash("/");
 static constexpr uint32_t HASH_INDEX_HTML = djb2_hash("/index.html");
+static constexpr uint32_t HASH_FAVICON    = djb2_hash("/favicon.ico");
 static constexpr uint32_t HASH_API_SCAN   = djb2_hash("/api/scan");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
@@ -49,6 +61,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
         case HASH_ROOT:
         case HASH_INDEX_HTML:
             handleRoot(client);
+            break;
+        case HASH_FAVICON:
+            handleFavicon(client);
             break;
         case HASH_API_SCAN:
             handleScanApi(client);

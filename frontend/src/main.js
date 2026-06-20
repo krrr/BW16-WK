@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs'
 import '@picocss/pico'
+import './styles.scss'
 
 Alpine.data('app', () => ({
   // Home
@@ -30,14 +31,24 @@ Alpine.data('app', () => ({
   async startScan() {
     this.scanning = true
     this.scanError = ''
-    this.scanResults = []
     this.scanResultCount = null
     try {
       const r = await fetch('/api/scan')
       const data = await r.json()
       if (data.success) {
-        this.scanResults = data.networks
-        this.scanResultCount = data.count
+        const now = new Date().toLocaleString('zh-CN')
+        const seen = new Set()
+        for (const ap of data.networks) {
+          seen.add(ap.bssid)
+          const existing = this.scanResults.find(a => a.bssid === ap.bssid)
+          if (existing) {
+            Object.assign(existing, ap, { lastSeen: now })
+          } else {
+            ap.lastSeen = now
+            this.scanResults.push(ap)
+          }
+        }
+        this.scanResultCount = this.scanResults.length
       } else {
         this.scanError = data.message || '扫描失败'
       }

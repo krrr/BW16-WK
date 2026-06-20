@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BW16 WiFi Killer</title>
   <link rel="stylesheet" href="/src/main.js">
-  <style>
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{display:inline-block;width:1em;height:1em;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.4em}
-  </style>
 </head>
 <body>
   <nav class="container-fluid" style="margin-top: 1rem;">
@@ -63,6 +59,7 @@
                 <th>信道</th>
                 <th>频段</th>
                 <th>加密</th>
+                <th>最后出现时间</th>
               </tr>
             </thead>
             <tbody>
@@ -74,6 +71,7 @@
                   <td x-text="ap.channel"></td>
                   <td x-text="ap.band"></td>
                   <td x-text="ap.security"></td>
+                  <td style="font-size:0.85em;" x-text="ap.lastSeen"></td>
                 </tr>
               </template>
             </tbody>
