@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BW16 WiFi Killer</title>
   <link rel="stylesheet" href="/src/main.js">
+  <style>
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{display:inline-block;width:1em;height:1em;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.4em}
+  </style>
 </head>
 <body>
   <nav class="container-fluid" style="margin-top: 1rem;">
@@ -42,7 +46,7 @@
         <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
           <button @click="startScan" :disabled="scanning" class="contrast" style="min-width:10rem;">
             <span x-show="!scanning">开始扫描</span>
-            <span x-show="scanning">扫描中...</span>
+            <span x-show="scanning"><span class="spinner"></span>扫描中...</span>
           </button>
           <small x-show="scanResultCount !== null" x-text="'发现 ' + scanResultCount + ' 个网络'"></small>
         </div>

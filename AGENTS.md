@@ -20,6 +20,10 @@
 2. `node scripts/compress-to-c.mjs` (gz压缩) → `include/webpage.h`
 3. `pio run` → 编译固件
 
+### 单片机SDK参考源码
+` lib/ameba-arduino-d-feature-platformio-support/Arduino_package`
+
+
 ### Build One-liner
 ```powershell
 .\build-all.ps1              # 完整构建

@@ -47,19 +47,38 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
         ap.ssid = String((const char*)r->SSID.val);
         ap.rssi = r->signal_strength;
         ap.channel = r->channel;
-        ap.band = (r->band == RTW_802_11_BAND_5GHZ) ? "5GHz" : "2.4GHz";
+        // SDK has bug, always 5G: r->band == RTW_802_11_BAND_5GHZ
+        ap.band = (r->channel >= 36) ? "5GHz" : "2.4GHz";
         switch (r->security) {
-            case RTW_SECURITY_OPEN:              ap.security = "OPEN"; break;
-            case RTW_SECURITY_WEP_PSK:           ap.security = "WEP"; break;
-            case RTW_SECURITY_WPA_TKIP_PSK:      ap.security = "WPA-TKIP"; break;
-            case RTW_SECURITY_WPA_AES_PSK:       ap.security = "WPA-AES"; break;
-            case RTW_SECURITY_WPA2_AES_PSK:      ap.security = "WPA2-AES"; break;
-            case RTW_SECURITY_WPA2_TKIP_PSK:     ap.security = "WPA2-TKIP"; break;
-            case RTW_SECURITY_WPA2_MIXED_PSK:    ap.security = "WPA2-MIXED"; break;
-            case RTW_SECURITY_WPA_WPA2_MIXED_PSK:ap.security = "WPA/WPA2"; break;
-            case RTW_SECURITY_WPA3_AES_PSK:       ap.security = "WPA3-SAE"; break;
-            case RTW_SECURITY_WPA2_WPA3_MIXED:   ap.security = "WPA2/WPA3"; break;
-            default:                             ap.security = "UNKNOWN"; break;
+            case RTW_SECURITY_OPEN:                 ap.security = "OPEN"; break;
+            case RTW_SECURITY_WEP_PSK:              ap.security = "WEP"; break;
+            case RTW_SECURITY_WEP_SHARED:           ap.security = "WEP-SHARED"; break;
+            case RTW_SECURITY_WPA_TKIP_PSK:         ap.security = "WPA-TKIP"; break;
+            case RTW_SECURITY_WPA_AES_PSK:          ap.security = "WPA-AES"; break;
+            case RTW_SECURITY_WPA_MIXED_PSK:        ap.security = "WPA-MIXED"; break;
+            case RTW_SECURITY_WPA2_AES_PSK:         ap.security = "WPA2-AES"; break;
+            case RTW_SECURITY_WPA2_TKIP_PSK:        ap.security = "WPA2-TKIP"; break;
+            case RTW_SECURITY_WPA2_MIXED_PSK:       ap.security = "WPA2-MIXED"; break;
+            case RTW_SECURITY_WPA_WPA2_TKIP_PSK:    ap.security = "WPA/WPA2-TKIP"; break;
+            case RTW_SECURITY_WPA_WPA2_AES_PSK:     ap.security = "WPA/WPA2-AES"; break;
+            case RTW_SECURITY_WPA_WPA2_MIXED_PSK:   ap.security = "WPA/WPA2"; break;
+            case RTW_SECURITY_WPA2_AES_CMAC:        ap.security = "WPA2-AES-CMAC"; break;
+            case RTW_SECURITY_WPA_TKIP_ENTERPRISE:  ap.security = "WPA-TKIP-ENT"; break;
+            case RTW_SECURITY_WPA_AES_ENTERPRISE:   ap.security = "WPA-AES-ENT"; break;
+            case RTW_SECURITY_WPA_MIXED_ENTERPRISE: ap.security = "WPA-MIXED-ENT"; break;
+            case RTW_SECURITY_WPA2_TKIP_ENTERPRISE: ap.security = "WPA2-TKIP-ENT"; break;
+            case RTW_SECURITY_WPA2_AES_ENTERPRISE:  ap.security = "WPA2-AES-ENT"; break;
+            case RTW_SECURITY_WPA2_MIXED_ENTERPRISE:ap.security = "WPA2-MIXED-ENT"; break;
+            case RTW_SECURITY_WPA_WPA2_TKIP_ENTERPRISE:  ap.security = "WPA/WPA2-TKIP-ENT"; break;
+            case RTW_SECURITY_WPA_WPA2_AES_ENTERPRISE:   ap.security = "WPA/WPA2-AES-ENT"; break;
+            case RTW_SECURITY_WPA_WPA2_MIXED_ENTERPRISE: ap.security = "WPA/WPA2-ENT"; break;
+            case RTW_SECURITY_WPS_OPEN:             ap.security = "WPS-OPEN"; break;
+            case RTW_SECURITY_WPS_SECURE:           ap.security = "WPS-SECURE"; break;
+            case RTW_SECURITY_WPA3_AES_PSK:         ap.security = "WPA3-SAE"; break;
+            case RTW_SECURITY_WPA2_WPA3_MIXED:      ap.security = "WPA2/WPA3"; break;
+            case RTW_SECURITY_WPA3_ENTERPRISE:      ap.security = "WPA3-ENT"; break;
+            case RTW_SECURITY_WPA3_OWE:             ap.security = "WPA3-OWE"; break;
+            default:                                ap.security = "UNKNOWN"; break;
         }
         char bssid_str[] = "XX:XX:XX:XX:XX:XX";
         snprintf(bssid_str, sizeof(bssid_str), "%02X:%02X:%02X:%02X:%02X:%02X",
