@@ -4,6 +4,7 @@
 #include "favicon.h"
 
 extern void handleScanApi(WiFiClient& client);
+static void handleStatusApi(WiFiClient& client);
 
 char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
@@ -40,6 +41,17 @@ static void handleNotFound(WiFiClient& client) {
     client.println();
 }
 
+static void handleStatusApi(WiFiClient& client) {
+    unsigned long uptime = millis() / 1000;
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: application/json");
+    client.println("Connection: close");
+    client.println();
+    client.print("{\"uptime\":");
+    client.print(uptime);
+    client.println("}");
+}
+
 // === Routing ===
 
 static constexpr uint32_t djb2_hash(const char* s, uint32_t h = 5381) {
@@ -50,6 +62,7 @@ static constexpr uint32_t HASH_ROOT       = djb2_hash("/");
 static constexpr uint32_t HASH_INDEX_HTML = djb2_hash("/index.html");
 static constexpr uint32_t HASH_FAVICON    = djb2_hash("/favicon.ico");
 static constexpr uint32_t HASH_API_SCAN   = djb2_hash("/api/scan");
+static constexpr uint32_t HASH_API_STATUS = djb2_hash("/api/status");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
     int s = req.indexOf(' ') + 1;
@@ -67,6 +80,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
             break;
         case HASH_API_SCAN:
             handleScanApi(client);
+            break;
+        case HASH_API_STATUS:
+            handleStatusApi(client);
             break;
         default:
             handleNotFound(client);

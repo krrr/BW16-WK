@@ -3,11 +3,6 @@
 #include <wifi_conf.h>
 #include <wifi_structures.h>
 
-// wifi_scan_networks() 在 STA+AP 并发模式下对 STA 接口 (wlan0) 发起的全信道扫描
-// 可能因驱动层未正确初始化 STA 链路而返回空结果。
-// wifi_scan_networks_mcc() 是 SDK 专为并发模式设计的逐信道扫描版本，
-// 它逐个信道调用 wext_set_scan + 信道间插入 100ms 间隔让 AP 发送信标，
-// 保证扫描期间 AP 服务不中断且结果正确返回。
 #define SCAN_TIMEOUT_MS 12000
 
 typedef struct {
@@ -107,7 +102,10 @@ void handleScanApi(WiFiClient& client) {
     g_scan_done = false;
 
     unsigned long start = millis();
-    // 必须使用 _mcc 版本：普通 wifi_scan_networks 在并发模式下 STA 链路未完整初始化，扫描结果为空
+    // 必须使用 _mcc 版本：普通 wifi_scan_networks 在STA+AP并发模式下 STA 链路未完整初始化，扫描结果为空
+    // wifi_scan_networks_mcc() 是 SDK 专为并发模式设计的逐信道扫描版本，
+    // 它逐个信道调用 wext_set_scan + 信道间插入 100ms 间隔让 AP 发送信标，
+    // 保证扫描期间 AP 服务不中断且结果正确返回。
     if (wifi_scan_networks_mcc(scanResultHandler, NULL) != RTW_SUCCESS) {
         sendJson(client, "{\"success\":false,\"message\":\"scan failed to start\"}");
         return;

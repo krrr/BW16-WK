@@ -15,9 +15,15 @@ importers:
         specifier: ^3
         version: 3.15.12
     devDependencies:
+      '@types/alpinejs':
+        specifier: ^3.13.11
+        version: 3.13.11
       sass-embedded:
         specifier: ^1.100.0
         version: 1.100.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^6
         version: 6.4.3(sass-embedded@1.100.0)(sass@1.100.0)
@@ -415,6 +421,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@types/alpinejs@3.13.11':
+    resolution: {integrity: sha512-3KhGkDixCPiLdL3Z/ok1GxHwLxEWqQOKJccgaQL01wc0EVM2tCTaqlC3NIedmxAXkVzt/V6VTM8qPgnOHKJ1MA==}
+
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
@@ -671,6 +680,11 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
 
   varint@6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
@@ -945,6 +959,8 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.62.1':
     optional: true
 
+  '@types/alpinejs@3.13.11': {}
+
   '@types/estree@1.0.9': {}
 
   '@vue/reactivity@3.1.5':
@@ -1203,6 +1219,8 @@ snapshots:
       is-number: 7.0.0
 
   tslib@2.8.1: {}
+
+  typescript@6.0.3: {}
 
   varint@6.0.0: {}
 

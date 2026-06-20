@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BW16 WiFi Killer</title>
-  <link rel="stylesheet" href="/src/main.js">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 </head>
 <body>
   <nav class="container-fluid" style="margin-top: 1rem;">
@@ -22,13 +22,11 @@
     <section x-show="currentTab==='home'">
       <article>
         <header>
-          <h1 x-text="message"></h1>
+          <h1>状态</h1>
         </header>
-        <p>Pico CSS + Alpine.js</p>
-        <button @click="count++" x-text="'点击: ' + count" class="contrast"></button>
-        <button @click="reset" class="secondary">重置</button>
+        <p x-text="'运行时间: ' + uptime + 's'"></p>
         <footer>
-          <small x-text="'运行时间: ' + uptime + 's'"></small>
+          <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
         </footer>
       </article>
     </section>
@@ -40,9 +38,8 @@
           <h1>WiFi 扫描</h1>
         </header>
         <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
-          <button @click="startScan" :disabled="scanning" class="contrast" style="min-width:10rem;">
-            <span x-show="!scanning">开始扫描</span>
-            <span x-show="scanning"><span class="spinner"></span>扫描中...</span>
+          <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:10rem;">
+            <span x-text="scanning ? '扫描中...' : '开始扫描'"></span>
           </button>
           <small x-show="scanResultCount !== null" x-text="'发现 ' + scanResultCount + ' 个网络'"></small>
         </div>
@@ -85,6 +82,6 @@
     </section>
   </main>
 
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
