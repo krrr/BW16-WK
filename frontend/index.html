@@ -7,17 +7,17 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 </head>
 <body>
-  <nav class="container-fluid" style="margin-top: 1rem;">
-    <ul>
-      <li><strong>BW16 WiFi Killer</strong></li>
-    </ul>
-    <ul>
-      <li><a href="#" @click.prevent="currentTab='home'" :class="{contrast: currentTab==='home'}">首页</a></li>
-      <li><a href="#" @click.prevent="currentTab='scan'" :class="{contrast: currentTab==='scan'}">扫描</a></li>
-    </ul>
-  </nav>
-
   <main class="container">
+    <nav class="container-fluid" style="margin-top: 1rem;">
+      <ul>
+      <li><strong>BW16 WiFi Killer</strong></li>
+      </ul>
+      <ul>
+        <li><a href="#" @click.prevent="currentTab='home'" :class="{contrast: currentTab==='home'}">首页</a></li>
+        <li><a href="#" @click.prevent="currentTab='scan'" :class="{contrast: currentTab==='scan'}">扫描</a></li>
+      </ul>
+    </nav>
+
     <!-- Home Tab -->
     <section x-show="currentTab==='home'">
       <article>
@@ -41,7 +41,6 @@
           <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:10rem;">
             <span x-text="scanning ? '扫描中...' : '开始扫描'"></span>
           </button>
-          <small x-show="scanResultCount !== null" x-text="'发现 ' + scanResultCount + ' 个网络'"></small>
         </div>
 
         <p x-show="scanError" role="alert" class="error" x-text="scanError"></p>
@@ -63,7 +62,9 @@
               <template x-for="ap in scanResults" :key="ap.bssid">
                 <tr>
                   <td x-text="ap.ssid || '(隐藏)'"></td>
-                  <td style="font-family:monospace;font-size:0.85em;" x-text="ap.bssid"></td>
+                  <td>
+                    <span style="font-family:monospace;font-size:0.85em;cursor:pointer" @click="openMacLookup(ap.bssid)" x-text="ap.bssid"></span>
+                  </td>
                   <td x-text="ap.rssi + ' dBm'" :style="'color:' + rssiColor(ap.rssi) + ';font-weight:bold;'"></td>
                   <td x-text="ap.channel"></td>
                   <td x-text="ap.band"></td>
@@ -76,7 +77,8 @@
         </div>
 
         <footer>
-          <small>扫描使用低层 wifi_scan_networks API，结果实时返回</small>
+          <small x-show="scanResultCount !== null" x-text="'发现 ' + scanResultCount + ' 个网络'"></small>
+          <small x-show="scanResultCount === null">扫描大致耗时5-10秒</small>
         </footer>
       </article>
     </section>

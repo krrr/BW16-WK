@@ -37,7 +37,7 @@ Alpine.data('app', () => ({
       const r = await fetch('/api/status')
       const data: StatusResponse = await r.json()
       this.uptime = data.uptime
-    } catch (_) {}
+    } catch (e) { console.error('fetchStatus error:', e) }
   },
 
   init() {
@@ -75,8 +75,12 @@ Alpine.data('app', () => ({
     }
   },
 
+  openMacLookup(bssid: string) {
+    window.open(`https://maclookup.app/search/result?mac=${bssid}`, 'maclookup', 'width=800,height=600')
+  },
+
   rssiColor(rssi: number): string {
-    if (rssi >= -50) return '#27ae60'
+    if (rssi >= -55) return '#27ae60'
     if (rssi >= -70) return '#f39c12'
     return '#e74c3c'
   }
