@@ -108,3 +108,146 @@ void handleScanApi(WiFiClient& client) {
     }
     wifiClientSendJson(client, doc);
 }
+
+// ─── Device Scan (被动监听特定AP关联设备) ───
+
+#define DEVICE_SCAN_TIMEOUT_MS 25000
+#define MAX_DISCOVERED_DEVICES 32
+
+typedef struct {
+    uint8_t mac[6];
+    short rssi;
+    unsigned long last_seen;
+    int packet_count;
+} DiscoveredDevice;
+
+static DiscoveredDevice g_devices[MAX_DISCOVERED_DEVICES];
+static volatile int g_device_count = 0;
+static uint8_t g_target_bssid[6];
+static int g_target_channel;
+
+static bool parseBssid(const String& str, uint8_t* bssid) {
+    unsigned int v[6];
+    if (sscanf(str.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x",
+               &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) != 6)
+        return false;
+    for (int i = 0; i < 6; i++) bssid[i] = (uint8_t)v[i];
+    return true;
+}
+
+static void addDiscoveredDevice(const uint8_t* mac, short rssi) {
+    if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
+    if (memcmp(mac, g_target_bssid, 6) == 0) return;
+    for (int i = 0; i < g_device_count; i++) {
+        if (memcmp(g_devices[i].mac, mac, 6) == 0) {
+            g_devices[i].last_seen = millis();
+            g_devices[i].packet_count++;
+            if (rssi > g_devices[i].rssi) g_devices[i].rssi = rssi;
+            return;
+        }
+    }
+    if (g_device_count >= MAX_DISCOVERED_DEVICES) return;
+    memcpy(g_devices[g_device_count].mac, mac, 6);
+    g_devices[g_device_count].rssi = rssi;
+    g_devices[g_device_count].last_seen = millis();
+    g_devices[g_device_count].packet_count = 1;
+    g_device_count++;
+}
+
+static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user) {
+    (void)user;
+    if (!buf || len < 24) return;
+
+    uint16_t fc = buf[0] | (buf[1] << 8);
+    unsigned int type = (fc >> 2) & 0x03;
+    bool toDS = (fc & (1 << 8)) != 0;
+    bool fromDS = (fc & (1 << 9)) != 0;
+
+    const uint8_t* addr1 = buf + 4;
+    const uint8_t* addr2 = buf + 10;
+    const uint8_t* addr3 = buf + 16;
+
+    // Infer BSSID/DA/SA from addressing bits
+    const uint8_t* da = addr1;
+    const uint8_t* sa = addr2;
+    const uint8_t* bssid = addr3;
+
+    if (!toDS && fromDS) {
+        // AP→STA: A1=DA, A2=BSSID, A3=SA
+        bssid = addr2;
+        sa = addr3;
+    } else if (toDS && !fromDS) {
+        // STA→AP: A1=BSSID, A2=SA, A3=DA
+        bssid = addr1;
+        da = addr3;
+    } else if (toDS && fromDS) {
+        return;
+    }
+
+    if (memcmp(bssid, g_target_bssid, 6) != 0) return;
+
+    // Collect all non-AP addresses
+    if (memcmp(sa, g_target_bssid, 6) != 0) addDiscoveredDevice(sa, -70);
+    if (memcmp(da, g_target_bssid, 6) != 0 && memcmp(da, sa, 6) != 0)
+        addDiscoveredDevice(da, -70);
+}
+
+void handleDeviceScanApi(WiFiClient& client, const String& req) {
+    String bssidStr = extractQueryParam(req, "bssid");
+    String chStr = extractQueryParam(req, "channel");
+
+    if (bssidStr.length() == 0 || chStr.length() == 0) {
+        JsonDocument doc;
+        doc["success"] = false;
+        doc["message"] = "missing bssid or channel";
+        wifiClientSendJson(client, doc);
+        return;
+    }
+    bssidStr = urlDecode(bssidStr);
+    if (!parseBssid(bssidStr, g_target_bssid)) {
+        JsonDocument doc;
+        doc["success"] = false;
+        doc["message"] = "invalid bssid";
+        wifiClientSendJson(client, doc);
+        return;
+    }
+    g_target_channel = chStr.toInt();
+
+    g_device_count = 0;
+
+    wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
+    delay(100);
+
+    wext_set_channel(WLAN0_NAME, g_target_channel);
+    delay(100);
+
+    wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1);
+
+    unsigned long start = millis();
+    while (millis() - start < DEVICE_SCAN_TIMEOUT_MS) {
+        delay(50);
+        if ((millis() - start) % 3000 < 60) {
+            wext_set_channel(WLAN0_NAME, g_target_channel);
+        }
+    }
+
+    wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
+
+    JsonDocument doc;
+    doc["success"] = true;
+    doc["bssid"] = bssidStr;
+    doc["channel"] = g_target_channel;
+    doc["count"] = g_device_count;
+    JsonArray devices = doc["devices"].to<JsonArray>();
+    for (int i = 0; i < g_device_count; i++) {
+        JsonObject d = devices.add<JsonObject>();
+        char mac[18];
+        snprintf(mac, sizeof(mac), "%02X:%02X:%02X:%02X:%02X:%02X",
+            g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
+            g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
+        d["mac"] = mac;
+        d["rssi"] = (int)g_devices[i].rssi;
+        d["packets"] = g_devices[i].packet_count;
+    }
+    wifiClientSendJson(client, doc);
+}

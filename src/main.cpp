@@ -6,6 +6,7 @@
 #include "utils.h"
 
 extern void handleScanApi(WiFiClient& client);
+extern void handleDeviceScanApi(WiFiClient& client, const String& req);
 static void handleStatusApi(WiFiClient& client);
 
 char ap_ssid[] = "BW16-WK";
@@ -58,14 +59,17 @@ static constexpr uint32_t djb2_hash(const char* s, uint32_t h = 5381) {
 static constexpr uint32_t HASH_ROOT       = djb2_hash("/");
 static constexpr uint32_t HASH_INDEX_HTML = djb2_hash("/index.html");
 static constexpr uint32_t HASH_FAVICON    = djb2_hash("/favicon.ico");
-static constexpr uint32_t HASH_API_SCAN   = djb2_hash("/api/scan");
-static constexpr uint32_t HASH_API_STATUS = djb2_hash("/api/status");
+static constexpr uint32_t HASH_API_SCAN         = djb2_hash("/api/scan");
+static constexpr uint32_t HASH_API_SCAN_DEVICES = djb2_hash("/api/scan-devices");
+static constexpr uint32_t HASH_API_STATUS       = djb2_hash("/api/status");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
     int s = req.indexOf(' ') + 1;
     int e = req.indexOf(' ', s);
     if (s < 1 || e < 0) { handleNotFound(client); return; }
     String path = req.substring(s, e);
+    int qm = path.indexOf('?');
+    if (qm >= 0) path = path.substring(0, qm);
 
     switch (djb2_hash(path.c_str())) {
         case HASH_ROOT:
@@ -77,6 +81,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
             break;
         case HASH_API_SCAN:
             handleScanApi(client);
+            break;
+        case HASH_API_SCAN_DEVICES:
+            handleDeviceScanApi(client, req);
             break;
         case HASH_API_STATUS:
             handleStatusApi(client);
