@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
 #include "webpage.h"
 #include "favicon.h"
+#include "utils.h"
 
 extern void handleScanApi(WiFiClient& client);
 static void handleStatusApi(WiFiClient& client);
@@ -42,14 +44,9 @@ static void handleNotFound(WiFiClient& client) {
 }
 
 static void handleStatusApi(WiFiClient& client) {
-    unsigned long uptime = millis() / 1000;
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: application/json");
-    client.println("Connection: close");
-    client.println();
-    client.print("{\"uptime\":");
-    client.print(uptime);
-    client.println("}");
+    JsonDocument doc;
+    doc["uptime"] = millis() / 1000;
+    wifiClientSendJson(client, doc);
 }
 
 // === Routing ===

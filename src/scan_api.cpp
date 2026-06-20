@@ -2,6 +2,8 @@
 #include <WiFi.h>
 #include <wifi_conf.h>
 #include <wifi_structures.h>
+#include <ArduinoJson.h>
+#include "utils.h"
 
 #define SCAN_TIMEOUT_MS 12000
 
@@ -18,21 +20,6 @@ static ScanAP g_scan_aps[64];
 static volatile int g_scan_count = 0;
 static volatile bool g_scan_done = false;
 
-static String escapeJson(const String& s) {
-    String out;
-    out.reserve(s.length() + 4);
-    for (size_t i = 0; i < s.length(); i++) {
-        char c = s[i];
-        if (c == '"' || c == '\\') { out += '\\'; out += c; }
-        else if (c == '\n') { out += "\\n"; }
-        else if (c == '\r') { out += "\\r"; }
-        else if (c == '\t') { out += "\\t"; }
-        else if ((unsigned char)c < 0x20) { out += ' '; }
-        else { out += c; }
-    }
-    return out;
-}
-
 static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
     if (!scan_result->scan_complete) {
         if (g_scan_count >= 64) return RTW_SUCCESS;
@@ -42,7 +29,6 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
         ap.ssid = String((const char*)r->SSID.val);
         ap.rssi = r->signal_strength;
         ap.channel = r->channel;
-        // SDK has bug, always 5G: r->band == RTW_802_11_BAND_5GHZ
         ap.band = (r->channel >= 36) ? "5GHz" : "2.4GHz";
         switch (r->security) {
             case RTW_SECURITY_OPEN:                 ap.security = "OPEN"; break;
@@ -87,16 +73,6 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
     return RTW_SUCCESS;
 }
 
-static void sendJson(WiFiClient& client, const String& json) {
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: application/json; charset=utf-8");
-    client.print("Content-Length: ");
-    client.println(json.length());
-    client.println("Connection: close");
-    client.println();
-    client.print(json);
-}
-
 void handleScanApi(WiFiClient& client) {
     g_scan_count = 0;
     g_scan_done = false;
@@ -107,27 +83,28 @@ void handleScanApi(WiFiClient& client) {
     // 它逐个信道调用 wext_set_scan + 信道间插入 100ms 间隔让 AP 发送信标，
     // 保证扫描期间 AP 服务不中断且结果正确返回。
     if (wifi_scan_networks_mcc(scanResultHandler, NULL) != RTW_SUCCESS) {
-        sendJson(client, "{\"success\":false,\"message\":\"scan failed to start\"}");
+        JsonDocument doc;
+        doc["success"] = false;
+        doc["message"] = "scan failed to start";
+        wifiClientSendJson(client, doc);
         return;
     }
     while (!g_scan_done && millis() - start < SCAN_TIMEOUT_MS) {
         delay(10);
     }
 
-    String json = "{\"success\":true,\"count\":";
-    json += g_scan_count;
-    json += ",\"networks\":[";
+    JsonDocument doc;
+    doc["success"] = true;
+    doc["count"] = g_scan_count;
+    JsonArray networks = doc["networks"].to<JsonArray>();
     for (int i = 0; i < g_scan_count; i++) {
-        if (i > 0) json += ",";
-        json += "{";
-        json += "\"ssid\":\"" + escapeJson(g_scan_aps[i].ssid) + "\",";
-        json += "\"bssid\":\"" + g_scan_aps[i].bssid_str + "\",";
-        json += "\"rssi\":" + String(g_scan_aps[i].rssi) + ",";
-        json += "\"channel\":" + String(g_scan_aps[i].channel) + ",";
-        json += "\"band\":\"" + g_scan_aps[i].band + "\",";
-        json += "\"security\":\"" + g_scan_aps[i].security + "\"";
-        json += "}";
+        JsonObject net = networks.add<JsonObject>();
+        net["ssid"] = g_scan_aps[i].ssid;
+        net["bssid"] = g_scan_aps[i].bssid_str;
+        net["rssi"] = g_scan_aps[i].rssi;
+        net["channel"] = g_scan_aps[i].channel;
+        net["band"] = g_scan_aps[i].band;
+        net["security"] = g_scan_aps[i].security;
     }
-    json += "]}";
-    sendJson(client, json);
+    wifiClientSendJson(client, doc);
 }
