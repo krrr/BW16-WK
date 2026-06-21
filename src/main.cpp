@@ -1,13 +1,19 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include <rtc.h>
 #include "webpage.h"
 #include "favicon.h"
 #include "utils.h"
 
-extern void handleScanApi(WiFiClient& client);
+extern void handleApScanApi(WiFiClient& client);
 extern void handleDeviceScanApi(WiFiClient& client, const String& req);
 static void handleStatusApi(WiFiClient& client);
+
+RTC rtc;
+
+const char COMPILE_DATE[] = __DATE__;
+const char COMPILE_TIME[] = __TIME__;
 
 char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
@@ -47,6 +53,9 @@ static void handleNotFound(WiFiClient& client) {
 static void handleStatusApi(WiFiClient& client) {
     JsonDocument doc;
     doc["uptime"] = millis() / 1000;
+    doc["compile_date"] = COMPILE_DATE;
+    doc["compile_time"] = COMPILE_TIME;
+    doc["rtc_time"] = rtc.Read();
     wifiClientSendJson(client, doc);
 }
 
@@ -80,7 +89,7 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
             handleFavicon(client);
             break;
         case HASH_API_SCAN:
-            handleScanApi(client);
+            handleApScanApi(client);
             break;
         case HASH_API_SCAN_DEVICES:
             handleDeviceScanApi(client, req);
@@ -97,19 +106,22 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
 void setup() {
     Serial.begin(115200);
     delay(1000);
-    Serial.println("\nBW16 WiFi AP + Web Server");
+    Serial.println("\nBW16 WiFi Killer init");
 
+    rtc.Init();
+    rtc.Write(0);
+
+    WiFi.enableConcurrent();
     IPAddress ip(192, 168, 4, 1);
     IPAddress gw(192, 168, 4, 1);
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gw, gw, subnet);
-    WiFi.enableConcurrent();
     WiFi.apbegin(ap_ssid, ap_pass, ap_channel, FALSE);
 
     Serial.print("SSID: ");
     Serial.println(ap_ssid);
     Serial.print("IP:   ");
-    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.localIP(1));
 
     server.begin();
     Serial.println("HTTP ready on port 80");

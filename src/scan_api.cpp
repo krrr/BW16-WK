@@ -4,8 +4,18 @@
 #include <wifi_structures.h>
 #include <ArduinoJson.h>
 #include "utils.h"
+#include "wifi_drv.h"
+
+// extern "C" {
+//     int wifi_set_mgnt_rxfilter(uint8_t enable);
+//     int wifi_set_promisc_filter_reason(uint8_t enable);
+// }
 
 #define SCAN_TIMEOUT_MS 12000
+
+static void printBssid(const uint8_t* bssid) {
+    for (int i=0;i<6;i++){if(bssid[i]<0x10)Serial.print("0");Serial.print(bssid[i],HEX);if(i<5)Serial.print(":");}
+}
 
 typedef struct {
     String ssid;
@@ -20,7 +30,7 @@ static ScanAP g_scan_aps[64];
 static volatile int g_scan_count = 0;
 static volatile bool g_scan_done = false;
 
-static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
+static rtw_result_t apScanResultHandler(rtw_scan_handler_result_t* scan_result) {
     if (!scan_result->scan_complete) {
         if (g_scan_count >= 64) return RTW_SUCCESS;
         rtw_scan_result_t* r = &scan_result->ap_details;
@@ -73,7 +83,7 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t* scan_result) {
     return RTW_SUCCESS;
 }
 
-void handleScanApi(WiFiClient& client) {
+void handleApScanApi(WiFiClient& client) {
     g_scan_count = 0;
     g_scan_done = false;
 
@@ -82,7 +92,7 @@ void handleScanApi(WiFiClient& client) {
     // wifi_scan_networks_mcc() 是 SDK 专为并发模式设计的逐信道扫描版本，
     // 它逐个信道调用 wext_set_scan + 信道间插入 100ms 间隔让 AP 发送信标，
     // 保证扫描期间 AP 服务不中断且结果正确返回。
-    if (wifi_scan_networks_mcc(scanResultHandler, NULL) != RTW_SUCCESS) {
+    if (wifi_scan_networks_mcc(apScanResultHandler, NULL) != RTW_SUCCESS) {
         JsonDocument doc;
         doc["success"] = false;
         doc["message"] = "scan failed to start";
@@ -90,7 +100,7 @@ void handleScanApi(WiFiClient& client) {
         return;
     }
     while (!g_scan_done && millis() - start < SCAN_TIMEOUT_MS) {
-        delay(10);
+        delay(30);
     }
 
     JsonDocument doc;
@@ -116,8 +126,6 @@ void handleScanApi(WiFiClient& client) {
 
 typedef struct {
     uint8_t mac[6];
-    short rssi;
-    unsigned long last_seen;
     int packet_count;
 } DiscoveredDevice;
 
@@ -126,37 +134,88 @@ static volatile int g_device_count = 0;
 static uint8_t g_target_bssid[6];
 static int g_target_channel;
 
+// AmebaD (RTL8720DN) 的 newlib-nano sscanf 不支持 %02x 格式，
+// 调用会静默返回但不写入任何值，导致 g_target_bssid 始终为全零。
+// 改用纯手动十六进制解析。
 static bool parseBssid(const String& str, uint8_t* bssid) {
-    unsigned int v[6];
-    if (sscanf(str.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x",
-               &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) != 6)
-        return false;
-    for (int i = 0; i < 6; i++) bssid[i] = (uint8_t)v[i];
+    const char* s = str.c_str();
+    for (int i = 0; i < 6; i++) {
+        if (*s == 0) return false;
+        unsigned int v = 0;
+        for (int j = 0; j < 2; j++) {
+            char c = *s++;
+            if (c >= '0' && c <= '9') v = (v << 4) | (c - '0');
+            else if (c >= 'a' && c <= 'f') v = (v << 4) | (c - 'a' + 10);
+            else if (c >= 'A' && c <= 'F') v = (v << 4) | (c - 'A' + 10);
+            else return false;
+        }
+        bssid[i] = (uint8_t)v;
+        if (i < 5 && *s++ != ':') return false;
+    }
     return true;
 }
 
-static void addDiscoveredDevice(const uint8_t* mac, short rssi) {
+static void addDiscoveredDevice(const uint8_t* mac) {
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
     for (int i = 0; i < g_device_count; i++) {
         if (memcmp(g_devices[i].mac, mac, 6) == 0) {
-            g_devices[i].last_seen = millis();
             g_devices[i].packet_count++;
-            if (rssi > g_devices[i].rssi) g_devices[i].rssi = rssi;
             return;
         }
     }
     if (g_device_count >= MAX_DISCOVERED_DEVICES) return;
     memcpy(g_devices[g_device_count].mac, mac, 6);
-    g_devices[g_device_count].rssi = rssi;
-    g_devices[g_device_count].last_seen = millis();
     g_devices[g_device_count].packet_count = 1;
     g_device_count++;
 }
 
+#define SNIFF_DEBUG
+
 static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user) {
     (void)user;
-    if (!buf || len < 24) return;
+    if (!buf || len < 22) return;
+
+    #ifdef SNIFF_DEBUG
+    // ── DEBUG: 打印原始包前若干字节，探测固件前置头偏移 ──
+    static unsigned int debug_count = 0;
+    static unsigned long debug_last_log = 0;
+    debug_count++;
+    if (debug_count <= 20 || millis() - debug_last_log > 10000) {
+        debug_last_log = millis();
+        Serial.print("[SNIFF_DEBUG] #"); Serial.print(debug_count);
+        Serial.print(" len="); Serial.print(len);
+        Serial.print(" hex=");
+        unsigned int dump_len = (len > 48) ? 48 : len;
+        for (unsigned int i = 0; i < dump_len; i++) {
+            if (buf[i] < 0x10) Serial.print("0");
+            Serial.print(buf[i], HEX);
+            if ((i & 1) && i < dump_len - 1) Serial.print(" ");
+        }
+        Serial.println();
+
+        // 尝试多种偏移解析帧控制头
+        const int tryOffsets[] = {0, 4, 8, 12, 16, 20, 24, 32, 36, 40};
+        for (size_t t = 0; t < sizeof(tryOffsets) / sizeof(tryOffsets[0]); t++) {
+            int off = tryOffsets[t];
+            if (len < (unsigned)(off + 24)) continue;
+            const uint8_t* base = buf + off;
+            uint16_t fc = (uint16_t)base[0] | ((uint16_t)base[1] << 8);
+            uint8_t ftype = (fc >> 2) & 0x3;
+            uint8_t fsubtype = (fc >> 4) & 0xF;
+            // 只打印看起来有效的帧控制(非全0, 非全1, type合理)
+            if (fc != 0 && fc != 0xFFFF && ftype <= 3) {
+                Serial.print("[SNIFF_DEBUG]   offset="); Serial.print(off);
+                Serial.print(" fc=0x"); if (fc < 0x1000) Serial.print("0");
+                if (fc < 0x100) Serial.print("0");
+                if (fc < 0x10) Serial.print("0");
+                Serial.print(fc, HEX);
+                Serial.print(" type="); Serial.print(ftype);
+                Serial.print(" subtype="); Serial.println(fsubtype);
+            }
+        }
+    }
+    #endif
 
     uint16_t fc = buf[0] | (buf[1] << 8);
     unsigned int type = (fc >> 2) & 0x03;
@@ -184,12 +243,35 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
         return;
     }
 
-    if (memcmp(bssid, g_target_bssid, 6) != 0) return;
+    if (memcmp(bssid, g_target_bssid, 6) != 0) {
+        #ifdef SNIFF_DEBUG
+        Serial.print("[SNIFF] BSSID mismatch: got=");
+        printBssid(bssid);
+        Serial.print(" target=");
+        printBssid(g_target_bssid);
+        Serial.print(" fc=0x"); Serial.print(fc, HEX);
+        Serial.print(" toDS="); Serial.print(toDS);
+        Serial.print(" fromDS="); Serial.println(fromDS);
+        #endif
+        return;
+    }
 
-    // Collect all non-AP addresses
-    if (memcmp(sa, g_target_bssid, 6) != 0) addDiscoveredDevice(sa, -70);
-    if (memcmp(da, g_target_bssid, 6) != 0 && memcmp(da, sa, 6) != 0)
-        addDiscoveredDevice(da, -70);
+    if (memcmp(sa, g_target_bssid, 6) != 0) {
+        #ifdef SNIFF_DEBUG
+        Serial.print("[SNIFF] ADD sa=");
+        printBssid(sa);
+        Serial.println();
+        #endif
+        addDiscoveredDevice(sa);
+    }
+    if (memcmp(da, g_target_bssid, 6) != 0 && memcmp(da, sa, 6) != 0) {
+        #ifdef SNIFF_DEBUG
+        Serial.print("[SNIFF] ADD da=");
+        printBssid(da);
+        Serial.println();
+        #endif
+        addDiscoveredDevice(da);
+    }
 }
 
 void handleDeviceScanApi(WiFiClient& client, const String& req) {
@@ -204,6 +286,8 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
         return;
     }
     bssidStr = urlDecode(bssidStr);
+    Serial.print("[SNIFF] rawBssidParam="); Serial.println(bssidStr);
+    Serial.print("[SNIFF] decodedBssid="); Serial.println(bssidStr);
     if (!parseBssid(bssidStr, g_target_bssid)) {
         JsonDocument doc;
         doc["success"] = false;
@@ -213,25 +297,49 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
     }
     g_target_channel = chStr.toInt();
 
+    Serial.print("[SNIFF] rawBssidStr="); Serial.println(bssidStr);
+    Serial.print("[SNIFF] targetBytes=");
+    printBssid(g_target_bssid);
+    Serial.print(" channel="); Serial.println(g_target_channel);
+
     g_device_count = 0;
+    // WiFi.disablePowerSave();
 
-    wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
+    // 必须切换到目标信道监听。通知客户端一起切换
+    if (wifi_ap_switch_chl_and_inform(g_target_channel) != RTW_SUCCESS) {
+        wifiClientSendJsonFail(client, "failed to switch channel");
+        return;
+    }
+    // wext_set_channel(WLAN0_NAME, g_target_channel);
     delay(100);
 
-    wext_set_channel(WLAN0_NAME, g_target_channel);
-    delay(100);
+    // 关闭过滤，确保收到管理帧
+    // wifi_set_mgnt_rxfilter(0);
+    // wifi_set_promisc_filter_reason(0);
 
-    wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1);
+    // 启用混杂模式
+    if (wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1) != RTW_SUCCESS) {
+        wifiClientSendJsonFail(client, "failed to set promisc mode");
+        return;
+    }
 
     unsigned long start = millis();
     while (millis() - start < DEVICE_SCAN_TIMEOUT_MS) {
-        delay(50);
-        if ((millis() - start) % 3000 < 60) {
-            wext_set_channel(WLAN0_NAME, g_target_channel);
-        }
+        delay(100);
+        // if ((millis() - start) % 3000 < 60) {
+            // wext_set_channel(WLAN0_NAME, g_target_channel);
+        // }
     }
 
     wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
+
+
+    Serial.print("[SNIFF] Scan done, device_count="); Serial.println(g_device_count);
+    for (int i = 0; i < g_device_count; i++) {
+        Serial.print("[SNIFF]   device ");
+        printBssid(g_devices[i].mac);
+        Serial.print(" packets="); Serial.println(g_devices[i].packet_count);
+    }
 
     JsonDocument doc;
     doc["success"] = true;
@@ -246,7 +354,6 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
             g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
             g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
         d["mac"] = mac;
-        d["rssi"] = (int)g_devices[i].rssi;
         d["packets"] = g_devices[i].packet_count;
     }
     wifiClientSendJson(client, doc);

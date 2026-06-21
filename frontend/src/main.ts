@@ -36,10 +36,14 @@ interface DeviceScanResponse {
 
 interface StatusResponse {
   uptime: number
+  compile_date?: string
+  compile_time?: string
 }
 
 Alpine.data('app', () => ({
   uptime: 0,
+  compileDate: '',
+  compileTime: '',
 
   currentTab: 'home' as 'home' | 'scan',
 
@@ -57,6 +61,8 @@ Alpine.data('app', () => ({
       const r = await fetch('/api/status')
       const data: StatusResponse = await r.json()
       this.uptime = data.uptime
+      this.compileDate = data.compile_date || ''
+      this.compileTime = data.compile_time || ''
     } catch (e) { console.error('fetchStatus error:', e) }
   },
 

@@ -15,6 +15,14 @@ void wifiClientSendJson(WiFiClient& client, JsonDocument& doc) {
     client.print(json);
 }
 
+void wifiClientSendJsonFail(WiFiClient& client, const String& message) {
+    JsonDocument doc;
+    doc["success"] = false;
+    doc["message"] = message;
+    wifiClientSendJson(client, doc);
+}
+
+
 char hexNibble(char c) {
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;

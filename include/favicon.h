@@ -2,6 +2,7 @@
 #define FAVICON_H
 
 #include <Arduino.h>
+// frontend icon file
 
 const uint8_t favicon_ico[] PROGMEM = {
   0x00,

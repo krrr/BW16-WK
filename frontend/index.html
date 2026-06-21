@@ -25,6 +25,7 @@
           <h1>状态</h1>
         </header>
         <p x-text="'运行时间: ' + uptime + 's'"></p>
+        <p x-show="compileDate" x-text="'固件编译: ' + compileDate + ' ' + compileTime"></p>
         <footer>
           <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
         </footer>
