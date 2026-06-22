@@ -26,8 +26,8 @@
             <th>操作</th>
           </tr>
         </thead>
-        <tbody>
-          <template x-for="ap in scanResults" :key="ap.bssid">
+        <template x-for="ap in scanResults" :key="ap.bssid">
+          <tbody>
             <tr>
               <td x-text="ap.ssid || '(隐藏)'"></td>
               <td>
@@ -44,20 +44,19 @@
                   :disabled="deviceScanning !== null" class="outline contrast"
                   style="padding:0.25rem 0.75rem;font-size:0.85rem;">
                   <span
-                    x-text="deviceScanning === ap.bssid ? '监听中...' : (deviceCount(ap.bssid) > 0 ? '设备(' + deviceCount(ap.bssid) + ')' : '扫描设备')"></span>
+                    x-text="deviceScanning === ap.bssid ? '监听中...' : '扫描设备'"></span>
                 </button>
               </td>
             </tr>
             <!-- Device scan results for this AP -->
-            <tr x-show="deviceResults[ap.bssid] && deviceResults[ap.bssid].length > 0">
+            <tr x-show="deviceResults[ap.bssid]?.length > 0">
               <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                 <div style="padding:0.5rem 1rem;">
-                  <small><strong>发现的设备 (<span x-text="deviceResults[ap.bssid].length"></span>)</strong></small>
+                  <small><strong>发现的设备 (<span x-text="deviceResults[ap.bssid]?.length"></span>)</strong></small>
                   <table style="margin:0.25rem 0 0 0;font-size:0.85em;">
                     <thead>
                       <tr>
                         <th>MAC</th>
-                        <th>信号</th>
                         <th>数据包</th>
                       </tr>
                     </thead>
@@ -66,8 +65,6 @@
                         <tr>
                           <td><span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
                               x-text="dev.mac"></span></td>
-                          <td x-text="dev.rssi + ' dBm'" :style="'color:' + rssiColor(dev.rssi) + ';font-weight:bold;'">
-                          </td>
                           <td x-text="dev.packets"></td>
                         </tr>
                       </template>
@@ -82,8 +79,8 @@
                 <span x-text="deviceErrors[ap.bssid]"></span>
               </td>
             </tr>
-          </template>
-        </tbody>
+          </tbody>
+        </template>
       </table>
     </div>
 

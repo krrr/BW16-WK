@@ -99,10 +99,6 @@ Alpine.data('scan', () => ({
     }
   },
 
-  deviceCount(bssid: string): number {
-    return (this.deviceResults[bssid] || []).length
-  },
-
   openMacLookup(bssid: string) {
     window.open(`https://maclookup.app/search/result?mac=${bssid}`, 'maclookup', 'width=800,height=600')
   },

@@ -307,13 +307,15 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
     // WiFi.disablePowerSave();
 
     // 必须切换到目标信道监听。通知客户端一起切换
-    if (wifi_ap_switch_chl_and_inform(g_target_channel) != RTW_SUCCESS) {
-        wifiClientSendJsonFail(client, "failed to switch channel");
-        return;
+    if (g_target_channel != ap_channel) {
+        if (wifi_ap_switch_chl_and_inform(g_target_channel) != RTW_SUCCESS) {
+            wifiClientSendJsonFail(client, "failed to switch channel");
+            return;
+        }
+        wext_set_channel(WLAN0_NAME, g_target_channel);  // 必须，上面的调用不够
+        ap_channel = g_target_channel;
+        delay(100);
     }
-    wext_set_channel(WLAN0_NAME, g_target_channel);  // 必须，上面的调用不够
-    ap_channel = g_target_channel;
-    delay(100);
 
     // 关闭过滤，确保收到管理帧
     // wifi_set_mgnt_rxfilter(0);
