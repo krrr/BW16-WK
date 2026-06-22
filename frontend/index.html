@@ -24,8 +24,16 @@
         <header>
           <h1>状态</h1>
         </header>
-        <p x-text="'运行时间: ' + uptime + 's'"></p>
-        <p x-show="compileDate" x-text="'固件编译: ' + compileDate + ' ' + compileTime"></p>
+        <p x-text="'当前信道: ' + apChannel"></p>
+        <p x-text="'运行时间: ' + formattedUptime"></p>
+        <p x-show="compileDate" x-text="'固件编译: ' + compileDate"></p>
+        <p>
+          RTC 时间: <span x-text="rtcTime ? rtcTime.toLocaleString('zh-CN') : '未设置'"></span>
+          <span x-show="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
+            (偏差 <span x-text="Math.round(timeDiff)"></span> 秒)
+          </span>
+          <button x-show="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast" style="padding:0.15rem 0.6rem;font-size:0.8rem;vertical-align:middle;margin-left:0.4rem;">同步时间</button>
+        </p>
         <footer>
           <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
         </footer>

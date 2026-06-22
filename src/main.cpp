@@ -1,7 +1,8 @@
+#include <main.h>
 #include <Arduino.h>
+#include "rtc_api.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>
-#include <rtc.h>
 #include "webpage.h"
 #include "favicon.h"
 #include "utils.h"
@@ -10,14 +11,12 @@ extern void handleApScanApi(WiFiClient& client);
 extern void handleDeviceScanApi(WiFiClient& client, const String& req);
 static void handleStatusApi(WiFiClient& client);
 
-RTC rtc;
-
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
 
 char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
-char ap_channel[] = "1";
+int ap_channel = 1;
 
 WiFiServer server(80);
 
@@ -55,7 +54,25 @@ static void handleStatusApi(WiFiClient& client) {
     doc["uptime"] = millis() / 1000;
     doc["compile_date"] = COMPILE_DATE;
     doc["compile_time"] = COMPILE_TIME;
-    doc["rtc_time"] = rtc.Read();
+    doc["rtc_time"] = rtc_read();
+    doc["ap_channel"] = ap_channel;
+    wifiClientSendJson(client, doc);
+}
+
+static void handleSetTimeApi(WiFiClient& client, const String& req) {
+    String t_str = urlDecode(extractQueryParam(req, "t"));
+    long t = t_str.toInt();
+
+    JsonDocument doc;
+    if (t > 0) {
+        rtc_init();  // setup里init一次后面再write总是返回-1
+        rtc_write(t);
+        doc["success"] = true;
+        doc["rtc_time"] = rtc_read();
+    } else {
+        doc["success"] = false;
+        doc["message"] = "invalid timestamp";
+    }
     wifiClientSendJson(client, doc);
 }
 
@@ -71,6 +88,7 @@ static constexpr uint32_t HASH_FAVICON    = djb2_hash("/favicon.ico");
 static constexpr uint32_t HASH_API_SCAN         = djb2_hash("/api/scan");
 static constexpr uint32_t HASH_API_SCAN_DEVICES = djb2_hash("/api/scan-devices");
 static constexpr uint32_t HASH_API_STATUS       = djb2_hash("/api/status");
+static constexpr uint32_t HASH_API_SET_TIME     = djb2_hash("/api/set-time");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
     int s = req.indexOf(' ') + 1;
@@ -97,6 +115,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
         case HASH_API_STATUS:
             handleStatusApi(client);
             break;
+        case HASH_API_SET_TIME:
+            handleSetTimeApi(client, req);
+            break;
         default:
             handleNotFound(client);
             break;
@@ -108,15 +129,16 @@ void setup() {
     delay(1000);
     Serial.println("\nBW16 WiFi Killer init");
 
-    rtc.Init();
-    rtc.Write(0);
-
+    // 设置AP热点
+    // 本单片机有两个虚拟接口，WLAN0和WLAN1，分别用于STA和AP。但其实共享同一个 PHY，频道切换是联动的
     WiFi.enableConcurrent();
     IPAddress ip(192, 168, 4, 1);
     IPAddress gw(192, 168, 4, 1);
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gw, gw, subnet);
-    WiFi.apbegin(ap_ssid, ap_pass, ap_channel, FALSE);
+    char chan_char[2];
+    itoa(ap_channel, chan_char, 10);
+    WiFi.apbegin(ap_ssid, ap_pass, chan_char, FALSE);
 
     Serial.print("SSID: ");
     Serial.println(ap_ssid);

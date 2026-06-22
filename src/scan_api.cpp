@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <main.h>
 #include <wifi_conf.h>
 #include <wifi_structures.h>
 #include <ArduinoJson.h>
@@ -310,7 +311,8 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
         wifiClientSendJsonFail(client, "failed to switch channel");
         return;
     }
-    // wext_set_channel(WLAN0_NAME, g_target_channel);
+    wext_set_channel(WLAN0_NAME, g_target_channel);  // 必须，上面的调用不够
+    ap_channel = g_target_channel;
     delay(100);
 
     // 关闭过滤，确保收到管理帧
