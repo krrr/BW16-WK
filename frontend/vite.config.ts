@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import injectHTML from 'vite-plugin-html-inject'
 
 export default defineConfig({
-  plugins: [viteSingleFile()],
+  plugins: [injectHTML(), viteSingleFile()],
   server: {
     proxy: {
       '/api/': {

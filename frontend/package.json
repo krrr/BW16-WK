@@ -1,5 +1,7 @@
 {
   "name": "bw16-wk-webui",
+  "author": {"name": "krrr", "email": "guogaishiwo@gmail.com", "url": "https://github.com/krrr"},
+  "license": "GPL-3.0-only",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +18,7 @@
     "sass-embedded": "^1.100.0",
     "typescript": "^6.0.3",
     "vite": "^6",
+    "vite-plugin-html-inject": "^1.1.2",
     "vite-plugin-singlefile": "^2"
   },
   "pnpm": {

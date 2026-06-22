@@ -27,6 +27,9 @@ importers:
       vite:
         specifier: ^6
         version: 6.4.3(sass-embedded@1.100.0)(sass@1.100.0)
+      vite-plugin-html-inject:
+        specifier: ^1.1.2
+        version: 1.1.2
       vite-plugin-singlefile:
         specifier: ^2
         version: 2.3.3(rollup@4.62.1)(vite@6.4.3(sass-embedded@1.100.0)(sass@1.100.0))
@@ -689,6 +692,9 @@ packages:
   varint@6.0.0:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
 
+  vite-plugin-html-inject@1.1.2:
+    resolution: {integrity: sha512-4DWANEcAw73H5JLWTAI4EvXdSyoGqGq/Is9fTRjpF+SJLor58LNdqB+YYnK3FOLwx6LMTAn4z1hkiRyc52lYLg==}
+
   vite-plugin-singlefile@2.3.3:
     resolution: {integrity: sha512-XVnGH0QzbOa8fxRSsHdCarVN1BSBXNi7uLMQYlrGRN5apdHkk62XQWRJhVever0lnfuyBkwn+kvVChdm/OoOUg==}
     engines: {node: '>18.0.0'}
@@ -1223,6 +1229,8 @@ snapshots:
   typescript@6.0.3: {}
 
   varint@6.0.0: {}
+
+  vite-plugin-html-inject@1.1.2: {}
 
   vite-plugin-singlefile@2.3.3(rollup@4.62.1)(vite@6.4.3(sass-embedded@1.100.0)(sass@1.100.0)):
     dependencies:
