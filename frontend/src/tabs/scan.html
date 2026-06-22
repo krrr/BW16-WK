@@ -8,6 +8,9 @@
       <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:10rem;">
         <span x-text="scanning ? '扫描中...' : '开始扫描'"></span>
       </button>
+      <label>
+        <input type="checkbox" x-model="persistEnabled" @change="savePersisted" role="switch"> 持久记录
+      </label>
     </div>
 
     <p x-show="scanError" role="alert" class="error" x-text="scanError"></p>

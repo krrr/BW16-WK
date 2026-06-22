@@ -32,7 +32,11 @@ interface DeviceScanResponse {
   devices: DeviceInfo[]
 }
 
+const STORAGE_KEY = 'wifi_scan_data'
+const PERSIST_KEY = 'wifi_scan_persist'
+
 Alpine.data('scan', () => ({
+  persistEnabled: localStorage.getItem(PERSIST_KEY) === 'true',
   scanning: false,
   scanError: '',
   scanResults: [] as NetworkInfo[],
@@ -41,6 +45,35 @@ Alpine.data('scan', () => ({
   deviceScanning: null as string | null,
   deviceErrors: {} as Record<string, string>,
   deviceResults: {} as Record<string, DeviceInfo[]>,
+
+  init() {
+    if (this.persistEnabled) {
+      this.loadPersisted()
+    }
+  },
+
+  loadPersisted() {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (!saved) return
+    try {
+      const data = JSON.parse(saved)
+      if (data.scanResults) this.scanResults = data.scanResults
+      if (data.deviceResults) this.deviceResults = data.deviceResults
+      if (this.scanResults.length > 0) this.scanResultCount = this.scanResults.length
+    } catch { /* ignore corrupt data */ }
+  },
+
+  savePersisted() {
+    localStorage.setItem(PERSIST_KEY, this.persistEnabled ? 'true' : 'false')
+    if (this.persistEnabled) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        scanResults: this.scanResults,
+        deviceResults: this.deviceResults,
+      }))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  },
 
   async startScan() {
     this.scanning = true
@@ -61,6 +94,7 @@ Alpine.data('scan', () => ({
           }
         }
         this.scanResultCount = this.scanResults.length
+        this.savePersisted()
       } else {
         this.scanError = data.message || '扫描失败'
       }
@@ -89,6 +123,7 @@ Alpine.data('scan', () => ({
             this.deviceResults[bssid].push(dev)
           }
         }
+        this.savePersisted()
       } else {
         this.deviceErrors[bssid] = data.message || '扫描失败'
       }
