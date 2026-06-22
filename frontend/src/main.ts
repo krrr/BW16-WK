@@ -49,6 +49,13 @@ Alpine.data('app', () => ({
 
   init() {
     this.fetchStatus()
+    const tab = location.hash.slice(1)
+    if (['home', 'scan'].includes(tab)) {
+      this.currentTab = tab as any
+    }
+    this.$watch('currentTab', (val: string) => {
+      location.hash = val
+    })
   },
   destroy() {
   },
