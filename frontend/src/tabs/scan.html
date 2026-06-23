@@ -25,12 +25,12 @@
             <th>信道</th>
             <th>频段</th>
             <th>加密</th>
-            <th>最后出现时间</th>
+            <th>最后出现</th>
             <th>操作</th>
           </tr>
         </thead>
         <template x-for="ap in scanResults" :key="ap.bssid">
-          <tbody>
+          <tbody x-data="{ expanded: true }">
             <tr>
               <td x-text="ap.ssid || '(隐藏)'"></td>
               <td>
@@ -55,24 +55,34 @@
             <tr x-show="deviceResults[ap.bssid]?.length > 0">
               <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                 <div style="padding:0.5rem 1rem;">
-                  <small><strong>发现的设备 (<span x-text="deviceResults[ap.bssid]?.length"></span>)</strong></small>
-                  <table style="margin:0.25rem 0 0 0;font-size:0.85em;">
-                    <thead>
-                      <tr>
-                        <th>MAC</th>
-                        <th>数据包</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template x-for="dev in deviceResults[ap.bssid]" :key="dev.mac">
+                  <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;margin-bottom:0.25rem;" @click="expanded = !expanded">
+                    <small><strong>发现的设备 (<span x-text="deviceResults[ap.bssid]?.length"></span>)</strong></small>
+                    <span style="font-size:0.85em;color:var(--muted-color);display:inline-flex;align-items:center;gap:0.25rem;">
+                      <span x-text="expanded ? '折叠' : '展开'"></span>
+                      <load src="src/assets/chevron-up.svg" />
+                    </span>
+                  </div>
+                  <div x-show="expanded" x-transition>
+                    <table style="margin-top:0.4em;font-size:0.85em;">
+                      <thead>
                         <tr>
-                          <td><span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
-                              x-text="dev.mac"></span></td>
-                          <td x-text="dev.packets"></td>
+                          <th>MAC</th>
+                          <th>数据包</th>
+                          <th>最后出现</th>
                         </tr>
-                      </template>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        <template x-for="dev in deviceResults[ap.bssid]" :key="dev.mac">
+                          <tr>
+                            <td><span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
+                                x-text="dev.mac"></span></td>
+                            <td x-text="dev.packets"></td>
+                            <td x-text="dev.lastSeen"></td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </td>
             </tr>

@@ -18,7 +18,6 @@ interface ScanResponse {
 
 interface DeviceInfo {
   mac: string
-  rssi: number
   packets: number
   lastSeen?: string
 }
@@ -117,7 +116,8 @@ Alpine.data('scan', () => ({
         for (const dev of data.devices) {
           const existing = this.deviceResults[bssid].find(d => d.mac === dev.mac)
           if (existing) {
-            Object.assign(existing, dev, { lastSeen: now })
+            existing.packets = (existing.packets || 0) + dev.packets
+            existing.lastSeen = now
           } else {
             dev.lastSeen = now
             this.deviceResults[bssid].push(dev)
