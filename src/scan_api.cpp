@@ -396,7 +396,6 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
             client.print("data: ");
             client.print(json);
             client.print("\n\n");
-            client.flush();
         }
         delay(50);
     }

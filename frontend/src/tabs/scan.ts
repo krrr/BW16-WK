@@ -196,4 +196,12 @@ Alpine.data('scan', () => ({
     if (rssi >= -70) return '#f39c12'
     return '#e74c3c'
   },
+
+  isVirtualMac(mac: string): boolean {
+    if (!mac) return false
+    const cleanMac = mac.replace(/[^0-9a-fA-F]/g, '')
+    if (cleanMac.length < 2) return false
+    const firstByte = parseInt(cleanMac.substring(0, 2), 16)
+    return !isNaN(firstByte) && (firstByte & 2) !== 0
+  },
 }))

@@ -9,7 +9,7 @@
         <span x-text="scanning ? '扫描中...' : '开始扫描'"></span>
       </button>
       <label>
-        <input type="checkbox" x-model="persistEnabled" @change="savePersisted" role="switch"> 持久记录
+        <input type="checkbox" x-model="persistEnabled" @change="savePersisted" role="switch"> 持久保存
       </label>
     </div>
 
@@ -36,6 +36,7 @@
               <td>
                 <span style="font-family:monospace;font-size:0.85em;cursor:pointer" @click="openMacLookup(ap.bssid)"
                   x-text="ap.bssid"></span>
+                <span x-show="isVirtualMac(ap.bssid)" class="virtual-badge" style="font-size: 0.7em;">虚拟</span>
               </td>
               <td x-text="ap.rssi + ' dBm'" :style="'color:' + rssiColor(ap.rssi) + ';font-weight:bold;'"></td>
               <td x-text="ap.channel"></td>
@@ -45,6 +46,7 @@
               <td>
                 <button @click="deviceScanning === ap.bssid ? stopDeviceScan(ap.bssid) : startDeviceScan(ap.bssid, ap.channel)"
                   :aria-busy="deviceScanning === ap.bssid"
+                  :class="{ 'pointer-ev-auto': deviceScanning === ap.bssid }"
                   :disabled="deviceScanning !== null && deviceScanning !== ap.bssid" class="outline contrast"
                   style="padding:0.25rem 0.75rem;font-size:0.85rem;">
                   <span x-text="deviceScanning === ap.bssid ? '停止监听' : '扫描设备'"></span>
@@ -74,8 +76,11 @@
                       <tbody>
                         <template x-for="dev in deviceResults[ap.bssid]" :key="dev.mac">
                           <tr>
-                            <td><span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
-                                x-text="dev.mac"></span></td>
+                            <td>
+                              <span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
+                                x-text="dev.mac"></span>
+                              <span x-show="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
+                            </td>
                             <td x-text="dev.packets"></td>
                             <td x-text="dev.lastSeen"></td>
                           </tr>

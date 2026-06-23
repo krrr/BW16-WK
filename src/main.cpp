@@ -167,6 +167,5 @@ void loop() {
 
     dispatchRequest(client, req);
 
-    client.flush();
     client.stop();
 }

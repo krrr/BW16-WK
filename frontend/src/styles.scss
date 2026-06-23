@@ -2,3 +2,32 @@ header > h1 {
     margin: 6px;
     margin-bottom: 6px;
 }
+
+.virtual-badge {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.7em;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: rgba(142, 68, 173, 0.15); // soft purple
+  color: #9b59b6; // premium purple/violet
+  border: 1px solid rgba(142, 68, 173, 0.3);
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .virtual-badge {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #d7bde2;
+    border-color: rgba(155, 89, 182, 0.45);
+  }
+}
+
+
+.pointer-ev-auto {
+  pointer-events: auto !important;
+}
+
