@@ -311,20 +311,14 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
     String chStr = extractQueryParam(req, "channel");
 
     if (bssidStr.length() == 0 || chStr.length() == 0) {
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "missing bssid or channel";
-        wifiClientSendJson(client, doc);
+        wifiClientSendJsonFail(client, "missing bssid or channel");
         return;
     }
     bssidStr = urlDecode(bssidStr);
     Serial.print("[SNIFF] rawBssidParam="); Serial.println(bssidStr);
     Serial.print("[SNIFF] decodedBssid="); Serial.println(bssidStr);
     if (!parseBssid(bssidStr, g_target_bssid)) {
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "invalid bssid";
-        wifiClientSendJson(client, doc);
+        wifiClientSendJsonFail(client, "invalid bssid");
         return;
     }
     g_target_channel = chStr.toInt();
@@ -358,16 +352,62 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
         return;
     }
 
+    // 发送 SSE 头部
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/event-stream; charset=utf-8");
+    client.println("Cache-Control: no-cache");
+    client.println("Connection: keep-alive");
+    client.println("Access-Control-Allow-Origin: *");
+    client.println();
+    client.flush();
+
     unsigned long start = millis();
+    unsigned long last_send = 0;
     while (millis() - start < DEVICE_SCAN_TIMEOUT_MS) {
-        delay(100);
-        // if ((millis() - start) % 3000 < 60) {
-            // wext_set_channel(WLAN0_NAME, g_target_channel);
-        // }
+        // 如果客户端主动断开，提前退出
+        if (!client.connected()) {
+            Serial.println("[SNIFF] SSE client disconnected, aborting scan");
+            break;
+        }
+
+        // 每秒推送一次当前扫描到的所有设备
+        if (millis() - last_send >= 1000) {
+            last_send = millis();
+
+            JsonDocument doc;
+            doc["success"] = true;
+            doc["bssid"] = bssidStr;
+            doc["channel"] = g_target_channel;
+            doc["count"] = g_device_count;
+            JsonArray devices = doc["devices"].to<JsonArray>();
+            for (int i = 0; i < g_device_count; i++) {
+                JsonObject d = devices.add<JsonObject>();
+                char mac[18];
+                snprintf(mac, sizeof(mac), "%02X:%02X:%02X:%02X:%02X:%02X",
+                    g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
+                    g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
+                d["mac"] = mac;
+                d["packets"] = g_devices[i].packet_count;
+            }
+
+            String json;
+            serializeJson(doc, json);
+
+            client.print("data: ");
+            client.print(json);
+            client.print("\n\n");
+            client.flush();
+        }
+        delay(50);
+    }
+
+    // 发送 done 事件标识扫描完成
+    if (client.connected()) {
+        client.print("event: done\ndata: {}\n\n");
+        client.flush();
     }
 
     wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
-
 
     Serial.print("[SNIFF] Scan done, device_count="); Serial.println(g_device_count);
     for (int i = 0; i < g_device_count; i++) {
@@ -375,21 +415,4 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
         printBssid(g_devices[i].mac);
         Serial.print(" packets="); Serial.println(g_devices[i].packet_count);
     }
-
-    JsonDocument doc;
-    doc["success"] = true;
-    doc["bssid"] = bssidStr;
-    doc["channel"] = g_target_channel;
-    doc["count"] = g_device_count;
-    JsonArray devices = doc["devices"].to<JsonArray>();
-    for (int i = 0; i < g_device_count; i++) {
-        JsonObject d = devices.add<JsonObject>();
-        char mac[18];
-        snprintf(mac, sizeof(mac), "%02X:%02X:%02X:%02X:%02X:%02X",
-            g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
-            g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
-        d["mac"] = mac;
-        d["packets"] = g_devices[i].packet_count;
-    }
-    wifiClientSendJson(client, doc);
 }

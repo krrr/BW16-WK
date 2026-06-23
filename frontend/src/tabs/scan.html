@@ -43,11 +43,11 @@
               <td x-text="ap.security"></td>
               <td style="font-size:0.85em;" x-text="ap.lastSeen"></td>
               <td>
-                <button @click="startDeviceScan(ap.bssid, ap.channel)" :aria-busy="deviceScanning === ap.bssid"
-                  :disabled="deviceScanning !== null" class="outline contrast"
+                <button @click="deviceScanning === ap.bssid ? stopDeviceScan(ap.bssid) : startDeviceScan(ap.bssid, ap.channel)"
+                  :aria-busy="deviceScanning === ap.bssid"
+                  :disabled="deviceScanning !== null && deviceScanning !== ap.bssid" class="outline contrast"
                   style="padding:0.25rem 0.75rem;font-size:0.85rem;">
-                  <span
-                    x-text="deviceScanning === ap.bssid ? '监听中...' : '扫描设备'"></span>
+                  <span x-text="deviceScanning === ap.bssid ? '停止监听' : '扫描设备'"></span>
                 </button>
               </td>
             </tr>

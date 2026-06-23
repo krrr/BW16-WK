@@ -44,6 +44,7 @@ Alpine.data('scan', () => ({
   deviceScanning: null as string | null,
   deviceErrors: {} as Record<string, string>,
   deviceResults: {} as Record<string, DeviceInfo[]>,
+  deviceEventSource: null as EventSource | null,
 
   init() {
     if (this.persistEnabled) {
@@ -104,32 +105,84 @@ Alpine.data('scan', () => ({
     }
   },
 
+  stopDeviceScan(bssid: string) {
+    if (this.deviceEventSource) {
+      this.deviceEventSource.close()
+      this.deviceEventSource = null
+    }
+    if (this.deviceScanning === bssid) {
+      this.deviceScanning = null
+    }
+  },
+
   async startDeviceScan(bssid: string, channel: number) {
+    if (this.deviceEventSource) {
+      this.stopDeviceScan(this.deviceScanning || '')
+    }
+
     this.deviceScanning = bssid
     this.deviceErrors[bssid] = ''
-    if (!this.deviceResults[bssid]) this.deviceResults[bssid] = []
+    if (!this.deviceResults[bssid]) {
+      this.deviceResults[bssid] = []
+    }
+
+    // 记录本次扫描前的历史数据作为 Baseline 基准
+    // 每当收到SSE更新时将当前会话扫描到的包数与之前的历史基数相加得到总包数，从而实现多次扫描不丢失历史数据且不重复计算
+    const baselines: Record<string, number> = {}
+    for (const dev of this.deviceResults[bssid]) {
+      baselines[dev.mac] = dev.packets || 0
+    }
+
     try {
-      const r = await fetch(`/api/scan-devices?bssid=${encodeURIComponent(bssid)}&channel=${channel}`)
-      const data: DeviceScanResponse = await r.json()
-      if (data.success) {
-        const now = new Date().toLocaleString('zh-CN')
-        for (const dev of data.devices) {
-          const existing = this.deviceResults[bssid].find(d => d.mac === dev.mac)
-          if (existing) {
-            existing.packets = (existing.packets || 0) + dev.packets
-            existing.lastSeen = now
+      const url = `/api/scan-devices?bssid=${encodeURIComponent(bssid)}&channel=${channel}`
+      const es = new EventSource(url)
+      this.deviceEventSource = es
+
+      es.onmessage = (event) => {
+        try {
+          const data: DeviceScanResponse = JSON.parse(event.data)
+          if (data.success) {
+            const now = new Date().toLocaleString('zh-CN')
+            for (const dev of data.devices) {
+              const existing = this.deviceResults[bssid].find(d => d.mac === dev.mac)
+              const basePackets = baselines[dev.mac] || 0
+              const newPackets = basePackets + dev.packets
+
+              if (existing) {
+                // 仅在数据包发生改变时更新数量与最后出现时间
+                if (existing.packets !== newPackets) {
+                  existing.packets = newPackets
+                  existing.lastSeen = now
+                }
+              } else {
+                // 新设备插入
+                this.deviceResults[bssid].push({
+                  mac: dev.mac,
+                  packets: newPackets,
+                  lastSeen: now
+                })
+              }
+            }
+            this.savePersisted()
           } else {
-            dev.lastSeen = now
-            this.deviceResults[bssid].push(dev)
+            this.deviceErrors[bssid] = data.message || '扫描失败'
+            this.stopDeviceScan(bssid)
           }
+        } catch (err) {
+          this.deviceErrors[bssid] = '解析数据错误'
+          this.stopDeviceScan(bssid)
         }
-        this.savePersisted()
-      } else {
-        this.deviceErrors[bssid] = data.message || '扫描失败'
+      }
+
+      es.addEventListener('done', () => {
+        this.stopDeviceScan(bssid)
+      })
+
+      es.onerror = () => {
+        this.stopDeviceScan(bssid)
       }
     } catch (e) {
-      this.deviceErrors[bssid] = '请求失败: ' + (e as Error).message
-    } finally {
+      this.deviceErrors[bssid] = '创建连接失败: ' + (e as Error).message
       this.deviceScanning = null
     }
   },
