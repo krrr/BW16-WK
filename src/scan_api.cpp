@@ -227,23 +227,19 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
     const uint8_t* addr2 = buf + 10;
     const uint8_t* addr3 = buf + 16;
 
-    // Infer BSSID/DA/SA from addressing bits
-    const uint8_t* da = addr1;
-    const uint8_t* sa = addr2;
-    const uint8_t* bssid = addr3;
-
+    // Derive BSSID from frame control flags (TA & RA are always addr2 & addr1)
+    const uint8_t* bssid;
     if (!toDS && fromDS) {
-        // AP→STA: A1=DA, A2=BSSID, A3=SA
         bssid = addr2;
-        sa = addr3;
     } else if (toDS && !fromDS) {
-        // STA→AP: A1=BSSID, A2=SA, A3=DA
         bssid = addr1;
-        da = addr3;
     } else if (toDS && fromDS) {
         return;
+    } else {
+        bssid = addr3;
     }
 
+    // 过滤掉不属于目标AP的所有无线数据包
     if (memcmp(bssid, g_target_bssid, 6) != 0) {
         #ifdef SNIFF_DEBUG
         Serial.print("[SNIFF] BSSID mismatch: got=");
@@ -257,21 +253,56 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
         return;
     }
 
-    if (memcmp(sa, g_target_bssid, 6) != 0) {
-        #ifdef SNIFF_DEBUG
-        Serial.print("[SNIFF] ADD sa=");
-        printBssid(sa);
-        Serial.println();
-        #endif
-        addDiscoveredDevice(sa);
+    const uint8_t* ta = addr2;
+    const uint8_t* ra = addr1;
+
+    bool ra_broadcast = (ra[0] == 0xFF && ra[1] == 0xFF && ra[2] == 0xFF &&
+                         ra[3] == 0xFF && ra[4] == 0xFF && ra[5] == 0xFF);
+    bool ra_multicast = (ra[0] & 0x01);
+
+    // AP bridging broadcast from wired side → skip entirely
+    if ((ra_broadcast || ra_multicast) && memcmp(ta, g_target_bssid, 6) == 0) {
+        return;
     }
-    if (memcmp(da, g_target_bssid, 6) != 0 && memcmp(da, sa, 6) != 0) {
-        #ifdef SNIFF_DEBUG
-        Serial.print("[SNIFF] ADD da=");
-        printBssid(da);
-        Serial.println();
-        #endif
-        addDiscoveredDevice(da);
+
+    if (toDS && !fromDS) {
+        // STA→AP: TA=station, RA=BSSID
+        if (memcmp(ta, g_target_bssid, 6) != 0) {
+            #ifdef SNIFF_DEBUG
+            Serial.print("[SNIFF] ADD TA (sta→ap)=");
+            printBssid(ta);
+            Serial.println();
+            #endif
+            addDiscoveredDevice(ta);
+        }
+    } else if (!toDS && fromDS) {
+        // AP→STA: TA=BSSID, RA=station
+        if (!ra_broadcast && memcmp(ra, g_target_bssid, 6) != 0) {
+            #ifdef SNIFF_DEBUG
+            Serial.print("[SNIFF] ADD RA (ap→sta)=");
+            printBssid(ra);
+            Serial.println();
+            #endif
+            addDiscoveredDevice(ra);
+        }
+    } else if (!toDS && !fromDS) {
+        // Direct/management: TA=source, RA=destination
+        if (memcmp(ta, g_target_bssid, 6) != 0) {
+            #ifdef SNIFF_DEBUG
+            Serial.print("[SNIFF] ADD TA (direct)=");
+            printBssid(ta);
+            Serial.println();
+            #endif
+            addDiscoveredDevice(ta);
+        }
+        if (!ra_broadcast && !ra_multicast && memcmp(ra, g_target_bssid, 6) != 0) {
+            #ifdef SNIFF_DEBUG
+            Serial.print("[SNIFF] ADD RA (direct)=");
+            printBssid(ra);
+            Serial.println();
+            #endif
+            addDiscoveredDevice(ra);
+        }
     }
 }
 
