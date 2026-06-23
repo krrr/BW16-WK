@@ -31,6 +31,13 @@ interface DeviceScanResponse {
   devices: DeviceInfo[]
 }
 
+interface DeauthResponse {
+  success: boolean
+  message?: string
+  rounds: number
+  packets: number
+}
+
 const STORAGE_KEY = 'wifi_scan_data'
 const PERSIST_KEY = 'wifi_scan_persist'
 
@@ -45,6 +52,9 @@ Alpine.data('scan', () => ({
   deviceErrors: {} as Record<string, string>,
   deviceResults: {} as Record<string, DeviceInfo[]>,
   deviceEventSource: null as EventSource | null,
+
+  deauthing: {} as Record<string, boolean>,
+  deauthResult: {} as Record<string, string>,
 
   init() {
     if (this.persistEnabled) {
@@ -113,6 +123,31 @@ Alpine.data('scan', () => ({
     if (this.deviceScanning === bssid) {
       this.deviceScanning = null
     }
+  },
+
+  async deauthDevice(bssid: string, mac: string, channel: number) {
+    const key = bssid + '-' + mac
+    if (this.deauthing[key]) return
+    if (!confirm(`确定要对 ${mac} 发起 Deauth 攻击？`)) return
+
+    this.deauthing[key] = true
+    this.deauthResult[key] = ''
+    try {
+      const url = `/api/deauth?bssid=${encodeURIComponent(bssid)}&mac=${encodeURIComponent(mac)}&channel=${channel}`
+      const r = await fetch(url)
+      const data: DeauthResponse = await r.json()
+      if (data.success) {
+        this.deauthResult[key] = '✓'
+      } else {
+        this.deauthResult[key] = '✗'
+      }
+    } catch {
+      this.deauthResult[key] = '✗'
+    }
+    setTimeout(() => {
+      this.deauthing[key] = false
+      this.deauthResult[key] = ''
+    }, 3000)
   },
 
   async startDeviceScan(bssid: string, channel: number) {

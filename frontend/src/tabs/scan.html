@@ -66,26 +66,36 @@
                   </div>
                   <div x-show="expanded" x-transition>
                     <table style="margin-top:0.4em;font-size:0.85em;">
-                      <thead>
-                        <tr>
-                          <th>MAC</th>
-                          <th>数据包</th>
-                          <th>最后出现</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <template x-for="dev in deviceResults[ap.bssid]" :key="dev.mac">
+                        <thead>
                           <tr>
-                            <td>
-                              <span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
-                                x-text="dev.mac"></span>
-                              <span x-show="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
-                            </td>
-                            <td x-text="dev.packets"></td>
-                            <td x-text="dev.lastSeen"></td>
+                            <th>MAC</th>
+                            <th>数据包</th>
+                            <th>最后出现</th>
+                            <th>攻击</th>
                           </tr>
-                        </template>
-                      </tbody>
+                        </thead>
+                        <tbody>
+                          <template x-for="dev in deviceResults[ap.bssid]" :key="dev.mac">
+                            <tr>
+                              <td>
+                                <span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)"
+                                  x-text="dev.mac"></span>
+                                <span x-show="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
+                              </td>
+                              <td x-text="dev.packets"></td>
+                              <td x-text="dev.lastSeen"></td>
+                              <td>
+                                <button @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"
+                                  :disabled="!!deauthing[ap.bssid + '-' + dev.mac]" 
+                                  :aria-busy="deauthing[ap.bssid + '-' + dev.mac]"
+                                  class="outline contrast"
+                                  style="padding:0.15rem 0.5rem;font-size:0.8rem;color:#e74c3c;border-color:#e74c3c;">
+                                  <span x-show="!deauthing[ap.bssid + '-' + dev.mac]" x-text="deauthResult[ap.bssid + '-' + dev.mac] || 'Deauth'"></span>
+                                </button>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
                     </table>
                   </div>
                 </div>

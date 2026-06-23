@@ -51,10 +51,18 @@ String extractQueryParam(const String& req, const String& param) {
     int sp = req.indexOf(' ', qm);
     if (sp < 0) return "";
     String qs = req.substring(qm + 1, sp);
-    int p = qs.indexOf(param + "=");
-    if (p < 0) return "";
-    int vstart = p + param.length() + 1;
-    int vend = qs.indexOf('&', vstart);
-    if (vend < 0) vend = qs.length();
-    return qs.substring(vstart, vend);
+    
+    String target = param + "=";
+    int p = -1;
+    int searchStart = 0;
+    while ((p = qs.indexOf(target, searchStart)) >= 0) {
+        if (p == 0 || qs[p - 1] == '&') {
+            int vstart = p + target.length();
+            int vend = qs.indexOf('&', vstart);
+            if (vend < 0) vend = qs.length();
+            return qs.substring(vstart, vend);
+        }
+        searchStart = p + 1;
+    }
+    return "";
 }

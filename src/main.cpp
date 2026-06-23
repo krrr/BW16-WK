@@ -6,9 +6,8 @@
 #include "webpage.h"
 #include "favicon.h"
 #include "utils.h"
+#include "api_all.h"
 
-extern void handleApScanApi(WiFiClient& client);
-extern void handleDeviceScanApi(WiFiClient& client, const String& req);
 static void handleStatusApi(WiFiClient& client);
 
 const char COMPILE_DATE[] = __DATE__;
@@ -89,6 +88,7 @@ static constexpr uint32_t HASH_API_SCAN         = djb2_hash("/api/scan");
 static constexpr uint32_t HASH_API_SCAN_DEVICES = djb2_hash("/api/scan-devices");
 static constexpr uint32_t HASH_API_STATUS       = djb2_hash("/api/status");
 static constexpr uint32_t HASH_API_SET_TIME     = djb2_hash("/api/set-time");
+static constexpr uint32_t HASH_API_DEAUTH       = djb2_hash("/api/deauth");
 
 static void dispatchRequest(WiFiClient& client, const String& req) {
     int s = req.indexOf(' ') + 1;
@@ -117,6 +117,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
             break;
         case HASH_API_SET_TIME:
             handleSetTimeApi(client, req);
+            break;
+        case HASH_API_DEAUTH:
+            handleDeauthApi(client, req);
             break;
         default:
             handleNotFound(client);

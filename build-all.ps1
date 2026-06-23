@@ -12,7 +12,7 @@ if ($LASTEXITCODE -ne 0) { Pop-Location; exit 1 }
 Pop-Location
 
 Write-Host "`n=== 2. Gzip compress -> C header ===" -ForegroundColor Cyan
-node (Join-Path $root "scripts" "compress-to-c.mjs")
+node (Join-Path (Join-Path $root "scripts") "compress-to-c.mjs")
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
 Write-Host "`n=== 3. Build firmware ===" -ForegroundColor Cyan
