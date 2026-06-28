@@ -20,6 +20,7 @@ interface DeviceInfo {
   mac: string
   packets_out: number
   packets_in: number
+  handshakes: number
   lastSeen?: string
 }
 
@@ -164,11 +165,12 @@ Alpine.data('scan', () => ({
 
     // 记录本次扫描前的历史数据作为 Baseline 基准
     // 每当收到SSE更新时将当前会话扫描到的包数与之前的历史基数相加得到总包数，从而实现多次扫描不丢失历史数据且不重复计算
-    const baselines: Record<string, { out: number, in: number }> = {}
+    const baselines: Record<string, { out: number, in: number, handshakes: number }> = {}
     for (const dev of this.deviceResults[bssid]) {
       baselines[dev.mac] = {
         out: dev.packets_out || 0,
-        in: dev.packets_in || 0
+        in: dev.packets_in || 0,
+        handshakes: dev.handshakes || 0
       }
     }
 
@@ -184,15 +186,19 @@ Alpine.data('scan', () => ({
             const now = new Date().toLocaleString('zh-CN')
             for (const dev of data.devices) {
               const existing = this.deviceResults[bssid].find(d => d.mac === dev.mac)
-              const base = baselines[dev.mac] || { out: 0, in: 0 }
+              const base = baselines[dev.mac] || { out: 0, in: 0, handshakes: 0 }
               const newPacketsOut = base.out + (dev.packets_out || 0)
               const newPacketsIn = base.in + (dev.packets_in || 0)
+              const newHandshakes = base.handshakes + (dev.handshakes || 0)
 
               if (existing) {
                 // 仅在数据包发生改变时更新数量与最后出现时间
-                if (existing.packets_out !== newPacketsOut || existing.packets_in !== newPacketsIn) {
+                if (existing.packets_out !== newPacketsOut || 
+                    existing.packets_in !== newPacketsIn ||
+                    existing.handshakes !== newHandshakes) {
                   existing.packets_out = newPacketsOut
                   existing.packets_in = newPacketsIn
+                  existing.handshakes = newHandshakes
                   existing.lastSeen = now
                 }
               } else {
@@ -201,6 +207,7 @@ Alpine.data('scan', () => ({
                   mac: dev.mac,
                   packets_out: newPacketsOut,
                   packets_in: newPacketsIn,
+                  handshakes: newHandshakes,
                   lastSeen: now
                 })
               }

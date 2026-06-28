@@ -129,6 +129,7 @@ typedef struct {
     uint8_t mac[6];
     int packets_out; // Device -> Router (Uplink / Tx)
     int packets_in;  // Router -> Device (Downlink / Rx)
+    int handshakes;  // Handshake packets count
 } DiscoveredDevice;
 
 static DiscoveredDevice g_devices[MAX_DISCOVERED_DEVICES];
@@ -157,7 +158,7 @@ static bool parseBssid(const String& str, uint8_t* bssid) {
     return true;
 }
 
-static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink) {
+static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false) {
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
     for (int i = 0; i < g_device_count; i++) {
@@ -166,6 +167,9 @@ static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink) {
                 g_devices[i].packets_out++;
             } else {
                 g_devices[i].packets_in++;
+            }
+            if (is_handshake) {
+                g_devices[i].handshakes++;
             }
             return;
         }
@@ -179,6 +183,7 @@ static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink) {
         g_devices[g_device_count].packets_out = 0;
         g_devices[g_device_count].packets_in = 1;
     }
+    g_devices[g_device_count].handshakes = is_handshake ? 1 : 0;
     g_device_count++;
 }
 
@@ -267,6 +272,30 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
     const uint8_t* ta = addr2;
     const uint8_t* ra = addr1;
 
+    bool is_eapol = false;
+    if (type == 2 && !(fc & 0x4000)) { // Data type and not protected
+        unsigned int subtype = (fc >> 4) & 0x0F;
+        unsigned int mac_hdr_len = 0;
+        if (subtype == 8) {
+            mac_hdr_len = 26; // QoS Data
+        } else if (subtype == 0) {
+            mac_hdr_len = 24; // Data
+        }
+        if (mac_hdr_len > 0 && len >= mac_hdr_len + 8) {
+            const uint8_t* llc = buf + mac_hdr_len;
+            if (llc[0] == 0xAA && llc[1] == 0xAA && llc[2] == 0x03 &&
+                llc[3] == 0x00 && llc[4] == 0x00 && llc[5] == 0x00 &&
+                llc[6] == 0x88 && llc[7] == 0x8E) {
+                is_eapol = true;
+                Serial.print("[SNIFF] EAPOL Handshake Packet detected: len=");
+                Serial.print(len);
+                Serial.print(" TA="); printBssid(ta);
+                Serial.print(" RA="); printBssid(ra);
+                Serial.println();
+            }
+        }
+    }
+
     bool ra_broadcast = (ra[0] == 0xFF && ra[1] == 0xFF && ra[2] == 0xFF &&
                          ra[3] == 0xFF && ra[4] == 0xFF && ra[5] == 0xFF);
     bool ra_multicast = (ra[0] & 0x01);
@@ -284,7 +313,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ta);
             Serial.println();
             #endif
-            addDiscoveredDevice(ta, true);
+            addDiscoveredDevice(ta, true, is_eapol);
         }
     } else if (!toDS && fromDS) {
         // AP→STA: TA=BSSID, RA=station
@@ -294,7 +323,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ra);
             Serial.println();
             #endif
-            addDiscoveredDevice(ra, false);
+            addDiscoveredDevice(ra, false, is_eapol);
         }
     } else if (!toDS && !fromDS) {
         // Direct/management: TA=source, RA=destination
@@ -304,7 +333,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ta);
             Serial.println();
             #endif
-            addDiscoveredDevice(ta, true);
+            addDiscoveredDevice(ta, true, is_eapol);
         }
         if (!ra_broadcast && !ra_multicast && memcmp(ra, g_target_bssid, 6) != 0) {
             #ifdef SNIFF_DEBUG
@@ -312,7 +341,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ra);
             Serial.println();
             #endif
-            addDiscoveredDevice(ra, false);
+            addDiscoveredDevice(ra, false, is_eapol);
         }
     }
 }
@@ -400,6 +429,7 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
                 d["mac"] = mac;
                 d["packets_out"] = g_devices[i].packets_out;
                 d["packets_in"] = g_devices[i].packets_in;
+                d["handshakes"] = g_devices[i].handshakes;
             }
 
             String json;
@@ -425,6 +455,7 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
         Serial.print("[SNIFF]   device ");
         printBssid(g_devices[i].mac);
         Serial.print(" tx_packets="); Serial.print(g_devices[i].packets_out);
-        Serial.print(" rx_packets="); Serial.println(g_devices[i].packets_in);
+        Serial.print(" rx_packets="); Serial.print(g_devices[i].packets_in);
+        Serial.print(" handshakes="); Serial.println(g_devices[i].handshakes);
     }
 }

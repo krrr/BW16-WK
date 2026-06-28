@@ -70,6 +70,7 @@
                           <tr>
                             <th>MAC</th>
                             <th>数据包</th>
+                            <th>握手包</th>
                             <th>最后出现</th>
                             <th>攻击</th>
                           </tr>
@@ -83,6 +84,7 @@
                                 <span x-show="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
                               </td>
                               <td x-text="'↑' + (dev.packets_out || 0) + ' / ↓' + (dev.packets_in || 0)"></td>
+                              <td x-text="dev.handshakes || 0"></td>
                               <td x-text="dev.lastSeen"></td>
                               <td>
                                 <button @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"
