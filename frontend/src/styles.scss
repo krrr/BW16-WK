@@ -40,3 +40,82 @@ header > h1 {
   font-size: 0.9rem;
   height: auto;
 }
+
+/* ========= Message Notification Utility ========= */
+.message-container {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  width: 100%;
+  max-width: 480px;
+  padding: 0 16px;
+}
+
+.message-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: var(--pico-border-radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--pico-box-shadow);
+  border: 1px solid;
+  width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Light Mode (default) */
+.message-success {
+  background-color: rgba(240, 253, 244, 0.95);
+  border-color: rgba(74, 222, 128, 0.4);
+  color: #15803d;
+}
+.message-error {
+  background-color: rgba(254, 242, 242, 0.95);
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #b91c1c;
+}
+.message-warning {
+  background-color: rgba(255, 251, 235, 0.95);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #b45309;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .message-success {
+    background-color: rgba(20, 83, 45, 0.85);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+  }
+  .message-error {
+    background-color: rgba(127, 29, 29, 0.85);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+  .message-warning {
+    background-color: rgba(120, 53, 4, 0.85);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #fde047;
+  }
+}
+
+.message-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.message-content {
+  line-height: 1.4;
+}

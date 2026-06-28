@@ -55,6 +55,31 @@
     <load src="src/tabs/scan.html" />
   </main>
 
+  <!-- Floating Message Notifications -->
+  <div class="message-container">
+    <template x-for="msg in $store.message.items" :key="msg.id">
+      <div
+        class="message-item"
+        :class="'message-' + msg.type"
+      >
+        <!-- Success Icon -->
+        <span x-show="msg.type === 'success'" style="display: flex; align-items: center; justify-content: center;">
+          <load src="src/assets/success.svg" />
+        </span>
+        <!-- Error Icon -->
+        <span x-show="msg.type === 'error'" style="display: flex; align-items: center; justify-content: center;">
+          <load src="src/assets/error.svg" />
+        </span>
+        <!-- Warning Icon -->
+        <span x-show="msg.type === 'warning'" style="display: flex; align-items: center; justify-content: center;">
+          <load src="src/assets/warning.svg" />
+        </span>
+        <span class="message-content" x-text="msg.text"></span>
+      </div>
+    </template>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
+

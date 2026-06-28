@@ -11,6 +11,52 @@ interface StatusResponse {
   rtc_time?: number
 }
 
+interface MessageItem {
+  id: number
+  type: 'success' | 'error' | 'warning'
+  text: string
+  duration: number
+}
+
+// Register Alpine store for messages
+Alpine.store('message', {
+  items: [] as MessageItem[],
+  nextId: 1,
+})
+
+export const message = {
+  show(text: string, type: 'success' | 'error' | 'warning' = 'success', duration = 3000) {
+    let msg_store = (Alpine.store('message') as any)
+    const id = msg_store.nextId++
+    const item: MessageItem = { id, type, text, duration }
+    msg_store.items.push(item)
+
+    if (duration > 0) {
+      setTimeout(() => {
+        this.close(id)
+      }, duration)
+    }
+    return id
+  },
+
+  success(text: string, duration = 3000) {
+    return this.show(text, 'success', duration)
+  },
+
+  error(text: string, duration = 4000) {
+    return this.show(text, 'error', duration)
+  },
+
+  warning(text: string, duration = 3500) {
+    return this.show(text, 'warning', duration)
+  },
+
+  close(id: number) {
+    let msg_store = (Alpine.store('message') as any)
+    msg_store.items = msg_store.items.filter((item: MessageItem) => item.id !== id)
+  }
+}
+
 Alpine.data('app', () => ({
   uptime: -1,
   apChannel: -1,
@@ -53,13 +99,14 @@ Alpine.data('app', () => ({
       if (data.success) {
         this.apChannel = data.ap_channel
         this.selectedChannel = data.ap_channel
+        message.success(`信道已成功切换至 ${data.ap_channel}`)
       } else {
-        alert(data.message || '切换信道失败')
+        message.error(data.message || '切换信道失败')
         this.selectedChannel = this.apChannel
       }
     } catch (e) {
       console.error('changeChannel error:', e)
-      alert('网络错误，切换信道失败')
+      message.error('网络错误，切换信道失败')
       this.selectedChannel = this.apChannel
     } finally {
       this.switchingChannel = false
