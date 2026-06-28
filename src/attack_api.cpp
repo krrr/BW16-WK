@@ -8,10 +8,9 @@
 #include "utils.h"
 #include "wifi_drv.h"
 
-extern uint8_t* rltk_wlan_info;
-extern "C" void* alloc_mgtxmitframe(void* ptr);
-extern "C" void update_mgntframe_attrib(void* ptr, void* frame_control);
-extern "C" int dump_mgntframe(void* ptr, void* frame_control);
+// extern "C" void* alloc_mgtxmitframe(void* ptr);
+// extern "C" void update_mgntframe_attrib(void* ptr, void* frame_control);
+// extern "C" int dump_mgntframe(void* ptr, void* frame_control);
 
 
 static bool parseMac(const String& str, uint8_t* mac) {

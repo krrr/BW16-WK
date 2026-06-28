@@ -96,12 +96,6 @@ typedef struct __attribute__((packed, aligned(4))) {
   uint8_t ssid[32];
 } AssocReqFrame;
 
-// 从闭源库导入所需的C函数
-// 注意：函数定义可能不是100%准确，因为在编译过程中类型信息会丢失
-extern uint8_t* rltk_wlan_info;
-extern "C" void* alloc_mgtxmitframe(void* ptr);
-extern "C" void update_mgntframe_attrib(void* ptr, void* frame_control);
-extern "C" int dump_mgntframe(void* ptr, void* frame_control);
 
 // 外部函数声明 - 移除冲突的声明，使用SDK中的版本
 
