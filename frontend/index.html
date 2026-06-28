@@ -24,7 +24,19 @@
         <header>
           <h1>状态</h1>
         </header>
-        <p x-text="'当前信道: ' + apChannel"></p>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;">
+          <span>当前信道: </span>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <select x-model.number="selectedChannel" class="chan-sel">
+              <template x-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13]" :key="ch">
+                <option :value="ch" x-text="ch"></option>
+              </template>
+            </select>
+            <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast" style="width:auto;margin:0;padding:0.2rem 0.6rem;font-size:0.8rem;height:auto;">
+              切换
+            </button>
+          </div>
+        </div>
         <p x-text="'运行时间: ' + formattedUptime"></p>
         <p x-show="compileDate" x-text="'固件编译: ' + compileDate"></p>
         <p>

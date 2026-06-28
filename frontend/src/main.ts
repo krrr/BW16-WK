@@ -14,6 +14,8 @@ interface StatusResponse {
 Alpine.data('app', () => ({
   uptime: -1,
   apChannel: -1,
+  selectedChannel: -1,
+  switchingChannel: false,
   compileDate: '',
   rtcTime: null as Date | null,
   timeDiff: null as number | null,
@@ -26,6 +28,9 @@ Alpine.data('app', () => ({
       const data: StatusResponse = await r.json()
       this.uptime = data.uptime
       this.apChannel = data.ap_channel
+      if (!this.switchingChannel) {
+        this.selectedChannel = data.ap_channel
+      }
       this.compileDate = this.formattedCompileTime(data.compile_date, data.compile_time)
       if (data.rtc_time !== undefined) {
         // MCU 返回的 rtc_time 是 Unix 秒数，JS new Date() 接收毫秒，所以 * 1000 做单位换算。
@@ -33,6 +38,32 @@ Alpine.data('app', () => ({
         this.timeDiff = Math.abs(Math.floor(Date.now() / 1000) - data.rtc_time)
       }
     } catch (e) { console.error('fetchStatus error:', e) }
+  },
+
+  async changeChannel() {
+    if (this.selectedChannel === this.apChannel || this.selectedChannel < 1 || this.selectedChannel > 13) return
+    this.switchingChannel = true
+    try {
+      const r = await fetch('/api/change-channel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: this.selectedChannel })
+      })
+      const data = await r.json()
+      if (data.success) {
+        this.apChannel = data.ap_channel
+        this.selectedChannel = data.ap_channel
+      } else {
+        alert(data.message || '切换信道失败')
+        this.selectedChannel = this.apChannel
+      }
+    } catch (e) {
+      console.error('changeChannel error:', e)
+      alert('网络错误，切换信道失败')
+      this.selectedChannel = this.apChannel
+    } finally {
+      this.switchingChannel = false
+    }
   },
 
   async syncTime() {

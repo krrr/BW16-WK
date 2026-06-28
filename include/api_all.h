@@ -5,3 +5,4 @@
 void handleApScanApi(WiFiClient& client);
 void handleDeviceScanApi(WiFiClient& client, const String& req);
 void handleDeauthApi(WiFiClient& client, const String& req);
+void handleChangeChannelApi(WiFiClient& client, const String& req, const String& body);

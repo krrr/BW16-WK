@@ -81,16 +81,17 @@ static constexpr uint32_t djb2_hash(const char* s, uint32_t h = 5381) {
     return *s ? djb2_hash(s + 1, ((h << 5) + h) + (unsigned char)*s) : h;
 }
 
-static constexpr uint32_t HASH_ROOT       = djb2_hash("/");
-static constexpr uint32_t HASH_INDEX_HTML = djb2_hash("/index.html");
-static constexpr uint32_t HASH_FAVICON    = djb2_hash("/favicon.ico");
-static constexpr uint32_t HASH_API_SCAN         = djb2_hash("/api/scan");
-static constexpr uint32_t HASH_API_SCAN_DEVICES = djb2_hash("/api/scan-devices");
-static constexpr uint32_t HASH_API_STATUS       = djb2_hash("/api/status");
-static constexpr uint32_t HASH_API_SET_TIME     = djb2_hash("/api/set-time");
-static constexpr uint32_t HASH_API_DEAUTH       = djb2_hash("/api/deauth");
+static constexpr uint32_t HASH_ROOT               = djb2_hash("/");
+static constexpr uint32_t HASH_INDEX_HTML         = djb2_hash("/index.html");
+static constexpr uint32_t HASH_FAVICON            = djb2_hash("/favicon.ico");
+static constexpr uint32_t HASH_API_SCAN           = djb2_hash("/api/scan");
+static constexpr uint32_t HASH_API_SCAN_DEVICES   = djb2_hash("/api/scan-devices");
+static constexpr uint32_t HASH_API_STATUS         = djb2_hash("/api/status");
+static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
+static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
+static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
 
-static void dispatchRequest(WiFiClient& client, const String& req) {
+static void dispatchRequest(WiFiClient& client, const String& req, const String& body) {
     int s = req.indexOf(' ') + 1;
     int e = req.indexOf(' ', s);
     if (s < 1 || e < 0) { handleNotFound(client); return; }
@@ -120,6 +121,9 @@ static void dispatchRequest(WiFiClient& client, const String& req) {
             break;
         case HASH_API_DEAUTH:
             handleDeauthApi(client, req);
+            break;
+        case HASH_API_CHANGE_CHANNEL:
+            handleChangeChannelApi(client, req, body);
             break;
         default:
             handleNotFound(client);
@@ -163,12 +167,37 @@ void loop() {
     String req = client.readStringUntil('\r');
     client.read();
 
+    int contentLength = 0;
     while (client.available()) {
         String line = client.readStringUntil('\n');
-        if (line.length() <= 1) break;
+        String trimmed = line;
+        trimmed.trim();
+        if (trimmed.length() == 0) break;
+
+        String lowerLine = trimmed;
+        lowerLine.toLowerCase();
+        if (lowerLine.startsWith("content-length:")) {
+            int colon = lowerLine.indexOf(':');
+            if (colon >= 0) {
+                contentLength = lowerLine.substring(colon + 1).toInt();
+            }
+        }
     }
 
-    dispatchRequest(client, req);
+    String body = "";
+    if (contentLength > 0) {
+        body.reserve(contentLength);
+        unsigned long bodyTimeout = millis() + 1000;
+        while (body.length() < (unsigned int)contentLength && millis() < bodyTimeout) {
+            if (client.available()) {
+                body += (char)client.read();
+            } else {
+                delay(10);
+            }
+        }
+    }
+
+    dispatchRequest(client, req, body);
 
     client.stop();
 }
