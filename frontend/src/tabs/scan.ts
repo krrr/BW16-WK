@@ -18,7 +18,8 @@ interface ScanResponse {
 
 interface DeviceInfo {
   mac: string
-  packets: number
+  packets_out: number
+  packets_in: number
   lastSeen?: string
 }
 
@@ -163,9 +164,12 @@ Alpine.data('scan', () => ({
 
     // 记录本次扫描前的历史数据作为 Baseline 基准
     // 每当收到SSE更新时将当前会话扫描到的包数与之前的历史基数相加得到总包数，从而实现多次扫描不丢失历史数据且不重复计算
-    const baselines: Record<string, number> = {}
+    const baselines: Record<string, { out: number, in: number }> = {}
     for (const dev of this.deviceResults[bssid]) {
-      baselines[dev.mac] = dev.packets || 0
+      baselines[dev.mac] = {
+        out: dev.packets_out || 0,
+        in: dev.packets_in || 0
+      }
     }
 
     try {
@@ -180,20 +184,23 @@ Alpine.data('scan', () => ({
             const now = new Date().toLocaleString('zh-CN')
             for (const dev of data.devices) {
               const existing = this.deviceResults[bssid].find(d => d.mac === dev.mac)
-              const basePackets = baselines[dev.mac] || 0
-              const newPackets = basePackets + dev.packets
+              const base = baselines[dev.mac] || { out: 0, in: 0 }
+              const newPacketsOut = base.out + (dev.packets_out || 0)
+              const newPacketsIn = base.in + (dev.packets_in || 0)
 
               if (existing) {
                 // 仅在数据包发生改变时更新数量与最后出现时间
-                if (existing.packets !== newPackets) {
-                  existing.packets = newPackets
+                if (existing.packets_out !== newPacketsOut || existing.packets_in !== newPacketsIn) {
+                  existing.packets_out = newPacketsOut
+                  existing.packets_in = newPacketsIn
                   existing.lastSeen = now
                 }
               } else {
                 // 新设备插入
                 this.deviceResults[bssid].push({
                   mac: dev.mac,
-                  packets: newPackets,
+                  packets_out: newPacketsOut,
+                  packets_in: newPacketsIn,
                   lastSeen: now
                 })
               }

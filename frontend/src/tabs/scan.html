@@ -58,7 +58,7 @@
               <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                 <div style="padding:0.5rem 1rem;">
                   <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;margin-bottom:0.25rem;" @click="expanded = !expanded">
-                    <small><strong>发现的设备 (<span x-text="deviceResults[ap.bssid]?.length"></span>)</strong></small>
+                    <small><strong>»»» 发现的设备 (<span x-text="deviceResults[ap.bssid]?.length"></span>)</strong></small>
                     <span style="font-size:0.85em;color:var(--muted-color);display:inline-flex;align-items:center;gap:0.25rem;">
                       <span x-text="expanded ? '折叠' : '展开'"></span>
                       <load src="src/assets/chevron-up.svg" />
@@ -82,7 +82,7 @@
                                   x-text="dev.mac"></span>
                                 <span x-show="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
                               </td>
-                              <td x-text="dev.packets"></td>
+                              <td x-text="'↑' + (dev.packets_out || 0) + ' / ↓' + (dev.packets_in || 0)"></td>
                               <td x-text="dev.lastSeen"></td>
                               <td>
                                 <button @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"

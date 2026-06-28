@@ -127,7 +127,8 @@ void handleApScanApi(WiFiClient& client) {
 
 typedef struct {
     uint8_t mac[6];
-    int packet_count;
+    int packets_out; // Device -> Router (Uplink / Tx)
+    int packets_in;  // Router -> Device (Downlink / Rx)
 } DiscoveredDevice;
 
 static DiscoveredDevice g_devices[MAX_DISCOVERED_DEVICES];
@@ -156,18 +157,28 @@ static bool parseBssid(const String& str, uint8_t* bssid) {
     return true;
 }
 
-static void addDiscoveredDevice(const uint8_t* mac) {
+static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink) {
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
     for (int i = 0; i < g_device_count; i++) {
         if (memcmp(g_devices[i].mac, mac, 6) == 0) {
-            g_devices[i].packet_count++;
+            if (is_uplink) {
+                g_devices[i].packets_out++;
+            } else {
+                g_devices[i].packets_in++;
+            }
             return;
         }
     }
     if (g_device_count >= MAX_DISCOVERED_DEVICES) return;
     memcpy(g_devices[g_device_count].mac, mac, 6);
-    g_devices[g_device_count].packet_count = 1;
+    if (is_uplink) {
+        g_devices[g_device_count].packets_out = 1;
+        g_devices[g_device_count].packets_in = 0;
+    } else {
+        g_devices[g_device_count].packets_out = 0;
+        g_devices[g_device_count].packets_in = 1;
+    }
     g_device_count++;
 }
 
@@ -273,7 +284,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ta);
             Serial.println();
             #endif
-            addDiscoveredDevice(ta);
+            addDiscoveredDevice(ta, true);
         }
     } else if (!toDS && fromDS) {
         // AP→STA: TA=BSSID, RA=station
@@ -283,7 +294,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ra);
             Serial.println();
             #endif
-            addDiscoveredDevice(ra);
+            addDiscoveredDevice(ra, false);
         }
     } else if (!toDS && !fromDS) {
         // Direct/management: TA=source, RA=destination
@@ -293,7 +304,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ta);
             Serial.println();
             #endif
-            addDiscoveredDevice(ta);
+            addDiscoveredDevice(ta, true);
         }
         if (!ra_broadcast && !ra_multicast && memcmp(ra, g_target_bssid, 6) != 0) {
             #ifdef SNIFF_DEBUG
@@ -301,7 +312,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
             printBssid(ra);
             Serial.println();
             #endif
-            addDiscoveredDevice(ra);
+            addDiscoveredDevice(ra, false);
         }
     }
 }
@@ -387,7 +398,8 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
                     g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
                     g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
                 d["mac"] = mac;
-                d["packets"] = g_devices[i].packet_count;
+                d["packets_out"] = g_devices[i].packets_out;
+                d["packets_in"] = g_devices[i].packets_in;
             }
 
             String json;
@@ -412,6 +424,7 @@ void handleDeviceScanApi(WiFiClient& client, const String& req) {
     for (int i = 0; i < g_device_count; i++) {
         Serial.print("[SNIFF]   device ");
         printBssid(g_devices[i].mac);
-        Serial.print(" packets="); Serial.println(g_devices[i].packet_count);
+        Serial.print(" tx_packets="); Serial.print(g_devices[i].packets_out);
+        Serial.print(" rx_packets="); Serial.println(g_devices[i].packets_in);
     }
 }
