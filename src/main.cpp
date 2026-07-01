@@ -3,6 +3,8 @@
 #include "rtc_api.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include "wifi_constants.h"
+#include "wifi_conf.h"
 #include "webpage.h"
 #include "favicon.h"
 #include "utils.h"
@@ -131,11 +133,7 @@ static void dispatchRequest(WiFiClient& client, const String& req, const String&
     }
 }
 
-void setup() {
-    Serial.begin(115200);
-    delay(1000);
-    Serial.println("\nBW16 WiFi Killer init");
-
+void startAP(const char* ssid, const char* password, int channel) {
     // 设置AP热点
     // 本单片机有两个虚拟接口，WLAN0和WLAN1，分别用于STA和AP。但其实共享同一个 PHY，频道切换是联动的
     WiFi.enableConcurrent();
@@ -143,9 +141,18 @@ void setup() {
     IPAddress gw(192, 168, 4, 1);
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gw, gw, subnet);
-    char chan_char[2];
-    itoa(ap_channel, chan_char, 10);
-    WiFi.apbegin(ap_ssid, ap_pass, chan_char, FALSE);
+
+    char chan_char[4];
+    itoa(channel, chan_char, 10);
+    WiFi.apbegin((char*)ssid, (char*)password, chan_char, FALSE);
+}
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+    Serial.println("\nBW16 WiFi Killer init ...");
+
+    startAP(ap_ssid, ap_pass, ap_channel);
 
     Serial.print("SSID: ");
     Serial.println(ap_ssid);
