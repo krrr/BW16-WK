@@ -12,9 +12,9 @@
       <ul>
       <li><strong>BW16 WiFi Killer</strong></li>
       </ul>
-      <ul>
-        <li><a href="#" @click.prevent="currentTab='home'" :class="{contrast: currentTab==='home'}">首页</a></li>
-        <li><a href="#" @click.prevent="currentTab='scan'" :class="{contrast: currentTab==='scan'}">扫描</a></li>
+      <ul class="tabs">
+        <li :class="{selected: currentTab==='home'}"><a href="#" @click.prevent="currentTab='home'">首页</a></li>
+        <li :class="{selected: currentTab==='scan'}"><a href="#" @click.prevent="currentTab='scan'">扫描</a></li>
       </ul>
     </nav>
 

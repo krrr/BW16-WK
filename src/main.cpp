@@ -1,6 +1,5 @@
 #include <main.h>
 #include <Arduino.h>
-#include "rtc_api.h"
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "wifi_constants.h"
@@ -9,12 +8,8 @@
 #include "favicon.h"
 #include "utils.h"
 #include "api_all.h"
-#include "portable.h"  // freertos
 
-static void handleStatusApi(WiFiClient& client);
 
-const char COMPILE_DATE[] = __DATE__;
-const char COMPILE_TIME[] = __TIME__;
 
 char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
@@ -51,33 +46,7 @@ static void handleNotFound(WiFiClient& client) {
     client.println();
 }
 
-static void handleStatusApi(WiFiClient& client) {
-    JsonDocument doc;
-    doc["uptime"] = millis() / 1000;
-    doc["compile_date"] = COMPILE_DATE;
-    doc["compile_time"] = COMPILE_TIME;
-    doc["rtc_time"] = rtc_read();
-    doc["ap_channel"] = ap_channel;
-    doc["free_heap"] = xPortGetFreeHeapSize();
-    wifiClientSendJson(client, doc);
-}
 
-static void handleSetTimeApi(WiFiClient& client, const String& req) {
-    String t_str = urlDecode(extractQueryParam(req, "t"));
-    long t = t_str.toInt();
-
-    JsonDocument doc;
-    if (t > 0) {
-        rtc_init();  // setup里init一次后面再write总是返回-1
-        rtc_write(t);
-        doc["success"] = true;
-        doc["rtc_time"] = rtc_read();
-    } else {
-        doc["success"] = false;
-        doc["message"] = "invalid timestamp";
-    }
-    wifiClientSendJson(client, doc);
-}
 
 // === Routing ===
 
