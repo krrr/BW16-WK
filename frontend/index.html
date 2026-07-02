@@ -32,19 +32,20 @@
                 <option :value="ch" x-text="ch"></option>
               </template>
             </select>
-            <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast" style="width:auto;margin:0;padding:0.2rem 0.6rem;font-size:0.8rem;height:auto;">
+            <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast btn-sm" style="margin-left: 6px">
               切换
             </button>
           </div>
         </div>
         <p x-text="'运行时间: ' + formattedUptime"></p>
         <p x-show="compileDate" x-text="'固件编译: ' + compileDate"></p>
+        <p x-show="freeHeap" x-text="'空闲堆内存: ' + freeHeap + ' KB'"></p>
         <p>
           RTC 时间: <span x-text="rtcTime ? rtcTime.toLocaleString('zh-CN') : '未设置'"></span>
           <span x-show="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
             (偏差 <span x-text="Math.round(timeDiff)"></span> 秒)
           </span>
-          <button x-show="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast" style="padding:0.15rem 0.6rem;font-size:0.8rem;vertical-align:middle;margin-left:0.4rem;">同步时间</button>
+          <button x-show="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">同步时间</button>
         </p>
         <footer>
           <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>

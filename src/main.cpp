@@ -9,6 +9,7 @@
 #include "favicon.h"
 #include "utils.h"
 #include "api_all.h"
+#include "portable.h"  // freertos
 
 static void handleStatusApi(WiFiClient& client);
 
@@ -57,6 +58,7 @@ static void handleStatusApi(WiFiClient& client) {
     doc["compile_time"] = COMPILE_TIME;
     doc["rtc_time"] = rtc_read();
     doc["ap_channel"] = ap_channel;
+    doc["free_heap"] = xPortGetFreeHeapSize();
     wifiClientSendJson(client, doc);
 }
 

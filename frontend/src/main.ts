@@ -9,6 +9,7 @@ interface StatusResponse {
   compile_date: string
   compile_time: string
   rtc_time?: number
+  free_heap?: number
 }
 
 interface MessageItem {
@@ -65,6 +66,7 @@ Alpine.data('app', () => ({
   compileDate: '',
   rtcTime: null as Date | null,
   timeDiff: null as number | null,
+  freeHeap: '',
 
   currentTab: 'home' as 'home' | 'scan',
 
@@ -82,6 +84,11 @@ Alpine.data('app', () => ({
         // MCU 返回的 rtc_time 是 Unix 秒数，JS new Date() 接收毫秒，所以 * 1000 做单位换算。
         this.rtcTime = new Date(data.rtc_time * 1000)
         this.timeDiff = Math.abs(Math.floor(Date.now() / 1000) - data.rtc_time)
+      }
+      if (data.free_heap !== undefined) {
+        this.freeHeap = (data.free_heap / 1024).toFixed(1)
+        console.log(this.freeHeap);
+        
       }
     } catch (e) { console.error('fetchStatus error:', e) }
   },
@@ -151,7 +158,7 @@ Alpine.data('app', () => ({
     const d = new Date(`${compileDate} ${compileTime}`)
     if (isNaN(d.getTime())) return `${compileDate} ${compileTime}`
     return d.toLocaleString('zh-CN')
-  }
+  },
 }))
 
 Alpine.start()
