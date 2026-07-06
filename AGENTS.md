@@ -29,8 +29,9 @@
 .\build-all.ps1 -Monitor     # 构建+串口监视
 ```
 
-### 单片机SDK参考源码
-` lib/ameba-arduino-d-feature-platformio-support/Arduino_package`
+### 文档位置
+单片机SDK参考源码: `lib/ameba-arduino-d-feature-platformio-support/Arduino_package`
+单片机手册：`docs/extracted`
 
 ## 编码规范
 - 不要随意删除代码里的注释

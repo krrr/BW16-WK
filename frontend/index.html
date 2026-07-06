@@ -28,9 +28,16 @@
           <span>当前信道: </span>
           <div style="display:flex;gap:0.4rem;align-items:center;">
             <select x-model.number="selectedChannel" class="chan-sel">
-              <template x-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13]" :key="ch">
-                <option :value="ch" x-text="ch"></option>
-              </template>
+              <optgroup label="2.4 GHz">
+                <template x-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13,14]" :key="ch">
+                  <option :value="ch" x-text="'CH ' + ch"></option>
+                </template>
+              </optgroup>
+              <optgroup label="5 GHz">
+                <template x-for="ch in [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165]" :key="ch">
+                  <option :value="ch" x-text="'CH ' + ch"></option>
+                </template>
+              </optgroup>
             </select>
             <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast btn-sm" style="margin-left: 6px">
               切换

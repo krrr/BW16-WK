@@ -87,14 +87,12 @@ Alpine.data('app', () => ({
       }
       if (data.free_heap !== undefined) {
         this.freeHeap = (data.free_heap / 1024).toFixed(1)
-        console.log(this.freeHeap);
-        
       }
     } catch (e) { console.error('fetchStatus error:', e) }
   },
 
   async changeChannel() {
-    if (this.selectedChannel === this.apChannel || this.selectedChannel < 1 || this.selectedChannel > 13) return
+    if (this.selectedChannel === this.apChannel) return
     this.switchingChannel = true
     try {
       const r = await fetch('/api/change-channel', {

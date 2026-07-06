@@ -32,8 +32,16 @@ void handleChangeChannelApi(WiFiClient& client, const String& req, const String&
     }
 
     int channel = doc["channel"].as<int>();
-    if (channel < 1 || channel > 13) {
-        wifiClientSendJsonFail(client, "Invalid channel (must be 1-13)");
+    bool isValid = (channel >= 1 && channel <= 14) ||
+                   (channel == 36 || channel == 40 || channel == 44 || channel == 48 ||
+                    channel == 52 || channel == 56 || channel == 60 || channel == 64 ||
+                    channel == 100 || channel == 104 || channel == 108 || channel == 112 ||
+                    channel == 116 || channel == 120 || channel == 124 || channel == 128 ||
+                    channel == 132 || channel == 136 || channel == 140 || channel == 144 ||
+                    channel == 149 || channel == 153 || channel == 157 || channel == 161 ||
+                    channel == 165);
+    if (!isValid) {
+        wifiClientSendJsonFail(client, "Invalid channel");
         return;
     }
 
