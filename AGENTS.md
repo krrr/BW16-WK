@@ -13,7 +13,7 @@
 - **Package**: pnpm
 - **Build**: Vite + `vite-plugin-singlefile` (全部 CSS/JS 内联到单 HTML)
 - **CSS**: Pico CSS v2
-- **JS**: Alpine.js v3
+- **JS**: Vue 3
 
 ## 开发
 
@@ -35,4 +35,3 @@
 
 ## 编码规范
 - 不要随意删除代码里的注释
-- alpine.js的x-for内部只能有一个根元素。建议绑定:key

@@ -1,6 +1,10 @@
 {
   "name": "bw16-wk-webui",
-  "author": {"name": "krrr", "email": "guogaishiwo@gmail.com", "url": "https://github.com/krrr"},
+  "author": {
+    "name": "krrr",
+    "email": "guogaishiwo@gmail.com",
+    "url": "https://github.com/krrr"
+  },
   "license": "GPL-3.0-only",
   "private": true,
   "type": "module",
@@ -11,14 +15,14 @@
   },
   "dependencies": {
     "@picocss/pico": "^2",
-    "alpinejs": "^3"
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
-    "@types/alpinejs": "^3.13.11",
+    "@vitejs/plugin-vue": "^6.0.7",
     "sass-embedded": "^1.100.0",
     "typescript": "^6.0.3",
     "vite": "^6",
-    "vite-plugin-html-inject": "^1.1.2",
     "vite-plugin-singlefile": "^2"
   },
   "pnpm": {

@@ -148,10 +148,18 @@ header > h1 {
   }
 }
 
-.message-item svg {
+.message-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .message-content {

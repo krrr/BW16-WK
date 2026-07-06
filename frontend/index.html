@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" x-data="app">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,87 +7,7 @@
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 </head>
 <body>
-  <main class="container">
-    <nav class="container-fluid" style="margin-top: 1rem;">
-      <ul>
-      <li><strong>BW16 WiFi Killer</strong></li>
-      </ul>
-      <ul class="tabs">
-        <li :class="{selected: currentTab==='home'}"><a href="#" @click.prevent="currentTab='home'">首页</a></li>
-        <li :class="{selected: currentTab==='scan'}"><a href="#" @click.prevent="currentTab='scan'">扫描</a></li>
-      </ul>
-    </nav>
-
-    <!-- Home Tab -->
-    <section x-show="currentTab==='home'">
-      <article>
-        <header>
-          <h1>状态</h1>
-        </header>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;">
-          <span>当前信道: </span>
-          <div style="display:flex;gap:0.4rem;align-items:center;">
-            <select x-model.number="selectedChannel" class="chan-sel">
-              <optgroup label="2.4 GHz">
-                <template x-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13,14]" :key="ch">
-                  <option :value="ch" x-text="'CH ' + ch"></option>
-                </template>
-              </optgroup>
-              <optgroup label="5 GHz">
-                <template x-for="ch in [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165]" :key="ch">
-                  <option :value="ch" x-text="'CH ' + ch"></option>
-                </template>
-              </optgroup>
-            </select>
-            <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast btn-sm" style="margin-left: 6px">
-              切换
-            </button>
-          </div>
-        </div>
-        <p x-text="'运行时间: ' + formattedUptime"></p>
-        <p x-show="compileDate" x-text="'固件编译: ' + compileDate"></p>
-        <p x-show="freeHeap" x-text="'空闲堆内存: ' + freeHeap + ' KB'"></p>
-        <p>
-          RTC 时间: <span x-text="rtcTime ? rtcTime.toLocaleString('zh-CN') : '未设置'"></span>
-          <span x-show="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
-            (偏差 <span x-text="Math.round(timeDiff)"></span> 秒)
-          </span>
-          <button x-show="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">同步时间</button>
-        </p>
-        <footer>
-          <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
-        </footer>
-      </article>
-    </section>
-
-    <load src="src/tabs/scan.html" />
-  </main>
-
-  <!-- Floating Message Notifications -->
-  <div class="message-container">
-    <template x-for="msg in $store.message.items" :key="msg.id">
-      <div
-        class="message-item"
-        :class="'message-' + msg.type"
-      >
-        <!-- Success Icon -->
-        <span x-show="msg.type === 'success'" style="display: flex; align-items: center; justify-content: center;">
-          <load src="src/assets/success.svg" />
-        </span>
-        <!-- Error Icon -->
-        <span x-show="msg.type === 'error'" style="display: flex; align-items: center; justify-content: center;">
-          <load src="src/assets/error.svg" />
-        </span>
-        <!-- Warning Icon -->
-        <span x-show="msg.type === 'warning'" style="display: flex; align-items: center; justify-content: center;">
-          <load src="src/assets/warning.svg" />
-        </span>
-        <span class="message-content" x-text="msg.text"></span>
-      </div>
-    </template>
-  </div>
-
+  <div id="app"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
-
