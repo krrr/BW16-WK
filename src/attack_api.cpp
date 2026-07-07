@@ -31,20 +31,20 @@ static bool parseMac(const String& str, uint8_t* mac) {
     return true;
 }
 
-void handleDeauthApi(HttpClient& client, const String& req) {
-    String bssidStr = urlDecode(extractQueryParam(req, "bssid"));
-    String macStr   = urlDecode(extractQueryParam(req, "mac"));
-    String chStr    = urlDecode(extractQueryParam(req, "channel"));
-    String roundsStr = urlDecode(extractQueryParam(req, "rounds"));
+void handleDeauthApi(HttpClient& client) {
+    String bssidStr = client.queryParam("bssid");
+    String macStr   = client.queryParam("mac");
+    String chStr    = client.queryParam("channel");
+    String roundsStr = client.queryParam("rounds");
 
     if (bssidStr.length() == 0 || macStr.length() == 0) {
-        wifiClientSendJsonFail(client, "missing bssid or mac");
+        client.sendJsonFail("missing bssid or mac");
         return;
     }
 
     uint8_t bssid[6], mac[6];
     if (!parseMac(bssidStr, bssid) || !parseMac(macStr, mac)) {
-        wifiClientSendJsonFail(client, "invalid mac address");
+        client.sendJsonFail("invalid mac address");
         return;
     }
 
@@ -61,7 +61,7 @@ void handleDeauthApi(HttpClient& client, const String& req) {
 
     if (channel != ap_channel) {
         if (wifi_ap_switch_chl_and_inform(channel) != RTW_SUCCESS) {
-            wifiClientSendJsonFail(client, "failed to switch channel");
+            client.sendJsonFail("failed to switch channel");
             return;
         }
         wext_set_channel(WLAN0_NAME, channel);  // 必须，上面的调用不够
@@ -95,7 +95,7 @@ void handleDeauthApi(HttpClient& client, const String& req) {
     doc["message"] = "deauth sent";
     doc["rounds"] = rounds;
     doc["packets"] = rounds * 20;
-    wifiClientSendJson(client, doc);
+    client.sendJson(doc);
 
     Serial.println("[DEAUTH] done");
 }

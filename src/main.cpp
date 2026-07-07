@@ -21,14 +21,7 @@ HttpServer server(80);
 // === Route Handlers ===
 
 static void handleRoot(HttpClient& client) {
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: text/html; charset=utf-8");
-    client.println("Content-Encoding: gzip");
-    client.print("Content-Length: ");
-    client.println(webpage_gz_len);
-    client.println("Connection: close");
-    client.println();
-    client.write((const uint8_t*)webpage_gz, webpage_gz_len);
+    client.sendHtml(webpage_gz, webpage_gz_len, true);
 }
 
 static void handleFavicon(HttpClient& client) {
@@ -42,9 +35,7 @@ static void handleFavicon(HttpClient& client) {
 }
 
 static void handleNotFound(HttpClient& client) {
-    client.println("HTTP/1.1 404 Not Found");
-    client.println("Connection: close");
-    client.println();
+    client.sendNotFound();
 }
 
 
@@ -65,13 +56,8 @@ static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
 static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
 static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
 
-static void dispatchRequest(HttpClient& client, const String& req, const String& body) {
-    int s = req.indexOf(' ') + 1;
-    int e = req.indexOf(' ', s);
-    if (s < 1 || e < 0) { handleNotFound(client); return; }
-    String path = req.substring(s, e);
-    int qm = path.indexOf('?');
-    if (qm >= 0) path = path.substring(0, qm);
+static void dispatchRequest(HttpClient& client) {
+    String path = client.path();
 
     switch (djb2_hash(path.c_str())) {
         case HASH_ROOT:
@@ -85,19 +71,19 @@ static void dispatchRequest(HttpClient& client, const String& req, const String&
             handleApScanApi(client);
             break;
         case HASH_API_SCAN_DEVICES:
-            handleDeviceScanApi(client, req);
+            handleDeviceScanApi(client);
             break;
         case HASH_API_STATUS:
             handleStatusApi(client);
             break;
         case HASH_API_SET_TIME:
-            handleSetTimeApi(client, req);
+            handleSetTimeApi(client);
             break;
         case HASH_API_DEAUTH:
-            handleDeauthApi(client, req);
+            handleDeauthApi(client);
             break;
         case HASH_API_CHANGE_CHANNEL:
-            handleChangeChannelApi(client, req, body);
+            handleChangeChannelApi(client);
             break;
         default:
             handleNotFound(client);
@@ -139,44 +125,12 @@ void loop() {
     HttpClient client = server.available();
     if (!client) return;
 
-    unsigned long timeout = millis() + 2000;
-    while (!client.available() && millis() < timeout) delay(1);
-    if (!client.available()) { client.stop(); return; }
-
-    String req = client.readStringUntil('\r');
-    client.read();
-
-    int contentLength = 0;
-    while (client.available()) {
-        String line = client.readStringUntil('\n');
-        String trimmed = line;
-        trimmed.trim();
-        if (trimmed.length() == 0) break;
-
-        String lowerLine = trimmed;
-        lowerLine.toLowerCase();
-        if (lowerLine.startsWith("content-length:")) {
-            int colon = lowerLine.indexOf(':');
-            if (colon >= 0) {
-                contentLength = lowerLine.substring(colon + 1).toInt();
-            }
-        }
+    if (!client.parseRequest()) {
+        client.stop();
+        return;
     }
 
-    String body = "";
-    if (contentLength > 0) {
-        body.reserve(contentLength);
-        unsigned long bodyTimeout = millis() + 1000;
-        while (body.length() < (unsigned int)contentLength && millis() < bodyTimeout) {
-            if (client.available()) {
-                body += (char)client.read();
-            } else {
-                delay(10);
-            }
-        }
-    }
-
-    dispatchRequest(client, req, body);
+    dispatchRequest(client);
 
     client.stop();
 }

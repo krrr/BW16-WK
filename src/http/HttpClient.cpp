@@ -317,3 +317,144 @@ int HttpClient::getIPv6Status()
 {
     return clientdrv.getIPv6Status();
 }
+
+static char hexNibble(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return 0;
+}
+
+String HttpClient::urlDecode(const String& s) {
+    String out;
+    for (int i = 0; i < (int)s.length(); i++) {
+        if (s[i] == '%' && i + 2 < (int)s.length()) {
+            out += (char)(hexNibble(s[i+1]) << 4 | hexNibble(s[i+2]));
+            i += 2;
+        } else if (s[i] == '+') {
+            out += ' ';
+        } else {
+            out += s[i];
+        }
+    }
+    return out;
+}
+
+bool HttpClient::parseRequest() {
+    unsigned long timeout = millis() + 2000;
+    while (!available() && millis() < timeout) {
+        delay(1);
+    }
+    if (!available()) {
+        return false;
+    }
+
+    String reqLine = readStringUntil('\r');
+    read(); // consume '\n'
+
+    // Parse method and path
+    int firstSpace = reqLine.indexOf(' ');
+    if (firstSpace < 1) return false;
+    _method = reqLine.substring(0, firstSpace);
+
+    int secondSpace = reqLine.indexOf(' ', firstSpace + 1);
+    if (secondSpace < 0) return false;
+    String fullPath = reqLine.substring(firstSpace + 1, secondSpace);
+
+    int qm = fullPath.indexOf('?');
+    if (qm >= 0) {
+        _path = fullPath.substring(0, qm);
+        _queryString = fullPath.substring(qm + 1);
+    } else {
+        _path = fullPath;
+        _queryString = "";
+    }
+
+    // Read headers
+    int contentLength = 0;
+    while (available()) {
+        String line = readStringUntil('\n');
+        String trimmed = line;
+        trimmed.trim();
+        if (trimmed.length() == 0) break;
+
+        String lowerLine = trimmed;
+        lowerLine.toLowerCase();
+        if (lowerLine.startsWith("content-length:")) {
+            int colon = lowerLine.indexOf(':');
+            if (colon >= 0) {
+                contentLength = lowerLine.substring(colon + 1).toInt();
+            }
+        }
+    }
+
+    // Read body
+    _body = "";
+    if (contentLength > 0) {
+        _body.reserve(contentLength);
+        unsigned long bodyTimeout = millis() + 1000;
+        while (_body.length() < (unsigned int)contentLength && millis() < bodyTimeout) {
+            if (available()) {
+                _body += (char)read();
+            } else {
+                delay(10);
+            }
+        }
+    }
+
+    return true;
+}
+
+String HttpClient::queryParam(const String& name) const {
+    String target = name + "=";
+    int p = -1;
+    int searchStart = 0;
+    while ((p = _queryString.indexOf(target, searchStart)) >= 0) {
+        if (p == 0 || _queryString[p - 1] == '&') {
+            int vstart = p + target.length();
+            int vend = _queryString.indexOf('&', vstart);
+            if (vend < 0) vend = _queryString.length();
+            return urlDecode(_queryString.substring(vstart, vend));
+        }
+        searchStart = p + 1;
+    }
+    return "";
+}
+
+void HttpClient::sendJson(JsonDocument& doc) {
+    String json;
+    serializeJson(doc, json);
+    println("HTTP/1.1 200 OK");
+    println("Content-Type: application/json; charset=utf-8");
+    print("Content-Length: ");
+    println(json.length());
+    println("Connection: close");
+    println();
+    print(json);
+}
+
+void HttpClient::sendJsonFail(const String& message) {
+    JsonDocument doc;
+    doc["success"] = false;
+    doc["message"] = message;
+    sendJson(doc);
+}
+
+void HttpClient::sendHtml(const uint8_t* content, size_t length, bool gzip) {
+    println("HTTP/1.1 200 OK");
+    println("Content-Type: text/html; charset=utf-8");
+    if (gzip) {
+        println("Content-Encoding: gzip");
+    }
+    print("Content-Length: ");
+    println(length);
+    println("Connection: close");
+    println();
+    write(content, length);
+}
+
+void HttpClient::sendNotFound() {
+    println("HTTP/1.1 404 Not Found");
+    println("Connection: close");
+    println();
+}

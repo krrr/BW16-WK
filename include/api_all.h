@@ -4,8 +4,8 @@
 #include "http/HttpClient.h"
 
 void handleApScanApi(HttpClient& client);
-void handleDeviceScanApi(HttpClient& client, const String& req);
-void handleDeauthApi(HttpClient& client, const String& req);
-void handleChangeChannelApi(HttpClient& client, const String& req, const String& body);
+void handleDeviceScanApi(HttpClient& client);
+void handleDeauthApi(HttpClient& client);
+void handleChangeChannelApi(HttpClient& client);
 void handleStatusApi(HttpClient& client);
-void handleSetTimeApi(HttpClient& client, const String& req);
+void handleSetTimeApi(HttpClient& client);

@@ -5,6 +5,7 @@
 #include "IPv6Address.h"
 #include "Print.h"
 #include "server_drv.h"
+#include <ArduinoJson.h>
 
 
 class HttpClient: public Client {
@@ -41,6 +42,21 @@ public:
     int enableIPv6();
     int getIPv6Status();
 
+    // HTTP Parsing & Responses
+    bool parseRequest();
+    const String& method() const { return _method; }
+    const String& path() const { return _path; }
+    const String& queryString() const { return _queryString; }
+    const String& body() const { return _body; }
+    String queryParam(const String& name) const;
+
+    void sendJson(JsonDocument& doc);
+    void sendJsonFail(const String& message);
+    void sendHtml(const uint8_t* content, size_t length, bool gzip = false);
+    void sendNotFound();
+
+    static String urlDecode(const String& s);
+
     friend class HttpServer;
     using Print::write;
 
@@ -52,6 +68,11 @@ private:
     int recvTimeout;
     tPortMode _portMode = TCP_MODE;
     tBlockingMode _is_blocked = NON_BLOCKING_MODE;
+
+    String _method;
+    String _path;
+    String _queryString;
+    String _body;
 };
 
 #ifdef __cplusplus

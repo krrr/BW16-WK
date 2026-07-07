@@ -13,21 +13,21 @@ const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
 
 
-void handleChangeChannelApi(HttpClient& client, const String& req, const String& body) {
-    if (!req.startsWith("POST")) {
-        wifiClientSendJsonFail(client, "Only POST method is allowed");
+void handleChangeChannelApi(HttpClient& client) {
+    if (client.method() != "POST") {
+        client.sendJsonFail("Only POST method is allowed");
         return;
     }
 
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, body);
+    DeserializationError error = deserializeJson(doc, client.body());
     if (error) {
-        wifiClientSendJsonFail(client, "Invalid JSON body");
+        client.sendJsonFail("Invalid JSON body");
         return;
     }
 
     if (!doc.containsKey("channel")) {
-        wifiClientSendJsonFail(client, "Missing channel parameter");
+        client.sendJsonFail("Missing channel parameter");
         return;
     }
 
@@ -41,13 +41,13 @@ void handleChangeChannelApi(HttpClient& client, const String& req, const String&
                     channel == 149 || channel == 153 || channel == 157 || channel == 161 ||
                     channel == 165);
     if (!isValid) {
-        wifiClientSendJsonFail(client, "Invalid channel");
+        client.sendJsonFail("Invalid channel");
         return;
     }
 
     if (channel != ap_channel) {
         if (wifi_ap_switch_chl_and_inform(channel) != RTW_SUCCESS) {
-            wifiClientSendJsonFail(client, "failed to switch channel");
+            client.sendJsonFail("failed to switch channel");
             return;
         }
         wext_set_channel(WLAN0_NAME, channel);  // 必须，上面的调用不够
@@ -58,12 +58,12 @@ void handleChangeChannelApi(HttpClient& client, const String& req, const String&
     JsonDocument resp;
     resp["success"] = true;
     resp["ap_channel"] = ap_channel;
-    wifiClientSendJson(client, resp);
+    client.sendJson(resp);
 }
 
 
-void handleSetTimeApi(HttpClient& client, const String& req) {
-    String t_str = urlDecode(extractQueryParam(req, "t"));
+void handleSetTimeApi(HttpClient& client) {
+    String t_str = client.queryParam("t");
     long t = t_str.toInt();
 
     JsonDocument doc;
@@ -76,7 +76,7 @@ void handleSetTimeApi(HttpClient& client, const String& req) {
         doc["success"] = false;
         doc["message"] = "invalid timestamp";
     }
-    wifiClientSendJson(client, doc);
+    client.sendJson(doc);
 }
 
 void handleStatusApi(HttpClient& client) {
@@ -87,5 +87,5 @@ void handleStatusApi(HttpClient& client) {
     doc["rtc_time"] = rtc_read();
     doc["ap_channel"] = ap_channel;
     doc["free_heap"] = xPortGetFreeHeapSize();
-    wifiClientSendJson(client, doc);
+    client.sendJson(doc);
 }

@@ -4,7 +4,7 @@
 #include <wifi_conf.h>
 #include <wifi_structures.h>
 #include <ArduinoJson.h>
-#include "utils.h"
+#include "api_all.h"
 #include "wifi_drv.h"
 
 // extern "C" {
@@ -97,7 +97,7 @@ void handleApScanApi(HttpClient& client) {
         JsonDocument doc;
         doc["success"] = false;
         doc["message"] = "scan failed to start";
-        wifiClientSendJson(client, doc);
+        client.sendJson(doc);
         return;
     }
     while (!g_scan_done && millis() - start < SCAN_TIMEOUT_MS) {
@@ -117,7 +117,7 @@ void handleApScanApi(HttpClient& client) {
         net["band"] = g_scan_aps[i].band;
         net["security"] = g_scan_aps[i].security;
     }
-    wifiClientSendJson(client, doc);
+    client.sendJson(doc);
 }
 
 // ─── Device Scan (被动监听特定AP关联设备) ───
@@ -346,19 +346,18 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
     }
 }
 
-void handleDeviceScanApi(HttpClient& client, const String& req) {
-    String bssidStr = extractQueryParam(req, "bssid");
-    String chStr = extractQueryParam(req, "channel");
+void handleDeviceScanApi(HttpClient& client) {
+    String bssidStr = client.queryParam("bssid");
+    String chStr = client.queryParam("channel");
 
     if (bssidStr.length() == 0 || chStr.length() == 0) {
-        wifiClientSendJsonFail(client, "missing bssid or channel");
+        client.sendJsonFail("missing bssid or channel");
         return;
     }
-    bssidStr = urlDecode(bssidStr);
     Serial.print("[SNIFF] rawBssidParam="); Serial.println(bssidStr);
     Serial.print("[SNIFF] decodedBssid="); Serial.println(bssidStr);
     if (!parseBssid(bssidStr, g_target_bssid)) {
-        wifiClientSendJsonFail(client, "invalid bssid");
+        client.sendJsonFail("invalid bssid");
         return;
     }
     g_target_channel = chStr.toInt();
@@ -374,7 +373,7 @@ void handleDeviceScanApi(HttpClient& client, const String& req) {
     // 必须切换到目标信道监听。通知客户端一起切换
     if (g_target_channel != ap_channel) {
         if (wifi_ap_switch_chl_and_inform(g_target_channel) != RTW_SUCCESS) {
-            wifiClientSendJsonFail(client, "failed to switch channel");
+            client.sendJsonFail("failed to switch channel");
             return;
         }
         wext_set_channel(WLAN0_NAME, g_target_channel);  // 必须，上面的调用不够
@@ -388,7 +387,7 @@ void handleDeviceScanApi(HttpClient& client, const String& req) {
 
     // 启用混杂模式
     if (wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1) != RTW_SUCCESS) {
-        wifiClientSendJsonFail(client, "failed to set promisc mode");
+        client.sendJsonFail("failed to set promisc mode");
         return;
     }
 
