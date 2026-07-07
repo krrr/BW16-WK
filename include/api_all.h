@@ -1,10 +1,11 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
+#include "http/HttpClient.h"
 
-void handleApScanApi(WiFiClient& client);
-void handleDeviceScanApi(WiFiClient& client, const String& req);
-void handleDeauthApi(WiFiClient& client, const String& req);
-void handleChangeChannelApi(WiFiClient& client, const String& req, const String& body);
-void handleStatusApi(WiFiClient& client);
-void handleSetTimeApi(WiFiClient& client, const String& req);
+void handleApScanApi(HttpClient& client);
+void handleDeviceScanApi(HttpClient& client, const String& req);
+void handleDeauthApi(HttpClient& client, const String& req);
+void handleChangeChannelApi(HttpClient& client, const String& req, const String& body);
+void handleStatusApi(HttpClient& client);
+void handleSetTimeApi(HttpClient& client, const String& req);

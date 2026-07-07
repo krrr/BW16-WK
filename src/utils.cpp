@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 #include "utils.h"
 
-void wifiClientSendJson(WiFiClient& client, JsonDocument& doc) {
+void wifiClientSendJson(HttpClient& client, JsonDocument& doc) {
     String json;
     serializeJson(doc, json);
     client.println("HTTP/1.1 200 OK");
@@ -15,7 +15,7 @@ void wifiClientSendJson(WiFiClient& client, JsonDocument& doc) {
     client.print(json);
 }
 
-void wifiClientSendJsonFail(WiFiClient& client, const String& message) {
+void wifiClientSendJsonFail(HttpClient& client, const String& message) {
     JsonDocument doc;
     doc["success"] = false;
     doc["message"] = message;

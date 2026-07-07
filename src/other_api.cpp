@@ -13,7 +13,7 @@ const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
 
 
-void handleChangeChannelApi(WiFiClient& client, const String& req, const String& body) {
+void handleChangeChannelApi(HttpClient& client, const String& req, const String& body) {
     if (!req.startsWith("POST")) {
         wifiClientSendJsonFail(client, "Only POST method is allowed");
         return;
@@ -62,7 +62,7 @@ void handleChangeChannelApi(WiFiClient& client, const String& req, const String&
 }
 
 
-void handleSetTimeApi(WiFiClient& client, const String& req) {
+void handleSetTimeApi(HttpClient& client, const String& req) {
     String t_str = urlDecode(extractQueryParam(req, "t"));
     long t = t_str.toInt();
 
@@ -79,7 +79,7 @@ void handleSetTimeApi(WiFiClient& client, const String& req) {
     wifiClientSendJson(client, doc);
 }
 
-void handleStatusApi(WiFiClient& client) {
+void handleStatusApi(HttpClient& client) {
     JsonDocument doc;
     doc["uptime"] = millis() / 1000;
     doc["compile_date"] = COMPILE_DATE;

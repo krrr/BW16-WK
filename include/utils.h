@@ -2,9 +2,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+#include "http/HttpClient.h"
 
-void wifiClientSendJson(WiFiClient& client, JsonDocument& doc);
-void wifiClientSendJsonFail(WiFiClient& client, const String& message);
+
+void wifiClientSendJson(HttpClient& client, JsonDocument& doc);
+void wifiClientSendJsonFail(HttpClient& client, const String& message);
 
 String urlDecode(const String& s);
 

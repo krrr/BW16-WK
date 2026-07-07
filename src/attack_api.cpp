@@ -31,7 +31,7 @@ static bool parseMac(const String& str, uint8_t* mac) {
     return true;
 }
 
-void handleDeauthApi(WiFiClient& client, const String& req) {
+void handleDeauthApi(HttpClient& client, const String& req) {
     String bssidStr = urlDecode(extractQueryParam(req, "bssid"));
     String macStr   = urlDecode(extractQueryParam(req, "mac"));
     String chStr    = urlDecode(extractQueryParam(req, "channel"));

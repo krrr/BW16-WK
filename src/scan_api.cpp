@@ -84,7 +84,7 @@ static rtw_result_t apScanResultHandler(rtw_scan_handler_result_t* scan_result) 
     return RTW_SUCCESS;
 }
 
-void handleApScanApi(WiFiClient& client) {
+void handleApScanApi(HttpClient& client) {
     g_scan_count = 0;
     g_scan_done = false;
 
@@ -346,7 +346,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
     }
 }
 
-void handleDeviceScanApi(WiFiClient& client, const String& req) {
+void handleDeviceScanApi(HttpClient& client, const String& req) {
     String bssidStr = extractQueryParam(req, "bssid");
     String chStr = extractQueryParam(req, "channel");
 

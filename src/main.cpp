@@ -8,6 +8,7 @@
 #include "favicon.h"
 #include "utils.h"
 #include "api_all.h"
+#include "http/HttpServer.h"
 
 
 
@@ -15,11 +16,11 @@ char ap_ssid[] = "BW16-WK";
 char ap_pass[] = "1234567890";
 int ap_channel = 1;
 
-WiFiServer server(80);
+HttpServer server(80);
 
 // === Route Handlers ===
 
-static void handleRoot(WiFiClient& client) {
+static void handleRoot(HttpClient& client) {
     client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: text/html; charset=utf-8");
     client.println("Content-Encoding: gzip");
@@ -30,7 +31,7 @@ static void handleRoot(WiFiClient& client) {
     client.write((const uint8_t*)webpage_gz, webpage_gz_len);
 }
 
-static void handleFavicon(WiFiClient& client) {
+static void handleFavicon(HttpClient& client) {
     client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: image/x-icon");
     client.print("Content-Length: ");
@@ -40,7 +41,7 @@ static void handleFavicon(WiFiClient& client) {
     client.write((const uint8_t*)favicon_ico, favicon_ico_len);
 }
 
-static void handleNotFound(WiFiClient& client) {
+static void handleNotFound(HttpClient& client) {
     client.println("HTTP/1.1 404 Not Found");
     client.println("Connection: close");
     client.println();
@@ -64,7 +65,7 @@ static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
 static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
 static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
 
-static void dispatchRequest(WiFiClient& client, const String& req, const String& body) {
+static void dispatchRequest(HttpClient& client, const String& req, const String& body) {
     int s = req.indexOf(' ') + 1;
     int e = req.indexOf(' ', s);
     if (s < 1 || e < 0) { handleNotFound(client); return; }
@@ -135,7 +136,7 @@ void setup() {
 }
 
 void loop() {
-    WiFiClient client = server.available();
+    HttpClient client = server.available();
     if (!client) return;
 
     unsigned long timeout = millis() + 2000;
