@@ -5,7 +5,7 @@
         <h1>WiFi 扫描</h1>
       </header>
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
-        <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:10rem;">
+        <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:8rem;">
           <span>{{ scanning ? '扫描中...' : '开始扫描' }}</span>
         </button>
         <label>
@@ -50,8 +50,7 @@
                     :aria-busy="deviceScanning === ap.bssid"
                     :class="{ 'pointer-ev-auto': deviceScanning === ap.bssid }"
                     :disabled="deviceScanning !== null && deviceScanning !== ap.bssid"
-                    class="outline contrast"
-                    style="padding:0.25rem 0.75rem;font-size:0.85rem;"
+                    class="outline contrast btn-sm"
                   >
                     <span>{{ deviceScanning === ap.bssid ? '停止监听' : '扫描设备' }}</span>
                   </button>
@@ -105,8 +104,8 @@
                                 @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"
                                 :disabled="!!deauthing[ap.bssid + '-' + dev.mac]"
                                 :aria-busy="deauthing[ap.bssid + '-' + dev.mac]"
-                                class="outline contrast"
-                                style="padding:0.15rem 0.5rem;font-size:0.8rem;color:#e74c3c;border-color:#e74c3c;"
+                                class="outline contrast btn-sm"
+                                style="color:#e74c3c;border-color:#e74c3c;"
                               >
                                 <span>{{ deauthResult[ap.bssid + '-' + dev.mac] || 'Deauth' }}</span>
                               </button>

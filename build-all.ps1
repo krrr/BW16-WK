@@ -23,6 +23,10 @@ if ($Upload) {
 }
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
+Write-Host "`n=== 4. Generate OTA image (ota_all.bin) ===" -ForegroundColor Cyan
+python (Join-Path (Join-Path $root "scripts") "make_ota_bin.py")
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
 Write-Host "`n=== DONE ===" -ForegroundColor Green
 
 if ($Monitor) {

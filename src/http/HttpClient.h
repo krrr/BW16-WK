@@ -24,6 +24,8 @@ public:
     virtual uint8_t connected() override;
     virtual operator bool() override;
 
+    int8_t getSock() const { return _sock; }
+
     // HTTP Parsing & Responses
     bool parseRequest();
     const String& method() const { return _method; }

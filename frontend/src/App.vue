@@ -11,6 +11,9 @@
         <li :class="{ selected: $route.path === '/scan' }">
           <router-link to="/scan">扫描</router-link>
         </li>
+        <li :class="{ selected: $route.path === '/settings' }">
+          <router-link to="/settings">设置</router-link>
+        </li>
       </ul>
     </nav>
 

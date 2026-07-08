@@ -55,6 +55,7 @@ static constexpr uint32_t HASH_API_STATUS         = djb2_hash("/api/status");
 static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
 static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
 static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
+static constexpr uint32_t HASH_API_OTA            = djb2_hash("/api/ota");
 
 static void dispatchRequest(HttpClient& client) {
     String path = client.path();
@@ -85,6 +86,9 @@ static void dispatchRequest(HttpClient& client) {
         case HASH_API_CHANGE_CHANNEL:
             handleChangeChannelApi(client);
             break;
+        case HASH_API_OTA:
+            handleOtaApi(client);
+            break;
         default:
             handleNotFound(client);
             break;
@@ -112,13 +116,13 @@ void setup() {
 
     startAP(ap_ssid, ap_pass, ap_channel);
 
+    Serial.println("[INFO] SoftAP started successfully");
     Serial.print("SSID: ");
     Serial.println(ap_ssid);
     Serial.print("IP:   ");
     Serial.println(WiFi.localIP(1));
 
     server.begin();
-    Serial.println("HTTP ready on port 80");
 }
 
 void loop() {
