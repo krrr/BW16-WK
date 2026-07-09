@@ -9,7 +9,7 @@
 #include "wifi_drv.h"
 
 
-#define SCAN_TIMEOUT_MS 12000  // 一般5秒内就好了
+#define SCAN_TIMEOUT_MS 15000  // 一般10秒内就好了
 #define MAX_SCAN_APS 96
 
 
@@ -112,6 +112,7 @@ void handleApScanApi(HttpClient& client) {
     g_scan_count = 0;
     g_scan_state = SCAN_RUNNING;
 
+    Serial.println("[SNIFF] AP scan start");
     unsigned long start = millis();
     // 必须使用 _mcc 版本：普通 wifi_scan_networks 在STA+AP并发模式下 STA 链路未完整初始化，扫描结果为空
     // wifi_scan_networks_mcc() 是 SDK 专为并发模式设计的逐信道扫描版本，
@@ -127,12 +128,12 @@ void handleApScanApi(HttpClient& client) {
         client.sendJson(doc);
         return;
     }
-    Serial.println("[SNIFF] AP scan started");
     while (g_scan_state == SCAN_RUNNING && millis() - start < SCAN_TIMEOUT_MS) {
         delay(30);
     }
 
     if (g_scan_state == SCAN_COMPLETED) {
+        Serial.print("[SNIFF] Scan done, ap_count="); Serial.println(g_scan_count);
         JsonDocument doc;
         doc["success"] = true;
         doc["count"] = g_scan_count;
@@ -187,7 +188,6 @@ typedef struct {
 static DiscoveredDevice g_devices[MAX_DISCOVERED_DEVICES];
 static volatile int g_device_count = 0;
 static uint8_t g_target_bssid[6];
-static int g_target_channel;
 
 // AmebaD (RTL8720DN) 的 newlib-nano sscanf 不支持 %02x 格式，
 // 调用会静默返回但不写入任何值，导致 g_target_bssid 始终为全零。
@@ -246,7 +246,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
     if (!buf || len < 22) return;
 
     #ifdef SNIFF_DEBUG
-    // ── DEBUG: 打印原始包前若干字节，探测固件前置头偏移 ──
+    // ── DEBUG: 打印原始包前若干字节 ──
     static unsigned int debug_count = 0;
     static unsigned long debug_last_log = 0;
     debug_count++;
@@ -263,25 +263,18 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
         }
         Serial.println();
 
-        // 尝试多种偏移解析帧控制头
-        const int tryOffsets[] = {0, 4, 8, 12, 16, 20, 24, 32, 36, 40};
-        for (size_t t = 0; t < sizeof(tryOffsets) / sizeof(tryOffsets[0]); t++) {
-            int off = tryOffsets[t];
-            if (len < (unsigned)(off + 24)) continue;
-            const uint8_t* base = buf + off;
-            uint16_t fc = (uint16_t)base[0] | ((uint16_t)base[1] << 8);
-            uint8_t ftype = (fc >> 2) & 0x3;
-            uint8_t fsubtype = (fc >> 4) & 0xF;
-            // 只打印看起来有效的帧控制(非全0, 非全1, type合理)
-            if (fc != 0 && fc != 0xFFFF && ftype <= 3) {
-                Serial.print("[SNIFF_DEBUG]   offset="); Serial.print(off);
-                Serial.print(" fc=0x"); if (fc < 0x1000) Serial.print("0");
-                if (fc < 0x100) Serial.print("0");
-                if (fc < 0x10) Serial.print("0");
-                Serial.print(fc, HEX);
-                Serial.print(" type="); Serial.print(ftype);
-                Serial.print(" subtype="); Serial.println(fsubtype);
-            }
+        uint16_t fc = (uint16_t)buf[0] | ((uint16_t)buf[1] << 8);
+        uint8_t ftype = (fc >> 2) & 0x3;
+        uint8_t fsubtype = (fc >> 4) & 0xF;
+        // 只打印看起来有效的帧控制(非全0, 非全1, type合理)
+        if (fc != 0 && fc != 0xFFFF && ftype <= 3) {
+            Serial.print("[SNIFF_DEBUG] frame dump:");
+            Serial.print(" fc=0x"); if (fc < 0x1000) Serial.print("0");
+            if (fc < 0x100) Serial.print("0");
+            if (fc < 0x10) Serial.print("0");
+            Serial.print(fc, HEX);
+            Serial.print(" type="); Serial.print(ftype);
+            Serial.print(" subtype="); Serial.println(fsubtype);
         }
     }
     #endif
@@ -412,24 +405,24 @@ void handleDeviceScanApi(HttpClient& client) {
         client.sendJsonFail("invalid bssid");
         return;
     }
-    g_target_channel = chStr.toInt();
+    int target_channel = chStr.toInt();
 
     Serial.print("[SNIFF] rawBssidStr="); Serial.println(bssidStr);
     Serial.print("[SNIFF] targetBytes=");
     printBssid(g_target_bssid);
-    Serial.print(" channel="); Serial.println(g_target_channel);
+    Serial.print(" channel="); Serial.println(target_channel);
 
     g_device_count = 0;
     // WiFi.disablePowerSave();
 
     // 必须切换到目标信道监听。通知客户端一起切换
-    if (g_target_channel != ap_channel) {
-        if (wifi_ap_switch_chl_and_inform(g_target_channel) != RTW_SUCCESS) {
+    if (target_channel != ap_channel) {
+        if (wifi_ap_switch_chl_and_inform(target_channel) != RTW_SUCCESS) {
             client.sendJsonFail("failed to switch channel");
             return;
         }
-        wext_set_channel(WLAN0_NAME, g_target_channel);  // 必须，上面的调用不够
-        ap_channel = g_target_channel;
+        wext_set_channel(WLAN0_NAME, target_channel);  // 必须，上面的调用不够
+        ap_channel = target_channel;
         delay(100);
     }
 
@@ -464,7 +457,7 @@ void handleDeviceScanApi(HttpClient& client) {
             JsonDocument doc;
             doc["success"] = true;
             doc["bssid"] = bssidStr;
-            doc["channel"] = g_target_channel;
+            doc["channel"] = target_channel;
             doc["count"] = g_device_count;
             JsonArray devices = doc["devices"].to<JsonArray>();
             for (int i = 0; i < g_device_count; i++) {
