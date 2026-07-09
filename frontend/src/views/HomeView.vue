@@ -21,7 +21,6 @@
         </div>
       </div>
       <p v-if="formattedUptime">运行时间: {{ formattedUptime }}</p>
-      <p v-if="compileDate">固件编译: {{ compileDate }}</p>
       <p v-if="freeHeap">空闲堆内存: {{ freeHeap }} KB</p>
       <p>
         RTC 时间: <span>{{ rtcTime ? rtcTime.toLocaleString('zh-CN') : '未设置' }}</span>
@@ -31,7 +30,8 @@
         <button v-if="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">同步时间</button>
       </p>
       <footer>
-        <small>by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
+        <small v-if="compileDate">固件编译: {{ compileDate }}</small>
+        <small style="float: right">by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
       </footer>
     </article>
   </section>

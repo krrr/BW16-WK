@@ -44,7 +44,7 @@
                 <td>{{ ap.band }}</td>
                 <td>{{ ap.security }}</td>
                 <td style="font-size:0.85em;">{{ ap.lastSeen }}</td>
-                <td>
+                <td class="btn-col">
                   <button
                     @click="deviceScanning === ap.bssid ? stopDeviceScan(ap.bssid) : startDeviceScan(ap.bssid, ap.channel)"
                     :aria-busy="deviceScanning === ap.bssid"
@@ -54,6 +54,13 @@
                   >
                     <span>{{ deviceScanning === ap.bssid ? '停止监听' : '扫描设备' }}</span>
                   </button>
+                  <Dropdown summary-class="outline secondary btn-sm" align="right">
+                    <li>
+                      <a @click.prevent="clearDevices(ap.bssid)">
+                        清除结果
+                      </a>
+                    </li>
+                  </Dropdown>
                 </td>
               </tr>
               <!-- Device scan results for this AP -->
@@ -138,6 +145,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import Dropdown from '../components/Dropdown.vue'
 
 interface NetworkInfo {
   ssid: string
@@ -294,6 +302,16 @@ const deauthDevice = async (bssid: string, mac: string, channel: number) => {
   }, 3000)
 }
 
+const clearDevices = (bssid: string) => {
+  if (deviceResults.value[bssid]) {
+    deviceResults.value[bssid] = []
+  }
+  if (deviceErrors.value[bssid]) {
+    delete deviceErrors.value[bssid]
+  }
+  savePersisted()
+}
+
 const startDeviceScan = async (bssid: string, channel: number) => {
   if (deviceEventSource.value) {
     stopDeviceScan(deviceScanning.value || '')
@@ -408,3 +426,19 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<style lang="scss">
+  .btn-col {
+    white-space: nowrap;
+    button:last-of-type {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    details summary[role=button] {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+</style>
