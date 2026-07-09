@@ -8,9 +8,13 @@ extern "C" {
 #include "errno.h"
 }
 
-#include "HttpClient.h"
-#include "HttpServer.h"
+#include "http/HttpClient.h"
+#include "http/HttpServer.h"
 #include "server_drv.h"
+
+
+#define MAX_ALLOWED_BODY_SIZE 8192
+
 
 HttpClient::HttpClient():
     _sock(MAX_SOCK_NUM), _is_connected(false), recvTimeout(3000), _contentLength(0)
@@ -227,13 +231,35 @@ bool HttpClient::parseRequest() {
     return true;
 }
 
+
 const String& HttpClient::body() {
+    if (_contentLength > MAX_ALLOWED_BODY_SIZE) {  // 限制最大 Payload 长度防止超大 Content-Length 导致 OOM
+        _body = "";
+        return _body;
+    }
+
     if (_body.length() == 0 && _contentLength > 0 && connected()) {
         _body.reserve(_contentLength);
         unsigned long bodyTimeout = millis() + 1000;
-        while (_body.length() < (unsigned int)_contentLength && millis() < bodyTimeout) {
+        char buffer[257];  // 额外留 1 字节用于 '\0'
+        unsigned int bytesRead = 0;
+
+        while (bytesRead < (unsigned int)_contentLength && connected() && millis() < bodyTimeout) {
             if (available()) {
-                _body += (char)read();
+                size_t toRead = sizeof(buffer) - 1;
+                if (toRead > (size_t)(_contentLength - bytesRead)) {
+                    toRead = (size_t)(_contentLength - bytesRead);
+                }
+                
+                int readBytes = read((uint8_t*)buffer, toRead);
+                if (readBytes > 0) {
+                    buffer[readBytes] = '\0';
+                    _body += buffer;
+                    bytesRead += readBytes;
+                } else if (!connected()) {
+                    // 读取出错或连接断开 (EOF)
+                    break;
+                }
             } else {
                 delay(10);
             }
