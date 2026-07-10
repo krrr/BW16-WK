@@ -93,19 +93,13 @@ void handleApScanApi(HttpClient& client) {
         g_scan_aps = nullptr;
         g_scan_state = SCAN_IDLE;
     } else if (g_scan_state == SCAN_RUNNING) {
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "another scan is already running";
-        client.sendJson(doc);
+        client.sendJsonFail("another scan is already running");
         return;
     }
 
     g_scan_aps = new (std::nothrow) ScanAP[MAX_SCAN_APS];
     if (!g_scan_aps) {
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "out of memory";
-        client.sendJson(doc);
+        client.sendJsonFail("out of memory");
         return;
     }
 
@@ -122,10 +116,7 @@ void handleApScanApi(HttpClient& client) {
         g_scan_state = SCAN_IDLE;
         delete[] g_scan_aps;
         g_scan_aps = nullptr;
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "scan failed to start";
-        client.sendJson(doc);
+        client.sendJsonFail("scan failed to start");
         return;
     }
     while (g_scan_state == SCAN_RUNNING && millis() - start < SCAN_TIMEOUT_MS) {
@@ -166,17 +157,14 @@ void handleApScanApi(HttpClient& client) {
         // Timeout case: Do NOT free g_scan_aps or reset g_scan_state.
         // It stays as SCAN_RUNNING so that late callbacks can safely run.
         // It will be cleaned up on the next API call once it transitions to SCAN_COMPLETED.
-        JsonDocument doc;
-        doc["success"] = false;
-        doc["message"] = "scan timeout";
-        client.sendJson(doc);
+        client.sendJsonFail("scan timeout");
     }
 }
 
 // ─── Device Scan (被动监听特定AP关联设备) ───
 
 #define DEVICE_SCAN_TIMEOUT_MS 25000
-#define MAX_DISCOVERED_DEVICES 32
+#define MAX_DISCOVERED_DEVICES 64
 
 typedef struct {
     uint8_t mac[6];
@@ -185,7 +173,7 @@ typedef struct {
     int handshakes;  // Handshake packets count
 } DiscoveredDevice;
 
-static DiscoveredDevice g_devices[MAX_DISCOVERED_DEVICES];
+static DiscoveredDevice* g_devices = nullptr;
 static volatile int g_device_count = 0;
 static uint8_t g_target_bssid[6];
 
@@ -211,6 +199,7 @@ static bool parseBssid(const String& str, uint8_t* bssid) {
 }
 
 static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false) {
+    if (!g_devices) return;
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
     for (int i = 0; i < g_device_count; i++) {
@@ -392,6 +381,11 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
 }
 
 void handleDeviceScanApi(HttpClient& client) {
+    if (g_devices != nullptr) {
+        client.sendJsonFail("another scan is already running");
+        return;
+    }
+    // 虽然可以同时监听同一个信道的所有客户端，但是ap的频道可能比较分散。还是设计成针对每个ap扫描设备
     String bssidStr = client.queryParam("bssid");
     String chStr = client.queryParam("channel");
 
@@ -399,18 +393,20 @@ void handleDeviceScanApi(HttpClient& client) {
         client.sendJsonFail("missing bssid or channel");
         return;
     }
-    Serial.print("[SNIFF] rawBssidParam="); Serial.println(bssidStr);
-    Serial.print("[SNIFF] decodedBssid="); Serial.println(bssidStr);
     if (!parseBssid(bssidStr, g_target_bssid)) {
         client.sendJsonFail("invalid bssid");
         return;
     }
     int target_channel = chStr.toInt();
 
-    Serial.print("[SNIFF] rawBssidStr="); Serial.println(bssidStr);
-    Serial.print("[SNIFF] targetBytes=");
-    printBssid(g_target_bssid);
+    Serial.print("[SNIFF] targetAp="); Serial.print(bssidStr);
     Serial.print(" channel="); Serial.println(target_channel);
+
+    g_devices = new (std::nothrow) DiscoveredDevice[MAX_DISCOVERED_DEVICES];
+    if (!g_devices) {
+        client.sendJsonFail("out of memory");
+        return;
+    }
 
     g_device_count = 0;
     // WiFi.disablePowerSave();
@@ -419,6 +415,8 @@ void handleDeviceScanApi(HttpClient& client) {
     if (target_channel != ap_channel) {
         if (wifi_ap_switch_chl_and_inform(target_channel) != RTW_SUCCESS) {
             client.sendJsonFail("failed to switch channel");
+            delete[] g_devices;
+            g_devices = nullptr;
             return;
         }
         wext_set_channel(WLAN0_NAME, target_channel);  // 必须，上面的调用不够
@@ -429,6 +427,8 @@ void handleDeviceScanApi(HttpClient& client) {
     // 启用混杂模式
     if (wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1) != RTW_SUCCESS) {
         client.sendJsonFail("failed to set promisc mode");
+        delete[] g_devices;
+        g_devices = nullptr;
         return;
     }
 
@@ -489,6 +489,7 @@ void handleDeviceScanApi(HttpClient& client) {
     }
 
     wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);
+    delay(50);  // 确保callback都执行完毕了
 
     Serial.print("[SNIFF] Scan done, device_count="); Serial.println(g_device_count);
     for (int i = 0; i < g_device_count; i++) {
@@ -498,4 +499,7 @@ void handleDeviceScanApi(HttpClient& client) {
         Serial.print(" rx_packets="); Serial.print(g_devices[i].packets_in);
         Serial.print(" handshakes="); Serial.println(g_devices[i].handshakes);
     }
+    DiscoveredDevice* temp = g_devices;
+    g_devices = nullptr;
+    delete[] temp;
 }
