@@ -1,4 +1,4 @@
-/* override pico.css */
+/* ========= override pico.css ========= */
 :root {
   --pico-form-element-spacing-vertical: 0.45rem;
   --pico-form-element-spacing-horizontal: 0.7rem;
@@ -16,27 +16,49 @@ header > h1 {
   font-size: 30px;
 }
 
-.virtual-badge {
+/* ================== */
+
+.badge {
   display: inline-block;
   padding: 0.1rem 0.35rem;
   font-size: 0.7em;
   font-weight: 600;
   border-radius: 4px;
-  background-color: rgba(142, 68, 173, 0.15); // soft purple
-  color: #9b59b6; // premium purple/violet
-  border: 1px solid rgba(142, 68, 173, 0.3);
+  border: 1px solid black;
   margin-left: 0.5rem;
   vertical-align: middle;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-
-@media (prefers-color-scheme: dark) {
-  .virtual-badge {
-    background-color: rgba(155, 89, 182, 0.2);
-    color: #d7bde2;
-    border-color: rgba(155, 89, 182, 0.45);
-  }
+.badge-purple {
+  color: #531dab;
+  background: #f9f0ff;
+  border-color: #d3adf7;
+}
+.badge-red {
+  color: #d4380d;
+  background-color: #fff2e8;
+  border-color: #ffbb96;
+}
+.badge-magenta {
+  color: #c41d7f;
+  background: #fff0f6;
+  border-color: #ffadd2;
+}
+.badge-blue {
+  color: #096dd9;
+  background: #e6f7ff;
+  border-color: #91d5ff;
+}
+.badge-green {
+  color: #389e0d;
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+.badge-orange {
+  color: #d46b08;
+  background: #fff7e6;
+  border-color: #ffd591;
 }
 
 

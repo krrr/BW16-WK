@@ -37,7 +37,7 @@
                   <span style="font-family:monospace;font-size:0.85em;cursor:pointer" @click="openMacLookup(ap.bssid)">
                     {{ ap.bssid }}
                   </span>
-                  <span v-if="isVirtualMac(ap.bssid)" class="virtual-badge" style="font-size: 0.7em;">虚拟</span>
+                  <span v-if="isVirtualMac(ap.bssid)" class="badge badge-red" style="font-size: 0.7em;">虚拟</span>
                 </td>
                 <td :style="{ color: rssiColor(ap.rssi), fontWeight: 'bold' }">{{ ap.rssi }} dBm</td>
                 <td>{{ ap.channel }}</td>
@@ -111,7 +111,7 @@
                               <span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)">
                                 {{ dev.mac }}
                               </span>
-                              <span v-if="isVirtualMac(dev.mac)" class="virtual-badge">虚拟</span>
+                              <span v-if="isVirtualMac(dev.mac)" class="badge badge-red">虚拟</span>
                             </td>
                             <td>{{ '↑' + (dev.packets_out || 0) + ' / ↓' + (dev.packets_in || 0) }}</td>
                             <td>{{ dev.handshakes || 0 }}</td>
