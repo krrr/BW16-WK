@@ -144,7 +144,6 @@ void handleApScanApi(HttpClient& client) {
 
             net["rssi"] = g_scan_aps[i].rssi;
             net["channel"] = g_scan_aps[i].channel;
-            net["band"] = (g_scan_aps[i].channel >= 36) ? "5GHz" : "2.4GHz";
             net["security"] = securityTypeToString(g_scan_aps[i].security);
         }
         client.sendJson(doc);

@@ -66,36 +66,32 @@
               <!-- Device scan results for this AP -->
               <tr v-if="deviceResults[ap.bssid]?.length > 0 || ap.advanced_info">
                 <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
-                  <div style="padding:0.5rem 1rem;">
-                    <div
-                      style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;"
-                      @click="toggleExpanded(ap.bssid)"
-                    >
-                      <small><strong>»»» 发现的设备 (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
+                  <div class="dev-table">
+                    <div class="dev-table-header" @click="toggleExpanded(ap.bssid)" >
+                      <div :title="isExpanded(ap.bssid) ? '折叠' : '展开'">
+                        <img src="../assets/chevron-up.svg" width="21" height="21"
+                          style="transition: transform 0.2s;"
+                          :style="isExpanded(ap.bssid) ? 'transform: rotate(180deg);' : 'transform: rotate(90deg);'"
+                        />
+                        <small><strong>发现的设备 (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
+                      </div>
                       
                       <!-- Middle Area for AP Advanced Properties -->
-                      <div v-if="ap.advanced_info" style="font-size:0.8em;color:var(--primary);display:flex;gap:0.8rem;align-items:center;margin:0 1rem;" @click.stop>
+                      <div v-if="ap.advanced_info" class="adv-ap-inf">
                         <span v-if="ap.advanced_info.uptime !== undefined" title="无线已运行时间" style="display:inline-flex;align-items:center;gap:2px;">
                           <img src="../assets/hourglass.svg" width="20" height="20" />
-                          运行：{{ formatUptime(ap.advanced_info.uptime) }}
+                          运行：<i>{{ formatUptime(ap.advanced_info.uptime) }}</i>
                         </span>
                         <span title="PMF（保护管理帧）" style="display:inline-flex;align-items:center;gap:2px;">
                           <img src="../assets/protection.svg" width="20" height="20" /> PMF：
-                          <span v-if="ap.advanced_info.pmfRequired">强制</span>
-                          <span v-else-if="ap.advanced_info.pmfCapable" >可选</span>
-                          <span v-else style="color:var(--muted-color)">未启用</span>
+                          <i v-if="ap.advanced_info.pmfRequired">强制</i>
+                          <i v-else-if="ap.advanced_info.pmfCapable" >可选</i>
+                          <i v-else style="color:var(--muted-color)">未启用</i>
                         </span>
                       </div>
-                      <span style="font-size:0.85em;color:var(--muted-color);display:inline-flex;align-items:center;gap:0.25rem;">
-                        <span>{{ isExpanded(ap.bssid) ? '折叠' : '展开' }}</span>
-                        <img src="../assets/chevron-up.svg" width="20" height="20"
-                          style="transition: transform 0.2s;"
-                          :style="isExpanded(ap.bssid) ? 'transform: rotate(0deg);' : 'transform: rotate(180deg);'"
-                        />
-                      </span>
                     </div>
-                    <div v-show="isExpanded(ap.bssid) && deviceResults[ap.bssid]?.length > 0">
-                      <table style="margin-top:0.4em;font-size:0.85em;">
+                    <div v-show="isExpanded(ap.bssid) && deviceResults[ap.bssid]?.length > 0" class="dev-table-table">
+                      <table style="font-size:0.85em;">
                         <thead>
                           <tr>
                             <th>MAC</th>
@@ -168,9 +164,9 @@ interface NetworkInfo {
   bssid: string
   rssi: number
   channel: number
-  band: string
   security: string
   lastSeen?: string
+  band?: string
   advanced_info?: ApAdvancedInfo
 }
 
@@ -228,7 +224,7 @@ const deauthResult = ref<Record<string, string>>({})
 const expandedBssids = ref<Record<string, boolean>>({})
 
 const isExpanded = (bssid: string) => {
-  return expandedBssids.value[bssid] !== false
+  return expandedBssids.value[bssid] === true
 }
 
 const toggleExpanded = (bssid: string) => {
@@ -273,6 +269,7 @@ const startScan = async () => {
           Object.assign(existing, ap, { lastSeen: now })
         } else {
           ap.lastSeen = now
+          ap.band = (ap.channel >= 36) ? '5G' : '2.4G'
           scanResults.value.push(ap)
         }
       }
@@ -486,5 +483,24 @@ onUnmounted(() => {
       border-left: 0;
       padding-left: 0;
     }
+  }
+  .adv-ap-inf {
+    font-size: 0.8em;
+    color: var(--primary);
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    margin: 0 1rem;
+  }
+  .dev-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding:0.5rem 1rem;
+  }
+  .dev-table-table {
+    padding: 0 1rem;
   }
 </style>
