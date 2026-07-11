@@ -64,27 +64,37 @@
                 </td>
               </tr>
               <!-- Device scan results for this AP -->
-              <tr v-if="deviceResults[ap.bssid]?.length > 0">
+              <tr v-if="deviceResults[ap.bssid]?.length > 0 || ap.advanced_info">
                 <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                   <div style="padding:0.5rem 1rem;">
                     <div
-                      style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;margin-bottom:0.25rem;"
+                      style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;"
                       @click="toggleExpanded(ap.bssid)"
                     >
-                      <small><strong>»»» 发现的设备 (<span>{{ deviceResults[ap.bssid]?.length }}</span>)</strong></small>
+                      <small><strong>»»» 发现的设备 (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
+                      
+                      <!-- Middle Area for AP Advanced Properties -->
+                      <div v-if="ap.advanced_info" style="font-size:0.8em;color:var(--primary);display:flex;gap:0.8rem;align-items:center;margin:0 1rem;" @click.stop>
+                        <span v-if="ap.advanced_info.uptime !== undefined" title="无线已运行时间" style="display:inline-flex;align-items:center;gap:2px;">
+                          <img src="../assets/hourglass.svg" width="20" height="20" />
+                          运行：{{ formatUptime(ap.advanced_info.uptime) }}
+                        </span>
+                        <span title="PMF（保护管理帧）" style="display:inline-flex;align-items:center;gap:2px;">
+                          <img src="../assets/protection.svg" width="20" height="20" /> PMF：
+                          <span v-if="ap.advanced_info.pmfRequired">强制</span>
+                          <span v-else-if="ap.advanced_info.pmfCapable" >可选</span>
+                          <span v-else style="color:var(--muted-color)">未启用</span>
+                        </span>
+                      </div>
                       <span style="font-size:0.85em;color:var(--muted-color);display:inline-flex;align-items:center;gap:0.25rem;">
                         <span>{{ isExpanded(ap.bssid) ? '折叠' : '展开' }}</span>
-                        <img
-                          src="../assets/chevron-up.svg"
-                          width="16"
-                          height="16"
-                          alt="chevron"
+                        <img src="../assets/chevron-up.svg" width="20" height="20"
                           style="transition: transform 0.2s;"
                           :style="isExpanded(ap.bssid) ? 'transform: rotate(0deg);' : 'transform: rotate(180deg);'"
                         />
                       </span>
                     </div>
-                    <div v-show="isExpanded(ap.bssid)">
+                    <div v-show="isExpanded(ap.bssid) && deviceResults[ap.bssid]?.length > 0">
                       <table style="margin-top:0.4em;font-size:0.85em;">
                         <thead>
                           <tr>
@@ -147,6 +157,12 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import Dropdown from '../components/Dropdown.vue'
 
+interface ApAdvancedInfo {
+  uptime?: number
+  pmfCapable?: boolean
+  pmfRequired?: boolean
+}
+
 interface NetworkInfo {
   ssid: string
   bssid: string
@@ -155,6 +171,7 @@ interface NetworkInfo {
   band: string
   security: string
   lastSeen?: string
+  advanced_info?: ApAdvancedInfo
 }
 
 interface ScanResponse {
@@ -178,6 +195,10 @@ interface DeviceScanResponse {
   channel: number
   count: number
   devices: DeviceInfo[]
+  ap_beacon_parsed?: boolean
+  ap_uptime?: number
+  pmf_capable?: boolean
+  pmf_required?: boolean
 }
 
 interface DeauthResponse {
@@ -372,6 +393,18 @@ const startDeviceScan = async (bssid: string, channel: number) => {
               })
             }
           }
+
+          if (data.ap_beacon_parsed) {
+            const ap = scanResults.value.find(a => a.bssid === bssid)
+            if (ap) {
+              ap.advanced_info = {
+                uptime: data.ap_uptime,
+                pmfCapable: data.pmf_capable,
+                pmfRequired: data.pmf_required
+              }
+            }
+          }
+
           savePersisted()
         } else {
           deviceErrors.value[bssid] = data.message || '扫描失败'
@@ -394,6 +427,19 @@ const startDeviceScan = async (bssid: string, channel: number) => {
     deviceErrors.value[bssid] = '创建连接失败: ' + (e as Error).message
     deviceScanning.value = null
   }
+}
+
+const formatUptime = (seconds?: number) => {
+  if (seconds === undefined) return ''
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  
+  const parts = []
+  if (days > 0) parts.push(`${days}d`)
+  if (hours > 0) parts.push(`${hours}h`)
+  if (parts.length == 0 || minutes > 0) parts.push(`${minutes}m`)
+  return parts.join('')
 }
 
 const openMacLookup = (bssid: string) => {

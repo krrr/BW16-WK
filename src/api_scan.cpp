@@ -173,7 +173,15 @@ typedef struct {
     int handshakes;  // Handshake packets count
 } DiscoveredDevice;
 
-static DiscoveredDevice* g_devices = nullptr;
+typedef struct {
+    bool ap_beacon_parsed;
+    uint64_t ap_timestamp;
+    bool pmf_capable;
+    bool pmf_required;
+    DiscoveredDevice devices[MAX_DISCOVERED_DEVICES];
+} DeviceScanSession;
+
+static DeviceScanSession* g_scan_session = nullptr;
 static volatile int g_device_count = 0;
 static uint8_t g_target_bssid[6];
 
@@ -199,33 +207,84 @@ static bool parseBssid(const String& str, uint8_t* bssid) {
 }
 
 static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false) {
-    if (!g_devices) return;
+    if (!g_scan_session) return;
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
     for (int i = 0; i < g_device_count; i++) {
-        if (memcmp(g_devices[i].mac, mac, 6) == 0) {
+        if (memcmp(g_scan_session->devices[i].mac, mac, 6) == 0) {
             if (is_uplink) {
-                g_devices[i].packets_out++;
+                g_scan_session->devices[i].packets_out++;
             } else {
-                g_devices[i].packets_in++;
+                g_scan_session->devices[i].packets_in++;
             }
             if (is_handshake) {
-                g_devices[i].handshakes++;
+                g_scan_session->devices[i].handshakes++;
             }
             return;
         }
     }
     if (g_device_count >= MAX_DISCOVERED_DEVICES) return;
-    memcpy(g_devices[g_device_count].mac, mac, 6);
+    memcpy(g_scan_session->devices[g_device_count].mac, mac, 6);
     if (is_uplink) {
-        g_devices[g_device_count].packets_out = 1;
-        g_devices[g_device_count].packets_in = 0;
+        g_scan_session->devices[g_device_count].packets_out = 1;
+        g_scan_session->devices[g_device_count].packets_in = 0;
     } else {
-        g_devices[g_device_count].packets_out = 0;
-        g_devices[g_device_count].packets_in = 1;
+        g_scan_session->devices[g_device_count].packets_out = 0;
+        g_scan_session->devices[g_device_count].packets_in = 1;
     }
-    g_devices[g_device_count].handshakes = is_handshake ? 1 : 0;
+    g_scan_session->devices[g_device_count].handshakes = is_handshake ? 1 : 0;
     g_device_count++;
+}
+
+static void parseBeaconFrame(const unsigned char* buf, unsigned int len, DeviceScanSession* session) {
+    // 已实现无线启动时间（根据时间戳解析）和pmf解析。
+    // 用qbss load element还可以解析出客户端数量、信道利用率，但是用不到。
+    if (!session) return;
+
+    session->pmf_capable = false;
+    session->pmf_required = false;
+
+    if (len >= 24 + 8) {
+        uint64_t ts = 0;
+        memcpy(&ts, buf + 24, 8);
+        session->ap_timestamp = ts;
+    }
+    int offset = 36;
+    while (offset + 2 <= (int)len) {
+        uint8_t ie_id = buf[offset];
+        uint8_t ie_len = buf[offset + 1];
+        if (offset + 2 + ie_len > (int)len) {
+            break;
+        }
+        if (ie_id == 48) { // RSN IE
+            int curr = offset + 2;
+            // RSN structure:
+            // Version (2 bytes)
+            // Group Cipher Suite (4 bytes)
+            // Pairwise Cipher Suite Count (2 bytes)
+            // Pairwise Cipher Suite List (4 * Count)
+            // AKM Suite Count (2 bytes)
+            // AKM Suite List (4 * Count)
+            // RSN Capabilities (2 bytes)
+            if (curr + 2 <= offset + 2 + ie_len) {
+                curr += 2; // skip Version
+                curr += 4; // skip Group Cipher Suite
+                if (curr + 2 <= offset + 2 + ie_len) {
+                    uint16_t pairwise_count = buf[curr] | (buf[curr + 1] << 8);
+                    curr += 2 + 4 * pairwise_count;
+                    if (curr + 2 <= offset + 2 + ie_len) {
+                        uint16_t akm_count = buf[curr] | (buf[curr + 1] << 8);
+                        curr += 2 + 4 * akm_count;
+                        if (curr + 2 <= offset + 2 + ie_len) {
+                            session->pmf_capable = (buf[curr] & 0x80) != 0;
+                            session->pmf_required = (buf[curr] & 0x40) != 0;
+                        }
+                    }
+                }
+            }
+        }
+        offset += 2 + ie_len;
+    }
 }
 
 #define SNIFF_DEBUG
@@ -270,6 +329,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
 
     uint16_t fc = buf[0] | (buf[1] << 8);
     unsigned int type = (fc >> 2) & 0x03;
+    unsigned int subtype = (fc >> 4) & 0x0F;
     bool toDS = (fc & (1 << 8)) != 0;
     bool fromDS = (fc & (1 << 9)) != 0;
 
@@ -303,12 +363,18 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
         return;
     }
 
+    // Parse target AP's Beacon frame (type 0, subtype 8)
+    // 反正是顺便的，返回一些有趣信息
+    if (!g_scan_session->ap_beacon_parsed && type == 0 && subtype == 8) {
+        parseBeaconFrame(buf, len, g_scan_session);
+        g_scan_session->ap_beacon_parsed = true;
+    }
+
     const uint8_t* ta = addr2;
     const uint8_t* ra = addr1;
 
     bool is_eapol = false;
     if (type == 2 && !(fc & 0x4000)) { // Data type and not protected
-        unsigned int subtype = (fc >> 4) & 0x0F;
         unsigned int mac_hdr_len = 0;
         if (subtype == 8) {
             mac_hdr_len = 26; // QoS Data
@@ -381,7 +447,7 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
 }
 
 void handleDeviceScanApi(HttpClient& client) {
-    if (g_devices != nullptr) {
+    if (g_scan_session != nullptr) {
         client.sendJsonFail("another scan is already running");
         return;
     }
@@ -402,8 +468,8 @@ void handleDeviceScanApi(HttpClient& client) {
     Serial.print("[SNIFF] targetAp="); Serial.print(bssidStr);
     Serial.print(" channel="); Serial.println(target_channel);
 
-    g_devices = new (std::nothrow) DiscoveredDevice[MAX_DISCOVERED_DEVICES];
-    if (!g_devices) {
+    g_scan_session = new (std::nothrow) DeviceScanSession{};
+    if (!g_scan_session) {
         client.sendJsonFail("out of memory");
         return;
     }
@@ -415,8 +481,8 @@ void handleDeviceScanApi(HttpClient& client) {
     if (target_channel != ap_channel) {
         if (wifi_ap_switch_chl_and_inform(target_channel) != RTW_SUCCESS) {
             client.sendJsonFail("failed to switch channel");
-            delete[] g_devices;
-            g_devices = nullptr;
+            delete g_scan_session;
+            g_scan_session = nullptr;
             return;
         }
         wext_set_channel(WLAN0_NAME, target_channel);  // 必须，上面的调用不够
@@ -427,8 +493,8 @@ void handleDeviceScanApi(HttpClient& client) {
     // 启用混杂模式
     if (wifi_set_promisc(RTW_PROMISC_ENABLE_2, deviceSniffCallback, 1) != RTW_SUCCESS) {
         client.sendJsonFail("failed to set promisc mode");
-        delete[] g_devices;
-        g_devices = nullptr;
+        delete g_scan_session;
+        g_scan_session = nullptr;
         return;
     }
 
@@ -459,17 +525,27 @@ void handleDeviceScanApi(HttpClient& client) {
             doc["bssid"] = bssidStr;
             doc["channel"] = target_channel;
             doc["count"] = g_device_count;
+
+            if (g_scan_session->ap_beacon_parsed) {
+                doc["ap_beacon_parsed"] = true;
+                doc["ap_uptime"] = g_scan_session->ap_timestamp / 1000000ULL;
+                doc["pmf_capable"] = g_scan_session->pmf_capable;
+                doc["pmf_required"] = g_scan_session->pmf_required;
+            } else {
+                doc["ap_beacon_parsed"] = false;
+            }
+
             JsonArray devices = doc["devices"].to<JsonArray>();
             for (int i = 0; i < g_device_count; i++) {
                 JsonObject d = devices.add<JsonObject>();
                 char mac[18];
                 snprintf(mac, sizeof(mac), "%02X:%02X:%02X:%02X:%02X:%02X",
-                    g_devices[i].mac[0], g_devices[i].mac[1], g_devices[i].mac[2],
-                    g_devices[i].mac[3], g_devices[i].mac[4], g_devices[i].mac[5]);
+                    g_scan_session->devices[i].mac[0], g_scan_session->devices[i].mac[1], g_scan_session->devices[i].mac[2],
+                    g_scan_session->devices[i].mac[3], g_scan_session->devices[i].mac[4], g_scan_session->devices[i].mac[5]);
                 d["mac"] = mac;
-                d["packets_out"] = g_devices[i].packets_out;
-                d["packets_in"] = g_devices[i].packets_in;
-                d["handshakes"] = g_devices[i].handshakes;
+                d["packets_out"] = g_scan_session->devices[i].packets_out;
+                d["packets_in"] = g_scan_session->devices[i].packets_in;
+                d["handshakes"] = g_scan_session->devices[i].handshakes;
             }
 
             String json;
@@ -494,12 +570,12 @@ void handleDeviceScanApi(HttpClient& client) {
     Serial.print("[SNIFF] Scan done, device_count="); Serial.println(g_device_count);
     for (int i = 0; i < g_device_count; i++) {
         Serial.print("[SNIFF]   device ");
-        printBssid(g_devices[i].mac);
-        Serial.print(" tx_packets="); Serial.print(g_devices[i].packets_out);
-        Serial.print(" rx_packets="); Serial.print(g_devices[i].packets_in);
-        Serial.print(" handshakes="); Serial.println(g_devices[i].handshakes);
+        printBssid(g_scan_session->devices[i].mac);
+        Serial.print(" tx_packets="); Serial.print(g_scan_session->devices[i].packets_out);
+        Serial.print(" rx_packets="); Serial.print(g_scan_session->devices[i].packets_in);
+        Serial.print(" handshakes="); Serial.println(g_scan_session->devices[i].handshakes);
     }
-    DiscoveredDevice* temp = g_devices;
-    g_devices = nullptr;
-    delete[] temp;
+    DeviceScanSession* temp = g_scan_session;
+    g_scan_session = nullptr;
+    delete temp;
 }
