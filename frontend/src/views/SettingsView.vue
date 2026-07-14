@@ -23,6 +23,18 @@
         </div>
       </div>
       
+      <hr style="margin: 1.5rem 0" />
+
+      <div>
+        <h4 style="margin-bottom: 0.5rem">System Control</h4>
+        <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+          Manually trigger a hardware reboot for the microcontroller.
+        </p>
+        <button @click="rebootDevice" :disabled="rebooting" :aria-busy="rebooting" class="outline secondary" style="width: auto; margin-bottom: 0">
+          {{ rebooting ? 'Rebooting...' : 'Reboot Device' }}
+        </button>
+      </div>
+
       <footer>
         <small>Configure software settings on this page</small>
       </footer>
@@ -38,6 +50,27 @@ const otaFileInput = ref<HTMLInputElement | null>(null)
 const otaUploading = ref(false)
 const otaProgress = ref<number | null>(null)
 const otaStatusText = ref('')
+const rebooting = ref(false)
+
+const rebootDevice = async () => {
+  if (!confirm('Are you sure you want to reboot the device?')) {
+    return
+  }
+  rebooting.value = true
+  try {
+    const res = await fetch('/api/reboot', { method: 'POST' })
+    const data = await res.json()
+    if (data.success) {
+      message.success('Device is rebooting...')
+    } else {
+      message.error(data.message || 'Failed to reboot device')
+      rebooting.value = false
+    }
+  } catch (err) {
+    message.error('Failed to send reboot request')
+    rebooting.value = false
+  }
+}
 
 const startOta = () => {
   if (!otaFileInput.value || !otaFileInput.value.files || otaFileInput.value.files.length === 0) {

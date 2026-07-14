@@ -10,3 +10,4 @@ void handleChangeChannelApi(HttpClient& client);
 void handleStatusApi(HttpClient& client);
 void handleSetTimeApi(HttpClient& client);
 void handleOtaApi(HttpClient& client);
+void handleRebootApi(HttpClient& client);

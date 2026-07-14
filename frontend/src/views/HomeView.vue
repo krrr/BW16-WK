@@ -24,11 +24,11 @@
       <p v-if="formattedUptime">Uptime: {{ formattedUptime }}</p>
       <p v-if="freeHeap">Free Heap: {{ freeHeap }} KB</p>
       <p>
-        RTC Time: <span>{{ rtcTime ? rtcTime.toLocaleString('en-US') : 'Not Set' }}</span>
+        RTC Time: <span>{{ rtcTime ? rtcTime.toLocaleString('sv-SE') : 'Not Set' }}</span>
         <span v-if="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
           (Offset <span>{{ Math.round(timeDiff) }}</span> s)
         </span>
-        <button v-if="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">Sync Time</button>
+        <button v-if="timeDiff !== null && timeDiff > 3" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">Sync Time</button>
       </p>
       <footer>
         <small v-if="compileDate">Firmware Build: {{ compileDate }}</small>
@@ -137,7 +137,7 @@ const formattedCompileTime = (cDate: string, cTime: string): string => {
   if (!cDate || !cTime) return ''
   const d = new Date(`${cDate} ${cTime}`)
   if (isNaN(d.getTime())) return `${cDate} ${cTime}`
-  return d.toLocaleString('en-US')
+  return d.toLocaleString('sv-SE')
 }
 
 onMounted(() => {

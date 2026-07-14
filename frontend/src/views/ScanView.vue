@@ -6,10 +6,10 @@
         <h1>WiFi Scan</h1>
       </header>
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
-        <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:8rem;">
+        <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:9rem;">
           <span>{{ scanning ? 'Scanning...' : 'Start Scan' }}</span>
         </button>
-        <label>
+        <label title="Save results in the browser">
           <input type="checkbox" v-model="persistEnabled" @change="savePersisted" role="switch"> Persist Data
         </label>
       </div>
@@ -144,7 +144,7 @@
 
       <footer>
         <small v-if="scanResultCount !== null">Discovered {{ scanResultCount }} networks</small>
-        <small v-else>Scan takes approx. 5-10 seconds</small>
+        <small v-else>Scan takes approx. 10 seconds</small>
       </footer>
     </article>
   </section>
@@ -263,7 +263,7 @@ const startScan = async () => {
     const r = await fetch('/api/scan')
     const data: ScanResponse = await r.json()
     if (data.success) {
-      const now = new Date().toLocaleString('en-US')
+      const now = new Date().toLocaleString('sv-SE').slice(5)
       for (const ap of data.networks) {
         const existing = scanResults.value.find(a => a.bssid === ap.bssid)
         if (existing) {
@@ -369,7 +369,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
       try {
         const data: DeviceScanResponse = JSON.parse(event.data)
         if (data.success) {
-          const now = new Date().toLocaleString('en-US')
+          const now = new Date().toLocaleString('sv-SE').slice(5)
           for (const dev of data.devices) {
             const existing = deviceResults.value[bssid].find(d => d.mac === dev.mac)
             const base = baselines[dev.mac] || { out: 0, in: 0, handshakes: 0 }

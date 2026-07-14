@@ -56,6 +56,7 @@ static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
 static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
 static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
 static constexpr uint32_t HASH_API_OTA            = djb2_hash("/api/ota");
+static constexpr uint32_t HASH_API_REBOOT         = djb2_hash("/api/reboot");
 
 static void dispatchRequest(HttpClient& client) {
     String path = client.path();
@@ -88,6 +89,9 @@ static void dispatchRequest(HttpClient& client) {
             break;
         case HASH_API_OTA:
             handleOtaApi(client);
+            break;
+        case HASH_API_REBOOT:
+            handleRebootApi(client);
             break;
         default:
             handleNotFound(client);

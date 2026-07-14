@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "wifi_drv.h"
 #include "portable.h"  // freertos
+#include "sys_api.h"
 
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
@@ -88,4 +89,20 @@ void handleStatusApi(HttpClient& client) {
     doc["ap_channel"] = ap_channel;
     doc["free_heap"] = xPortGetFreeHeapSize();
     client.sendJson(doc);
+}
+
+void handleRebootApi(HttpClient& client) {
+    if (client.method() != "POST") {
+        client.sendJsonFail("Only POST method is allowed");
+        return;
+    }
+
+    JsonDocument doc;
+    doc["success"] = true;
+    doc["message"] = "Rebooting...";
+    client.sendJson(doc);
+    client.stop();
+
+    delay(500);
+    sys_reset();
 }
