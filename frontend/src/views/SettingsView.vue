@@ -2,6 +2,7 @@
   <section>
     <article>
       <header>
+        <img src="../assets/setting.svg" />
         <h1>Settings</h1>
       </header>
 

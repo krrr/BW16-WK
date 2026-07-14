@@ -5,15 +5,15 @@
         <li><strong>BW16 WiFi Killer</strong></li>
       </ul>
       <ul class="tabs">
-        <li :class="{ selected: $route.path === '/home' }">
-          <router-link to="/home">Home</router-link>
-        </li>
-        <li :class="{ selected: $route.path === '/scan' }">
-          <router-link to="/scan">Scan</router-link>
-        </li>
-        <li :class="{ selected: $route.path === '/settings' }">
-          <router-link to="/settings">Settings</router-link>
-        </li>
+        <router-link to="/home">
+          <li>Home</li>
+        </router-link>
+        <router-link to="/scan">
+          <li>Scan</li>
+        </router-link>
+        <router-link to="/settings">
+          <li>Settings</li>
+        </router-link>
       </ul>
     </nav>
 
@@ -48,3 +48,39 @@ const icons: Record<string, string> = {
   warning: warningSvg
 }
 </script>
+
+<style scoped lang="scss">
+.tabs > a {
+  margin: 0 var(--pico-nav-link-spacing-horizontal);
+  padding: 0;
+  position: relative;
+  height: 1.8rem;
+
+  > li {
+    padding: 0;
+    margin: 0;
+    color: #373c44
+  }
+  a:hover {
+    text-decoration: none;
+    font-weight: 600;
+  }
+}
+.tabs > a.router-link-active {
+  > li {
+    color: #373c44;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  > li::before {
+    content: "​";
+    background: var(--pico-primary);;
+    width: 100%;
+    display: block;
+    height: 4px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+}
+</style>

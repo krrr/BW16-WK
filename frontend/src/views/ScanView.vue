@@ -2,6 +2,7 @@
   <section>
     <article>
       <header>
+        <img src="../assets/radio.svg" />
         <h1>WiFi Scan</h1>
       </header>
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
@@ -471,7 +472,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
   .btn-col {
     white-space: nowrap;
     button:last-of-type {

@@ -2,6 +2,7 @@
   <section>
     <article>
       <header>
+        <img src="../assets/dashboard.svg" />
         <h1>Status</h1>
       </header>
       <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;">
@@ -143,3 +144,14 @@ onMounted(() => {
   fetchStatus()
 })
 </script>
+
+<style scoped lang="scss">
+.chan-sel {
+  width: auto;
+  margin: 0;
+  font-size: 0.9rem;
+  height: auto;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+</style>
