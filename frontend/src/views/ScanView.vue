@@ -2,14 +2,14 @@
   <section>
     <article>
       <header>
-        <h1>WiFi 扫描</h1>
+        <h1>WiFi Scan</h1>
       </header>
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
         <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:8rem;">
-          <span>{{ scanning ? '扫描中...' : '开始扫描' }}</span>
+          <span>{{ scanning ? 'Scanning...' : 'Start Scan' }}</span>
         </button>
         <label>
-          <input type="checkbox" v-model="persistEnabled" @change="savePersisted" role="switch"> 持久保存
+          <input type="checkbox" v-model="persistEnabled" @change="savePersisted" role="switch"> Persist Data
         </label>
       </div>
 
@@ -19,25 +19,25 @@
         <table>
           <thead>
             <tr>
-              <th>SSID</th>
-              <th>BSSID</th>
-              <th>信号</th>
-              <th>信道</th>
-              <th>频段</th>
-              <th>加密</th>
-              <th>最后出现</th>
-              <th>操作</th>
+              <th title="Service Set Identifier">SSID</th>
+              <th title="Basic Service Set Identifier (BSSID)">MAC</th>
+              <th title="Received Signal Strength Indicator">RSSI</th>
+              <th>Ch</th>
+              <th>Band</th>
+              <th>Security</th>
+              <th>Last Seen</th>
+              <th>Operations</th>
             </tr>
           </thead>
           <template v-for="ap in scanResults" :key="ap.bssid">
             <tbody>
               <tr>
-                <td>{{ ap.ssid || '(隐藏)' }}</td>
+                <td>{{ ap.ssid || '(Hidden)' }}</td>
                 <td>
                   <span style="font-family:monospace;font-size:0.85em;cursor:pointer" @click="openMacLookup(ap.bssid)">
                     {{ ap.bssid }}
                   </span>
-                  <span v-if="isVirtualMac(ap.bssid)" class="badge badge-red" style="font-size: 0.7em;">虚拟</span>
+                  <span v-if="isVirtualMac(ap.bssid)" class="badge badge-red" style="font-size: 0.7em;">Virtual</span>
                 </td>
                 <td :style="{ color: rssiColor(ap.rssi), fontWeight: 'bold' }">{{ ap.rssi }} dBm</td>
                 <td>{{ ap.channel }}</td>
@@ -52,12 +52,12 @@
                     :disabled="deviceScanning !== null && deviceScanning !== ap.bssid"
                     class="outline contrast btn-sm"
                   >
-                    <span>{{ deviceScanning === ap.bssid ? '停止监听' : '扫描设备' }}</span>
+                    <span>{{ deviceScanning === ap.bssid ? 'Stop Listening' : 'Scan Devices' }}</span>
                   </button>
                   <Dropdown summary-class="outline secondary btn-sm" align="right">
                     <li>
                       <a @click.prevent="clearDevices(ap.bssid)">
-                        清除结果
+                        Clear Results
                       </a>
                     </li>
                   </Dropdown>
@@ -68,25 +68,25 @@
                 <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                   <div class="dev-table">
                     <div class="dev-table-header" @click="toggleExpanded(ap.bssid)" >
-                      <div :title="isExpanded(ap.bssid) ? '折叠' : '展开'">
+                      <div :title="isExpanded(ap.bssid) ? 'Collapse' : 'Expand'">
                         <img src="../assets/chevron-up.svg" width="21" height="21"
                           style="transition: transform 0.2s;"
                           :style="isExpanded(ap.bssid) ? 'transform: rotate(180deg);' : 'transform: rotate(90deg);'"
                         />
-                        <small><strong>发现的设备 (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
+                        <small><strong>Discovered Devices (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
                       </div>
                       
                       <!-- Middle Area for AP Advanced Properties -->
                       <div v-if="ap.advanced_info" class="adv-ap-inf">
-                        <span v-if="ap.advanced_info.uptime !== undefined" title="无线已运行时间" style="display:inline-flex;align-items:center;gap:2px;">
+                        <span v-if="ap.advanced_info.uptime !== undefined" title="Wireless Uptime" style="display:inline-flex;align-items:center;gap:2px;">
                           <img src="../assets/hourglass.svg" width="20" height="20" />
-                          运行：<i>{{ formatUptime(ap.advanced_info.uptime) }}</i>
+                          Uptime: <i>{{ formatUptime(ap.advanced_info.uptime) }}</i>
                         </span>
-                        <span title="PMF（保护管理帧）" style="display:inline-flex;align-items:center;gap:2px;">
-                          <img src="../assets/protection.svg" width="20" height="20" /> PMF：
-                          <i v-if="ap.advanced_info.pmfRequired">强制</i>
-                          <i v-else-if="ap.advanced_info.pmfCapable" >可选</i>
-                          <i v-else style="color:var(--muted-color)">未启用</i>
+                        <span title="PMF (Protected Management Frames)" style="display:inline-flex;align-items:center;gap:2px;">
+                          <img src="../assets/protection.svg" width="20" height="20" /> PMF: 
+                          <i v-if="ap.advanced_info.pmfRequired">Required</i>
+                          <i v-else-if="ap.advanced_info.pmfCapable" >Capable</i>
+                          <i v-else style="color:var(--muted-color)">Disabled</i>
                         </span>
                       </div>
                     </div>
@@ -95,10 +95,10 @@
                         <thead>
                           <tr>
                             <th>MAC</th>
-                            <th>数据包</th>
-                            <th>握手包</th>
-                            <th>最后出现</th>
-                            <th>攻击</th>
+                            <th>Packets</th>
+                            <th>Handshakes</th>
+                            <th>Last Seen</th>
+                            <th>Attack</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -107,7 +107,7 @@
                               <span style="font-family:monospace;cursor:pointer" @click="openMacLookup(dev.mac)">
                                 {{ dev.mac }}
                               </span>
-                              <span v-if="isVirtualMac(dev.mac)" class="badge badge-red">虚拟</span>
+                              <span v-if="isVirtualMac(dev.mac)" class="badge badge-red">Virtual</span>
                             </td>
                             <td>{{ '↑' + (dev.packets_out || 0) + ' / ↓' + (dev.packets_in || 0) }}</td>
                             <td>{{ dev.handshakes || 0 }}</td>
@@ -142,8 +142,8 @@
       </div>
 
       <footer>
-        <small v-if="scanResultCount !== null">发现 {{ scanResultCount }} 个网络</small>
-        <small v-else>扫描大致耗时5-10秒</small>
+        <small v-if="scanResultCount !== null">Discovered {{ scanResultCount }} networks</small>
+        <small v-else>Scan takes approx. 5-10 seconds</small>
       </footer>
     </article>
   </section>
@@ -262,7 +262,7 @@ const startScan = async () => {
     const r = await fetch('/api/scan')
     const data: ScanResponse = await r.json()
     if (data.success) {
-      const now = new Date().toLocaleString('zh-CN')
+      const now = new Date().toLocaleString('en-US')
       for (const ap of data.networks) {
         const existing = scanResults.value.find(a => a.bssid === ap.bssid)
         if (existing) {
@@ -273,13 +273,14 @@ const startScan = async () => {
           scanResults.value.push(ap)
         }
       }
+      scanResults.value.sort((a, b) => b.rssi - a.rssi)
       scanResultCount.value = scanResults.value.length
       savePersisted()
     } else {
-      scanError.value = data.message || '扫描失败'
+      scanError.value = data.message || 'Scan failed'
     }
   } catch (e) {
-    scanError.value = '请求失败: ' + (e as Error).message
+    scanError.value = 'Request failed: ' + (e as Error).message
   } finally {
     scanning.value = false
   }
@@ -298,7 +299,7 @@ const stopDeviceScan = (bssid: string) => {
 const deauthDevice = async (bssid: string, mac: string, channel: number) => {
   const key = bssid + '-' + mac
   if (deauthing.value[key]) return
-  if (!confirm(`确定要对 ${mac} 发起 Deauth 攻击？`)) return
+  if (!confirm(`Are you sure you want to launch Deauth attack against ${mac}?`)) return
 
   deauthing.value[key] = true
   deauthResult.value[key] = ''
@@ -361,7 +362,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
       try {
         const data: DeviceScanResponse = JSON.parse(event.data)
         if (data.success) {
-          const now = new Date().toLocaleString('zh-CN')
+          const now = new Date().toLocaleString('en-US')
           for (const dev of data.devices) {
             const existing = deviceResults.value[bssid].find(d => d.mac === dev.mac)
             const base = baselines[dev.mac] || { out: 0, in: 0, handshakes: 0 }
@@ -370,7 +371,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
             const newHandshakes = base.handshakes + (dev.handshakes || 0)
 
             if (existing) {
-              // 仅在数据包发生改变时更新数量与最后出现时间
+              // Only update packet counts and lastSeen timestamp when packet counts change
               if (existing.packets_out !== newPacketsOut ||
                   existing.packets_in !== newPacketsIn ||
                   existing.handshakes !== newHandshakes) {
@@ -380,7 +381,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
                 existing.lastSeen = now
               }
             } else {
-              // 新设备插入
+              // New device insertion
               deviceResults.value[bssid].push({
                 mac: dev.mac,
                 packets_out: newPacketsOut,
@@ -404,11 +405,11 @@ const startDeviceScan = async (bssid: string, channel: number) => {
 
           savePersisted()
         } else {
-          deviceErrors.value[bssid] = data.message || '扫描失败'
+          deviceErrors.value[bssid] = data.message || 'Scan failed'
           stopDeviceScan(bssid)
         }
       } catch (err) {
-        deviceErrors.value[bssid] = '解析数据错误'
+        deviceErrors.value[bssid] = 'Data parsing error'
         stopDeviceScan(bssid)
       }
     }
@@ -421,7 +422,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
       stopDeviceScan(bssid)
     }
   } catch (e) {
-    deviceErrors.value[bssid] = '创建连接失败: ' + (e as Error).message
+    deviceErrors.value[bssid] = 'Failed to connect: ' + (e as Error).message
     deviceScanning.value = null
   }
 }

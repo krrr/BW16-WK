@@ -6,18 +6,18 @@
       </ul>
       <ul class="tabs">
         <li :class="{ selected: $route.path === '/home' }">
-          <router-link to="/home">首页</router-link>
+          <router-link to="/home">Home</router-link>
         </li>
         <li :class="{ selected: $route.path === '/scan' }">
-          <router-link to="/scan">扫描</router-link>
+          <router-link to="/scan">Scan</router-link>
         </li>
         <li :class="{ selected: $route.path === '/settings' }">
-          <router-link to="/settings">设置</router-link>
+          <router-link to="/settings">Settings</router-link>
         </li>
       </ul>
     </nav>
 
-    <!-- 路由视图 -->
+    <!-- Router View -->
     <router-view></router-view>
   </main>
 

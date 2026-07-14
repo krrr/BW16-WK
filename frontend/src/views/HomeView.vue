@@ -2,10 +2,10 @@
   <section>
     <article>
       <header>
-        <h1>状态</h1>
+        <h1>Status</h1>
       </header>
       <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;">
-        <span>当前信道: </span>
+        <span>Current Channel: </span>
         <div style="display:flex;gap:0.4rem;align-items:center;">
           <select v-model.number="selectedChannel" class="chan-sel">
             <optgroup label="2.4 GHz">
@@ -16,21 +16,21 @@
             </optgroup>
           </select>
           <button @click="changeChannel" :disabled="switchingChannel || selectedChannel === apChannel" :aria-busy="switchingChannel" class="outline contrast btn-sm" style="margin-left: 6px">
-            切换
+            Switch
           </button>
         </div>
       </div>
-      <p v-if="formattedUptime">运行时间: {{ formattedUptime }}</p>
-      <p v-if="freeHeap">空闲堆内存: {{ freeHeap }} KB</p>
+      <p v-if="formattedUptime">Uptime: {{ formattedUptime }}</p>
+      <p v-if="freeHeap">Free Heap: {{ freeHeap }} KB</p>
       <p>
-        RTC 时间: <span>{{ rtcTime ? rtcTime.toLocaleString('zh-CN') : '未设置' }}</span>
+        RTC Time: <span>{{ rtcTime ? rtcTime.toLocaleString('en-US') : 'Not Set' }}</span>
         <span v-if="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
-          (偏差 <span>{{ Math.round(timeDiff) }}</span> 秒)
+          (Offset <span>{{ Math.round(timeDiff) }}</span> s)
         </span>
-        <button v-if="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">同步时间</button>
+        <button v-if="timeDiff !== null && timeDiff > 30" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">Sync Time</button>
       </p>
       <footer>
-        <small v-if="compileDate">固件编译: {{ compileDate }}</small>
+        <small v-if="compileDate">Firmware Build: {{ compileDate }}</small>
         <small style="float: right">by <a href="https://github.com/krrr" target="_blank">krrr</a></small>
       </footer>
     </article>
@@ -70,7 +70,7 @@ const fetchStatus = async () => {
     }
     compileDate.value = formattedCompileTime(data.compile_date, data.compile_time)
     if (data.rtc_time !== undefined) {
-      // MCU 返回的 rtc_time 是 Unix 秒数，JS new Date() 接收毫秒，所以 * 1000 做单位换算。
+      // rtc_time returned by MCU is Unix timestamp in seconds, JS new Date() accepts milliseconds, so multiply by 1000.
       rtcTime.value = new Date(data.rtc_time * 1000)
       timeDiff.value = Math.abs(Math.floor(Date.now() / 1000) - data.rtc_time)
     }
@@ -95,14 +95,14 @@ const changeChannel = async () => {
     if (data.success) {
       apChannel.value = data.ap_channel
       selectedChannel.value = data.ap_channel
-      message.success(`信道已成功切换至 ${data.ap_channel}`)
+      message.success(`Channel successfully switched to ${data.ap_channel}`)
     } else {
-      message.error(data.message || '切换信道失败')
+      message.error(data.message || 'Failed to switch channel')
       selectedChannel.value = apChannel.value
     }
   } catch (e) {
     console.error('changeChannel error:', e)
-    message.error('网络错误，切换信道失败')
+    message.error('Network error, failed to switch channel')
     selectedChannel.value = apChannel.value
   } finally {
     switchingChannel.value = false
@@ -117,7 +117,7 @@ const syncTime = async () => {
     if (data.success) {
       rtcTime.value = new Date(data.rtc_time * 1000)
       timeDiff.value = 0
-      message.success("同步成功")
+      message.success("Time synced successfully")
     }
   } catch (e) {
     console.error('syncTime error:', e)
@@ -128,15 +128,15 @@ const formattedUptime = computed(() => {
   if (uptime.value < 0) return ''
   const h = Math.floor(uptime.value / 3600)
   const m = Math.floor((uptime.value % 3600) / 60)
-  if (h > 0) return `${h}小时${m}分钟`
-  return `${m}分钟`
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
 })
 
 const formattedCompileTime = (cDate: string, cTime: string): string => {
   if (!cDate || !cTime) return ''
   const d = new Date(`${cDate} ${cTime}`)
   if (isNaN(d.getTime())) return `${cDate} ${cTime}`
-  return d.toLocaleString('zh-CN')
+  return d.toLocaleString('en-US')
 }
 
 onMounted(() => {
