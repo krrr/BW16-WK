@@ -339,6 +339,12 @@ const startDeviceScan = async (bssid: string, channel: number) => {
 
   deviceScanning.value = bssid
   deviceErrors.value[bssid] = ''
+
+  // 仅在热点未扫描过（没有历史设备结果）时自动展开
+  if (!deviceResults.value[bssid] || deviceResults.value[bssid].length === 0) {
+    expandedBssids.value[bssid] = true
+  }
+
   if (!deviceResults.value[bssid]) {
     deviceResults.value[bssid] = []
   }
@@ -479,7 +485,7 @@ onUnmounted(() => {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
-    details summary[role=button] {
+    :deep(details summary[role="button"]) {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       border-left: 0;

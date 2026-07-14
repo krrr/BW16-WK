@@ -257,6 +257,7 @@ static void parseBeaconFrame(const unsigned char* buf, unsigned int len, DeviceS
         }
         if (ie_id == 48) { // RSN IE
             int curr = offset + 2;
+            int ie_end = offset + 2 + ie_len;
             // RSN structure:
             // Version (2 bytes)
             // Group Cipher Suite (4 bytes)
@@ -265,18 +266,26 @@ static void parseBeaconFrame(const unsigned char* buf, unsigned int len, DeviceS
             // AKM Suite Count (2 bytes)
             // AKM Suite List (4 * Count)
             // RSN Capabilities (2 bytes)
-            if (curr + 2 <= offset + 2 + ie_len) {
+            if (curr + 6 <= ie_end) {
                 curr += 2; // skip Version
                 curr += 4; // skip Group Cipher Suite
-                if (curr + 2 <= offset + 2 + ie_len) {
+                if (curr + 2 <= ie_end) {
                     uint16_t pairwise_count = buf[curr] | (buf[curr + 1] << 8);
-                    curr += 2 + 4 * pairwise_count;
-                    if (curr + 2 <= offset + 2 + ie_len) {
-                        uint16_t akm_count = buf[curr] | (buf[curr + 1] << 8);
-                        curr += 2 + 4 * akm_count;
-                        if (curr + 2 <= offset + 2 + ie_len) {
-                            session->pmf_capable = (buf[curr] & 0x80) != 0;
-                            session->pmf_required = (buf[curr] & 0x40) != 0;
+                    curr += 2;
+                    int pairwise_bytes = (int)pairwise_count * 4;
+                    if (pairwise_bytes >= 0 && curr + pairwise_bytes <= ie_end) {
+                        curr += pairwise_bytes;
+                        if (curr + 2 <= ie_end) {
+                            uint16_t akm_count = buf[curr] | (buf[curr + 1] << 8);
+                            curr += 2;
+                            int akm_bytes = (int)akm_count * 4;
+                            if (akm_bytes >= 0 && curr + akm_bytes <= ie_end) {
+                                curr += akm_bytes;
+                                if (curr + 2 <= ie_end) {
+                                    session->pmf_capable = (buf[curr] & 0x80) != 0;
+                                    session->pmf_required = (buf[curr] & 0x40) != 0;
+                                }
+                            }
                         }
                     }
                 }
@@ -290,7 +299,7 @@ static void parseBeaconFrame(const unsigned char* buf, unsigned int len, DeviceS
 
 static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user) {
     (void)user;
-    if (!buf || len < 22) return;
+    if (!buf || len < 22 || !g_scan_session) return;
 
     #ifdef SNIFF_DEBUG
     // ── DEBUG: 打印原始包前若干字节 ──

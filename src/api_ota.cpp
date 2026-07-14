@@ -82,12 +82,12 @@ void handleOtaApi(HttpClient& client) {
 
 
     // Step 5: Erase flash space
-    if (ota_target_index == 1) {
-        printf("[%s] Erasing OTA target flash index 2 (0x08106000)...\n", __FUNCTION__);
-        erase_ota_target_flash(0x08106000, OtaTargetHdr.FileImgHdr[0].ImgLen);
-    } else {
+    if (ota_target_index == OTA_INDEX_1) {
         printf("[%s] Erasing OTA target flash index 1 (0x08006000)...\n", __FUNCTION__);
         erase_ota_target_flash(0x08006000, OtaTargetHdr.FileImgHdr[0].ImgLen);
+    } else {
+        printf("[%s] Erasing OTA target flash index 2 (0x08106000)...\n", __FUNCTION__);
+        erase_ota_target_flash(0x08106000, OtaTargetHdr.FileImgHdr[0].ImgLen);
     }
     printf("[%s] Erase flash done\n", __FUNCTION__);
 

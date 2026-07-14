@@ -51,19 +51,15 @@ int HttpClient::available()
         return 0;
     }
 
-    while (true) {
-        if (clientdrv.availData(_sock) > 0) {
-            return 1;
-        } else {
-            int err = clientdrv.getLastErrno(_sock);
-            if (err == EAGAIN) {
-                continue;
-            }
-            if (err != 0) {
-                _is_connected = false;
-            }
-            return 0;
+    int ret = clientdrv.availData(_sock);
+    if (ret > 0) {
+        return ret;
+    } else {
+        int err = clientdrv.getLastErrno(_sock);
+        if (err != 0 && err != EAGAIN) {
+            _is_connected = false;
         }
+        return 0;
     }
 }
 
