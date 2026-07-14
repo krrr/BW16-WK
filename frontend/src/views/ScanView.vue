@@ -96,6 +96,7 @@
                         <thead>
                           <tr>
                             <th>MAC</th>
+                            <th>RSSI</th>
                             <th>Packets</th>
                             <th>Handshakes</th>
                             <th>Last Seen</th>
@@ -109,6 +110,10 @@
                                 {{ dev.mac }}
                               </span>
                               <span v-if="isVirtualMac(dev.mac)" class="badge badge-red">Virtual</span>
+                            </td>
+                            <td>
+                              <span v-if="dev.rssi" :style="{ color: rssiColor(dev.rssi), fontWeight: 'bold' }">{{ dev.rssi }} dBm</span>
+                              <span v-else style="color:var(--muted-color)">—</span>
                             </td>
                             <td>{{ '↑' + (dev.packets_out || 0) + ' / ↓' + (dev.packets_in || 0) }}</td>
                             <td>{{ dev.handshakes || 0 }}</td>
@@ -182,6 +187,7 @@ interface DeviceInfo {
   packets_out: number
   packets_in: number
   handshakes: number
+  rssi: number
   lastSeen?: string
 }
 
@@ -387,6 +393,8 @@ const startDeviceScan = async (bssid: string, channel: number) => {
                 existing.handshakes = newHandshakes
                 existing.lastSeen = now
               }
+              // RSSI: 始终取最新值（只要非零）
+              if (dev.rssi) existing.rssi = dev.rssi
             } else {
               // New device insertion
               deviceResults.value[bssid].push({
@@ -394,6 +402,7 @@ const startDeviceScan = async (bssid: string, channel: number) => {
                 packets_out: newPacketsOut,
                 packets_in: newPacketsIn,
                 handshakes: newHandshakes,
+                rssi: dev.rssi || 0,
                 lastSeen: now
               })
             }

@@ -170,6 +170,7 @@ typedef struct {
     int packets_out; // Device -> Router (Uplink / Tx)
     int packets_in;  // Router -> Device (Downlink / Rx)
     int handshakes;  // Handshake packets count
+    int8_t rssi;     // Client RSSI (from STA->AP uplink frames only)
 } DiscoveredDevice;
 
 typedef struct {
@@ -205,7 +206,8 @@ static bool parseBssid(const String& str, uint8_t* bssid) {
     return true;
 }
 
-static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false) {
+// rssi 参数仅在 is_uplink=true 时有意义（STA→AP 方向，反映客户端信号强度）
+static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false, int8_t rssi = 0) {
     if (!g_scan_session) return;
     if (mac[0] == 0xFF || (mac[0] & 0x01)) return;
     if (memcmp(mac, g_target_bssid, 6) == 0) return;
@@ -213,6 +215,8 @@ static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_hand
         if (memcmp(g_scan_session->devices[i].mac, mac, 6) == 0) {
             if (is_uplink) {
                 g_scan_session->devices[i].packets_out++;
+                // 更新 RSSI（取最新上行帧的值）
+                if (rssi != 0) g_scan_session->devices[i].rssi = rssi;
             } else {
                 g_scan_session->devices[i].packets_in++;
             }
@@ -227,9 +231,11 @@ static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_hand
     if (is_uplink) {
         g_scan_session->devices[g_device_count].packets_out = 1;
         g_scan_session->devices[g_device_count].packets_in = 0;
+        g_scan_session->devices[g_device_count].rssi = rssi;
     } else {
         g_scan_session->devices[g_device_count].packets_out = 0;
         g_scan_session->devices[g_device_count].packets_in = 1;
+        g_scan_session->devices[g_device_count].rssi = 0;
     }
     g_scan_session->devices[g_device_count].handshakes = is_handshake ? 1 : 0;
     g_device_count++;
@@ -297,8 +303,13 @@ static void parseBeaconFrame(const unsigned char* buf, unsigned int len, DeviceS
 
 #define SNIFF_DEBUG
 
-static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user) {
-    (void)user;
+static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* userdata) {
+    // userdata 实际是 ieee80211_frame_info_t*，包含 rssi/data_rate 等信息
+    // SDK 汇编里用 ldrb（无符号）写入 rssi 字段，需要 (int8_t) 强转修正符号
+    int8_t rssi = 0;
+    if (userdata) {
+        rssi = (int8_t)((ieee80211_frame_info_t*)userdata)->rssi;
+    }
     if (!buf || len < 22 || !g_scan_session) return;
 
     #ifdef SNIFF_DEBUG
@@ -415,13 +426,15 @@ static void deviceSniffCallback(unsigned char* buf, unsigned int len, void* user
 
     if (toDS && !fromDS) {
         // STA→AP: TA=station, RA=BSSID
+        // 只有上行帧(STA→AP)的RSSI反映客户端信号强度
         if (memcmp(ta, g_target_bssid, 6) != 0) {
             #ifdef SNIFF_DEBUG
             Serial.print("[SNIFF] ADD TA (sta→ap)=");
             printBssid(ta);
+            Serial.print(" rssi="); Serial.print(rssi);
             Serial.println();
             #endif
-            addDiscoveredDevice(ta, true, is_eapol);
+            addDiscoveredDevice(ta, true, is_eapol, rssi);
         }
     } else if (!toDS && fromDS) {
         // AP→STA: TA=BSSID, RA=station
@@ -554,6 +567,7 @@ void handleDeviceScanApi(HttpClient& client) {
                 d["packets_out"] = g_scan_session->devices[i].packets_out;
                 d["packets_in"] = g_scan_session->devices[i].packets_in;
                 d["handshakes"] = g_scan_session->devices[i].handshakes;
+                d["rssi"] = g_scan_session->devices[i].rssi;
             }
 
             String json;
@@ -581,7 +595,8 @@ void handleDeviceScanApi(HttpClient& client) {
         printBssid(g_scan_session->devices[i].mac);
         Serial.print(" tx_packets="); Serial.print(g_scan_session->devices[i].packets_out);
         Serial.print(" rx_packets="); Serial.print(g_scan_session->devices[i].packets_in);
-        Serial.print(" handshakes="); Serial.println(g_scan_session->devices[i].handshakes);
+        Serial.print(" handshakes="); Serial.print(g_scan_session->devices[i].handshakes);
+        Serial.print(" rssi="); Serial.println(g_scan_session->devices[i].rssi);
     }
     DeviceScanSession* temp = g_scan_session;
     g_scan_session = nullptr;
