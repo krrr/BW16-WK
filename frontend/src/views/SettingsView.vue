@@ -9,7 +9,10 @@
       <div>
         <h4 style="margin-bottom: 0.5rem">OTA Firmware Update</h4>
         <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
-          Select the compiled firmware <code>OTA_All.bin</code> to upload wirelessly and update the system.
+          <p>Select the compiled firmware <code>OTA_All.bin</code> to upload wirelessly and update the system.</p>
+          <p v-if="otaSlot !== null" style="display: block; margin-top: 0.25rem;">
+            <strong>Current Slot</strong>: {{ otaSlot }}
+          </p>
         </p>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <input type="file" ref="otaFileInput" accept=".bin" style="margin-bottom: 0; flex: 1" :disabled="otaUploading" />
@@ -27,7 +30,7 @@
 
       <div>
         <h4 style="margin-bottom: 0.5rem">System Control</h4>
-        <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
+        <p style="font-size: 0.9rem">
           Manually trigger a hardware reboot for the microcontroller.
         </p>
         <button @click="rebootDevice" :disabled="rebooting" :aria-busy="rebooting" class="outline secondary" style="width: auto; margin-bottom: 0">
@@ -43,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { message } from '../utils/message'
 
 const otaFileInput = ref<HTMLInputElement | null>(null)
@@ -51,6 +54,25 @@ const otaUploading = ref(false)
 const otaProgress = ref<number | null>(null)
 const otaStatusText = ref('')
 const rebooting = ref(false)
+const otaSlot = ref<number | null>(null)
+
+const fetchSettings = async () => {
+  try {
+    const res = await fetch('/api/settings')
+    if (res.ok) {
+      const data = await res.json()
+      if (typeof data.ota_slot === 'number') {
+        otaSlot.value = data.ota_slot
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch settings:', err)
+  }
+}
+
+onMounted(() => {
+  fetchSettings()
+})
 
 const rebootDevice = async () => {
   if (!confirm('Are you sure you want to reboot the device?')) {

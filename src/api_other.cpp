@@ -9,6 +9,7 @@
 #include "wifi_drv.h"
 #include "portable.h"  // freertos
 #include "sys_api.h"
+#include "OTA.h"
 
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
@@ -105,4 +106,11 @@ void handleRebootApi(HttpClient& client) {
 
     delay(500);
     sys_reset();
+}
+
+void handleGetSettingsApi(HttpClient& client) {
+    OTA ota;
+    JsonDocument doc;
+    doc["ota_slot"] = ota.getOTACurAddr();
+    client.sendJson(doc);
 }
