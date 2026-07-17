@@ -8,12 +8,9 @@
 #include "favicon.h"
 #include "utils.h"
 #include "api_all.h"
+#include "settings.h"
 #include "http/HttpServer.h"
 
-
-
-char ap_ssid[] = "BW16-WK";
-char ap_pass[] = "1234567890";
 int ap_channel = 1;
 
 HttpServer server(80);
@@ -95,7 +92,7 @@ static void dispatchRequest(HttpClient& client) {
             handleRebootApi(client);
             break;
         case HASH_API_SETTINGS:
-            handleGetSettingsApi(client);
+            handleSettingsApi(client);
             break;
         default:
             handleNotFound(client);
@@ -122,11 +119,13 @@ void setup() {
     delay(1000);
     Serial.println("\nBW16 WiFi Killer init ...");
 
-    startAP(ap_ssid, ap_pass, ap_channel);
+    loadSettings();
+
+    startAP(g_appSettings.ap_ssid, g_appSettings.ap_pass, ap_channel);
 
     Serial.println("[INFO] SoftAP started successfully");
     Serial.print("SSID: ");
-    Serial.println(ap_ssid);
+    Serial.println(g_appSettings.ap_ssid);
     Serial.print("IP:   ");
     Serial.println(WiFi.localIP(1));
 

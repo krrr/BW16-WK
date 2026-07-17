@@ -2,7 +2,9 @@
 
 A WiFi killer built using the Ai-Thinker BW16 development board, with pure remote web interface control.
 
+## Note
 
+**4MB Flash**: This project targets 4MB flash variants. The SDK OTA addresses have been modified accordingly - address in `rtl8721d_bootcfg.c` and `rtl8721d_ota.h` is set to `0x08206000` and the OTA sector size is capped at 2024KB per slot. Bootloader also need to be rebuilt.
 
 ## License
 

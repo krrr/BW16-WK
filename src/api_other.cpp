@@ -10,6 +10,7 @@
 #include "portable.h"  // freertos
 #include "sys_api.h"
 #include "OTA.h"
+#include "settings.h"
 
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
@@ -108,9 +109,49 @@ void handleRebootApi(HttpClient& client) {
     sys_reset();
 }
 
-void handleGetSettingsApi(HttpClient& client) {
-    OTA ota;
-    JsonDocument doc;
-    doc["ota_slot"] = ota.getOTACurAddr();
-    client.sendJson(doc);
+void handleSettingsApi(HttpClient& client) {
+    if (client.method() == "GET") {
+        OTA ota;
+        JsonDocument doc;
+        doc["ota_slot"] = ota.getOTACurAddr();  // 不是设置里的，但是为了方便放这里
+        doc["ssid"] = g_appSettings.ap_ssid;
+        doc["password"] = g_appSettings.ap_pass;
+        client.sendJson(doc);
+    } else if (client.method() == "POST") {
+        JsonDocument req;
+        DeserializationError error = deserializeJson(req, client.body());
+        if (error) {
+            client.sendJsonFail("Invalid JSON payload");
+            return;
+        }
+
+        const char* ssid = req["ssid"] | "";
+        const char* password = req["password"] | "";
+
+        if (strlen(ssid) == 0 || strlen(ssid) > 32) {
+            client.sendJsonFail("SSID length must be between 1 and 32 characters");
+            return;
+        } else if (strlen(password) > 0 && strlen(password) < 8) {
+            client.sendJsonFail("Password must be at least 8 characters or empty");
+            return;
+        } else if (strlen(password) > 32) {
+            client.sendJsonFail("Password must not exceed 32 characters");
+            return;
+        }
+
+        // write into appSettings
+        strncpy(g_appSettings.ap_ssid, ssid, 32);
+        g_appSettings.ap_ssid[32] = '\0';
+        strncpy(g_appSettings.ap_pass, password, 32);
+        g_appSettings.ap_pass[32] = '\0';
+
+        if (!saveSettings()) {
+            client.sendJsonFail("Failed to write settings to FlashMemory");
+            return;
+        }
+
+        client.sendJsonSuccess("Settings saved successfully to Flash");
+    } else {
+        client.sendJsonFail("Method not allowed");
+    }
 }

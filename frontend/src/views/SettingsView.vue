@@ -7,13 +7,66 @@
       </header>
 
       <div>
+        <h4 style="margin-bottom: 0.5rem">System Settings</h4>
+        <p style="font-size: 0.9rem; margin-bottom: 0.75rem">
+          Configure SoftAP / power etc. Saved to flash.
+        </p>
+
+        <form @submit.prevent="saveWifiSettings">
+          <label style="margin-bottom: 0.75rem">
+            <span style="font-weight: 600; font-size: 0.9rem">SSID Name</span>
+            <input
+              type="text"
+              v-model="apSsid"
+              maxlength="32"
+              required
+              placeholder="e.g. BW16-WK"
+              :disabled="savingSettings"
+              style="margin-top: 0.25rem"
+            />
+          </label>
+
+          <label style="margin-bottom: 0.75rem">
+            <span style="font-weight: 600; font-size: 0.9rem">Password</span>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem">
+              <input
+                v-model="apPass"
+                minlength="8"
+                maxlength="32"
+                placeholder="8 - 32 characters"
+                :disabled="savingSettings"
+                style="margin-bottom: 0; flex: 1"
+              />
+            </div>
+          </label>
+
+          <small style="font-size: 0.85rem; color: var(--pico-muted-color);">
+            * SoftAP changes require a device reboot to take effect.
+          </small>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
+            <button
+              type="submit"
+              :disabled="savingSettings"
+              :aria-busy="savingSettings"
+              style="width: auto; margin-bottom: 0"
+            >
+              {{ savingSettings ? 'Saving...' : 'Save Settings' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <hr style="margin: 1.5rem 0" />
+
+      <div>
         <h4 style="margin-bottom: 0.5rem">OTA Firmware Update</h4>
-        <p style="font-size: 0.9rem; margin-bottom: 0.5rem">
-          <p>Select the compiled firmware <code>OTA_All.bin</code> to upload wirelessly and update the system.</p>
+        <div style="font-size: 0.9rem; margin-bottom: 0.5rem">
+          <p style="margin-bottom: 0.25rem">Select the compiled firmware <code>OTA_All.bin</code> to upload and update the system.</p>
           <p v-if="otaSlot !== null" style="display: block; margin-top: 0.25rem;">
             <strong>Current Slot</strong>: {{ otaSlot }}
           </p>
-        </p>
+        </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <input type="file" ref="otaFileInput" accept=".bin" style="margin-bottom: 0; flex: 1" :disabled="otaUploading" />
           <button @click="startOta" :disabled="otaUploading" :aria-busy="otaUploading" class="" style="width: auto; margin-bottom: 0">
@@ -31,7 +84,7 @@
       <div>
         <h4 style="margin-bottom: 0.5rem">System Control</h4>
         <p style="font-size: 0.9rem">
-          Manually trigger a hardware reboot for the microcontroller.
+          Manually trigger a hardware reboot for the MCU.
         </p>
         <button @click="rebootDevice" :disabled="rebooting" :aria-busy="rebooting" class="outline secondary" style="width: auto; margin-bottom: 0">
           {{ rebooting ? 'Rebooting...' : 'Reboot Device' }}
@@ -49,6 +102,10 @@
 import { ref, onMounted } from 'vue'
 import { message } from '../utils/message'
 
+const apSsid = ref('')
+const apPass = ref('')
+const savingSettings = ref(false)
+
 const otaFileInput = ref<HTMLInputElement | null>(null)
 const otaUploading = ref(false)
 const otaProgress = ref<number | null>(null)
@@ -64,6 +121,12 @@ const fetchSettings = async () => {
       if (typeof data.ota_slot === 'number') {
         otaSlot.value = data.ota_slot
       }
+      if (typeof data.ssid === 'string') {
+        apSsid.value = data.ssid
+      }
+      if (typeof data.password === 'string') {
+        apPass.value = data.password
+      }
     }
   } catch (err) {
     console.error('Failed to fetch settings:', err)
@@ -73,6 +136,33 @@ const fetchSettings = async () => {
 onMounted(() => {
   fetchSettings()
 })
+
+const saveWifiSettings = async () => {
+  savingSettings.value = true
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ssid: apSsid.value,
+        password: apPass.value
+      })
+    })
+
+    const data = await res.json()
+    if (res.ok && data.success) {
+      message.success('WiFi settings saved successfully! Reboot device to apply.')
+    } else {
+      message.error(data.message || 'Failed to save WiFi settings')
+    }
+  } catch (err) {
+    message.error('Failed to send save request')
+  } finally {
+    savingSettings.value = false
+  }
+}
 
 const rebootDevice = async () => {
   if (!confirm('Are you sure you want to reboot the device?')) {

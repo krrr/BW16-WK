@@ -36,6 +36,7 @@ public:
 
     void sendJson(JsonDocument& doc);
     void sendJsonFail(const String& message);
+    void sendJsonSuccess(const String& message);
     void sendHtml(const uint8_t* content, size_t length, bool gzip = false);
     void sendNotFound();
 
