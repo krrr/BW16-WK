@@ -9,7 +9,7 @@ struct AppSettings {
     uint32_t struct_size;   // Struct size for forward/backward compatibility
     char ap_ssid[33];       // SoftAP SSID (max 32 chars + null terminator)
     char ap_pass[33];       // SoftAP Password (max 32 chars + null terminator)
-    uint8_t reserved[2];    // Padding alignment (total 80 bytes)
+    uint8_t ap_mac[6];      // Custom SoftAP MAC (6 bytes binary, all 0s = default)
     uint32_t checksum;      // CRC-32 checksum
 };
 

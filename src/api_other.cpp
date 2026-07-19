@@ -116,6 +116,11 @@ void handleSettingsApi(HttpClient& client) {
         doc["ota_slot"] = ota.getOTACurAddr();  // 不是设置里的，但是为了方便放这里
         doc["ssid"] = g_appSettings.ap_ssid;
         doc["password"] = g_appSettings.ap_pass;
+        if (isMacValidUnicast(g_appSettings.ap_mac)) {
+            doc["mac"] = formatMac(g_appSettings.ap_mac);
+        } else {
+            doc["mac"] = "";
+        }
         client.sendJson(doc);
     } else if (client.method() == "POST") {
         JsonDocument req;
@@ -127,6 +132,7 @@ void handleSettingsApi(HttpClient& client) {
 
         const char* ssid = req["ssid"] | "";
         const char* password = req["password"] | "";
+        const char* mac_str = req["mac"].as<const char*>();
 
         if (strlen(ssid) == 0 || strlen(ssid) > 32) {
             client.sendJsonFail("SSID length must be between 1 and 32 characters");
@@ -139,11 +145,20 @@ void handleSettingsApi(HttpClient& client) {
             return;
         }
 
+        uint8_t new_mac[6] = {0};
+        if (mac_str && strlen(mac_str) > 0) {
+            if (!parseMac(mac_str, new_mac) || !isMacValidUnicast(new_mac)) {
+                client.sendJsonFail("Invalid MAC address format (must be unicast XX:XX:XX:XX:XX:XX)");
+                return;
+            }
+        }
+
         // write into appSettings
         strncpy(g_appSettings.ap_ssid, ssid, 32);
         g_appSettings.ap_ssid[32] = '\0';
         strncpy(g_appSettings.ap_pass, password, 32);
         g_appSettings.ap_pass[32] = '\0';
+        memcpy(g_appSettings.ap_mac, new_mac, 6);
 
         if (!saveSettings()) {
             client.sendJsonFail("Failed to write settings to FlashMemory");

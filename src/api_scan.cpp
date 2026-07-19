@@ -7,6 +7,7 @@
 #include <new>
 #include "api_all.h"
 #include "wifi_drv.h"
+#include "utils.h"
 
 
 #define SCAN_TIMEOUT_MS 15000  // 一般10秒内就好了
@@ -184,27 +185,6 @@ typedef struct {
 static DeviceScanSession* g_scan_session = nullptr;
 static volatile int g_device_count = 0;
 static uint8_t g_target_bssid[6];
-
-// AmebaD (RTL8720DN) 的 newlib-nano sscanf 不支持 %02x 格式，
-// 调用会静默返回但不写入任何值，导致 g_target_bssid 始终为全零。
-// 改用纯手动十六进制解析。
-static bool parseBssid(const String& str, uint8_t* bssid) {
-    const char* s = str.c_str();
-    for (int i = 0; i < 6; i++) {
-        if (*s == 0) return false;
-        unsigned int v = 0;
-        for (int j = 0; j < 2; j++) {
-            char c = *s++;
-            if (c >= '0' && c <= '9') v = (v << 4) | (c - '0');
-            else if (c >= 'a' && c <= 'f') v = (v << 4) | (c - 'a' + 10);
-            else if (c >= 'A' && c <= 'F') v = (v << 4) | (c - 'A' + 10);
-            else return false;
-        }
-        bssid[i] = (uint8_t)v;
-        if (i < 5 && *s++ != ':') return false;
-    }
-    return true;
-}
 
 // rssi 参数仅在 is_uplink=true 时有意义（STA→AP 方向，反映客户端信号强度）
 static void addDiscoveredDevice(const uint8_t* mac, bool is_uplink, bool is_handshake = false, int8_t rssi = 0) {
@@ -480,7 +460,7 @@ void handleDeviceScanApi(HttpClient& client) {
         client.sendJsonFail("missing bssid or channel");
         return;
     }
-    if (!parseBssid(bssidStr, g_target_bssid)) {
+    if (!parseMac(bssidStr, g_target_bssid)) {
         client.sendJsonFail("invalid bssid");
         return;
     }

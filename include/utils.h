@@ -1,2 +1,6 @@
 #pragma once
-// Utils header has been refactored. HTTP helpers are now in HttpClient.
+#include <Arduino.h>
+
+bool parseMac(const String& str, uint8_t* mac);
+bool isMacValidUnicast(const uint8_t* mac);
+String formatMac(const uint8_t* mac);

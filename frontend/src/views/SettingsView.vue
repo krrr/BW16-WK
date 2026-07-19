@@ -40,6 +40,18 @@
             </div>
           </label>
 
+          <label style="margin-bottom: 0.75rem">
+            <span style="font-weight: 600; font-size: 0.9rem">Custom MAC Address</span>
+            <input
+              type="text"
+              v-model="apMac"
+              maxlength="17"
+              placeholder="e.g. 02:12:34:56:78:9A (Leave empty for default)"
+              :disabled="savingSettings"
+              style="margin-top: 0.25rem; font-family: monospace;"
+            />
+          </label>
+
           <small style="font-size: 0.85rem; color: var(--pico-muted-color);">
             * SoftAP changes require a device reboot to take effect.
           </small>
@@ -104,6 +116,7 @@ import { message } from '../utils/message'
 
 const apSsid = ref('')
 const apPass = ref('')
+const apMac = ref('')
 const savingSettings = ref(false)
 
 const otaFileInput = ref<HTMLInputElement | null>(null)
@@ -127,6 +140,9 @@ const fetchSettings = async () => {
       if (typeof data.password === 'string') {
         apPass.value = data.password
       }
+      if (typeof data.mac === 'string' && data.mac.length > 0) {
+        apMac.value = data.mac
+      }
     }
   } catch (err) {
     console.error('Failed to fetch settings:', err)
@@ -147,7 +163,8 @@ const saveWifiSettings = async () => {
       },
       body: JSON.stringify({
         ssid: apSsid.value,
-        password: apPass.value
+        password: apPass.value,
+        mac: apMac.value.trim()
       })
     })
 

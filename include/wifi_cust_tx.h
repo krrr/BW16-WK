@@ -3,11 +3,6 @@
 
 #include <Arduino.h>
 
-// 类型定义
-typedef uint8_t __u8;
-
-// 必要的常量定义
-#define WLAN0_NAME "wlan0"
 
 // 紧凑打包并按4字节对齐整体实例，降低拷贝/访问的未对齐开销
 
@@ -97,8 +92,6 @@ typedef struct __attribute__((packed, aligned(4))) {
 } AssocReqFrame;
 
 
-// 外部函数声明 - 移除冲突的声明，使用SDK中的版本
-
 // 函数声明
 void wifi_tx_raw_frame(void* frame, size_t length);
 void wifi_tx_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason = 0x06);
@@ -110,11 +103,6 @@ size_t wifi_build_beacon_frame(void* src_mac, void* dst_mac, const char *ssid, B
 // 构建/发送探测响应，便于上层突发重用
 size_t wifi_build_probe_resp_frame(void* src_mac, void* dst_mac, const char *ssid, ProbeRespFrame &out);
 void wifi_tx_probe_resp_frame(void* src_mac, void* dst_mac, const char *ssid);
-
-// 新增：支持802.11w的加密管理帧函数
-void wifi_tx_protected_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason, const uint8_t* mic, const uint8_t* replay_counter);
-bool wifi_generate_pmf_mic(const uint8_t* frame, size_t frame_len, const uint8_t* key, uint8_t* mic);
-bool wifi_attempt_pmf_attack(const uint8_t* bssid, const uint8_t* client_mac, uint8_t channel);
 
 // 新增：构建并发送认证/关联请求
 size_t wifi_build_auth_req(void* sta_mac, void* bssid, AuthReqFrame &out);

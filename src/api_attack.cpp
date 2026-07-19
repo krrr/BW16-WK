@@ -13,23 +13,6 @@
 // extern "C" int dump_mgntframe(void* ptr, void* frame_control);
 
 
-static bool parseMac(const String& str, uint8_t* mac) {
-    const char* s = str.c_str();
-    for (int i = 0; i < 6; i++) {
-        if (*s == 0) return false;
-        unsigned int v = 0;
-        for (int j = 0; j < 2; j++) {
-            char c = *s++;
-            if (c >= '0' && c <= '9') v = (v << 4) | (c - '0');
-            else if (c >= 'a' && c <= 'f') v = (v << 4) | (c - 'a' + 10);
-            else if (c >= 'A' && c <= 'F') v = (v << 4) | (c - 'A' + 10);
-            else return false;
-        }
-        mac[i] = (uint8_t)v;
-        if (i < 5 && *s++ != ':') return false;
-    }
-    return true;
-}
 
 void handleDeauthApi(HttpClient& client) {
     String bssidStr = client.queryParam("bssid");

@@ -9,6 +9,8 @@
 #include "utils.h"
 #include "api_all.h"
 #include "settings.h"
+#include "wifi_drv.h"
+#include "lwip_netconf.h"
 #include "http/HttpServer.h"
 
 int ap_channel = 1;
@@ -109,6 +111,16 @@ void startAP(const char* ssid, const char* password, int channel) {
     IPAddress subnet(255, 255, 255, 0);
     WiFi.config(ip, gw, gw, subnet);
 
+    WiFiDrv::wifiDriverInit();  // 本来apbegin里会调用，但是wifi_change_mac_address_from_ram需要先初始化
+
+    if (isMacValidUnicast(g_appSettings.ap_mac)) {
+        wifi_change_mac_address_from_ram(WLAN1_IDX, g_appSettings.ap_mac);
+        // 同步 LwIP 协议栈 hwaddr
+        memcpy(xnetif[1].hwaddr, g_appSettings.ap_mac, 6);
+        Serial.print("[INFO] Custom SoftAP MAC applied: ");
+        Serial.println(formatMac(g_appSettings.ap_mac));
+    }
+
     char chan_char[4];
     itoa(channel, chan_char, 10);
     WiFi.apbegin((char*)ssid, (char*)password, chan_char, FALSE);
@@ -123,11 +135,11 @@ void setup() {
 
     startAP(g_appSettings.ap_ssid, g_appSettings.ap_pass, ap_channel);
 
-    Serial.println("[INFO] SoftAP started successfully");
+    Serial.println("[INFO] SoftAP started successfully. ");
     Serial.print("SSID: ");
-    Serial.println(g_appSettings.ap_ssid);
-    Serial.print("IP:   ");
-    Serial.println(WiFi.localIP(1));
+    Serial.print(g_appSettings.ap_ssid);
+    Serial.print(", IP: ");
+    Serial.println(WiFi.localIP(WLAN1_IDX));
 
     server.begin();
 }
