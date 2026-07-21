@@ -52,7 +52,7 @@ static constexpr uint32_t HASH_API_SCAN           = djb2_hash("/api/scan");
 static constexpr uint32_t HASH_API_SCAN_DEVICES   = djb2_hash("/api/scan-devices");
 static constexpr uint32_t HASH_API_STATUS         = djb2_hash("/api/status");
 static constexpr uint32_t HASH_API_SET_TIME       = djb2_hash("/api/set-time");
-static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/deauth");
+static constexpr uint32_t HASH_API_DEAUTH         = djb2_hash("/api/attack/test-deauth");
 static constexpr uint32_t HASH_API_CHANGE_CHANNEL = djb2_hash("/api/change-channel");
 static constexpr uint32_t HASH_API_OTA            = djb2_hash("/api/ota");
 static constexpr uint32_t HASH_API_REBOOT         = djb2_hash("/api/reboot");
@@ -82,7 +82,7 @@ static void dispatchRequest(HttpClient& client) {
             handleSetTimeApi(client);
             break;
         case HASH_API_DEAUTH:
-            handleDeauthApi(client);
+            handleTestDeauthApi(client);
             break;
         case HASH_API_CHANGE_CHANNEL:
             handleChangeChannelApi(client);

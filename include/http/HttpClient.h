@@ -40,6 +40,12 @@ public:
     void sendHtml(const uint8_t* content, size_t length, bool gzip = false);
     void sendNotFound();
 
+    void sendSseHeader();
+    void sendSseData(const String& data);
+    void sendSseData(JsonDocument& doc);
+    void sendSseEvent(const char* event, const String& data);
+    void sendSseEvent(const char* event, JsonDocument& doc);
+
     static String urlDecode(const String& s);
 
     friend class HttpServer;

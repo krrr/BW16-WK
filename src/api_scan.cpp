@@ -500,13 +500,7 @@ void handleDeviceScanApi(HttpClient& client) {
     }
 
     // 发送 SSE 头部
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-Type: text/event-stream; charset=utf-8");
-    client.println("Cache-Control: no-cache");
-    client.println("Connection: keep-alive");
-    client.println("Access-Control-Allow-Origin: *");
-    client.println();
-    client.flush();
+    client.sendSseHeader();
 
     unsigned long start = millis();
     unsigned long last_send = 0;
@@ -550,20 +544,14 @@ void handleDeviceScanApi(HttpClient& client) {
                 d["rssi"] = g_scan_session->devices[i].rssi;
             }
 
-            String json;
-            serializeJson(doc, json);
-
-            client.print("data: ");
-            client.print(json);
-            client.print("\n\n");
+            client.sendSseData(doc);
         }
         delay(50);
     }
 
     // 发送 done 事件标识扫描完成
     if (client.connected()) {
-        client.print("event: done\ndata: {}\n\n");
-        client.flush();
+        client.sendSseEvent("done", "{}");
     }
 
     wifi_set_promisc(RTW_PROMISC_DISABLE, NULL, 1);

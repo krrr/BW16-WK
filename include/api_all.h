@@ -5,7 +5,7 @@
 
 void handleApScanApi(HttpClient& client);
 void handleDeviceScanApi(HttpClient& client);
-void handleDeauthApi(HttpClient& client);
+void handleTestDeauthApi(HttpClient& client);
 void handleChangeChannelApi(HttpClient& client);
 void handleStatusApi(HttpClient& client);
 void handleSetTimeApi(HttpClient& client);

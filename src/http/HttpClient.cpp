@@ -324,3 +324,40 @@ void HttpClient::sendNotFound() {
     println("Connection: close");
     println();
 }
+
+void HttpClient::sendSseHeader() {
+    println("HTTP/1.1 200 OK");
+    println("Content-Type: text/event-stream; charset=utf-8");
+    println("Cache-Control: no-cache");
+    println("Connection: keep-alive");
+    println("Access-Control-Allow-Origin: *");
+    println();
+    flush();
+}
+
+void HttpClient::sendSseData(const String& data) {
+    print("data: ");
+    print(data);
+    print("\n\n");
+}
+
+void HttpClient::sendSseData(JsonDocument& doc) {
+    String json;
+    serializeJson(doc, json);
+    sendSseData(json);
+}
+
+void HttpClient::sendSseEvent(const char* event, const String& data) {
+    print("event: ");
+    print(event);
+    print("\ndata: ");
+    print(data);
+    print("\n\n");
+    flush();
+}
+
+void HttpClient::sendSseEvent(const char* event, JsonDocument& doc) {
+    String json;
+    serializeJson(doc, json);
+    sendSseEvent(event, json);
+}

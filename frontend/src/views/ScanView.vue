@@ -100,7 +100,7 @@
                             <th>Packets</th>
                             <th>Handshakes</th>
                             <th>Last Seen</th>
-                            <th>Attack</th>
+                            <th>Operations</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -121,12 +121,13 @@
                             <td>
                               <button
                                 @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"
-                                :disabled="!!deauthing[ap.bssid + '-' + dev.mac]"
-                                :aria-busy="deauthing[ap.bssid + '-' + dev.mac]"
+                                :aria-busy="!!deauthing[ap.bssid + '-' + dev.mac]"
+                                :class="{ 'pointer-ev-auto': !!deauthing[ap.bssid + '-' + dev.mac] }"
+                                :disabled="activeDeauthKey !== null && activeDeauthKey !== (ap.bssid + '-' + dev.mac)"
                                 class="outline contrast btn-sm"
                                 style="color:#e74c3c;border-color:#e74c3c;"
                               >
-                                <span>{{ deauthResult[ap.bssid + '-' + dev.mac] || 'Deauth' }}</span>
+                                <span>{{ deauthing[ap.bssid + '-' + dev.mac] ? 'Stop Listening' : 'Deauth' }}</span>
                               </button>
                             </td>
                           </tr>
@@ -158,6 +159,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Dropdown from '../components/Dropdown.vue'
+import { message } from '../utils/message'
 
 interface ApAdvancedInfo {
   uptime?: number
@@ -204,11 +206,12 @@ interface DeviceScanResponse {
   pmf_required?: boolean
 }
 
-interface DeauthResponse {
+interface TestDeauthResponse {
   success: boolean
-  message?: string
   rounds: number
   packets: number
+  detected: boolean
+  handshake_delay_ms: number
 }
 
 const STORAGE_KEY = 'wifi_scan_data'
@@ -226,7 +229,6 @@ const deviceResults = ref<Record<string, DeviceInfo[]>>({})
 const deviceEventSource = ref<EventSource | null>(null)
 
 const deauthing = ref<Record<string, boolean>>({})
-const deauthResult = ref<Record<string, string>>({})
 
 const expandedBssids = ref<Record<string, boolean>>({})
 
@@ -303,29 +305,70 @@ const stopDeviceScan = (bssid: string) => {
   }
 }
 
+const deauthEventSource = ref<EventSource | null>(null)
+const activeDeauthKey = ref<string | null>(null)
+
+const stopDeauth = (key?: string) => {
+  if (deauthEventSource.value) {
+    deauthEventSource.value.close()
+    deauthEventSource.value = null
+  }
+  const targetKey = key || activeDeauthKey.value
+  if (targetKey) {
+    deauthing.value[targetKey] = false
+  }
+  if (!key || activeDeauthKey.value === key) {
+    activeDeauthKey.value = null
+  }
+}
+
 const deauthDevice = async (bssid: string, mac: string, channel: number) => {
   const key = bssid + '-' + mac
-  if (deauthing.value[key]) return
-  if (!confirm(`Are you sure you want to launch Deauth attack against ${mac}?`)) return
+  if (deauthing.value[key]) {
+    stopDeauth(key)
+    return
+  }
+
+  stopDeauth()
 
   deauthing.value[key] = true
-  deauthResult.value[key] = ''
+  activeDeauthKey.value = key
+
   try {
-    const url = `/api/deauth?bssid=${encodeURIComponent(bssid)}&mac=${encodeURIComponent(mac)}&channel=${channel}`
-    const r = await fetch(url)
-    const data: DeauthResponse = await r.json()
-    if (data.success) {
-      deauthResult.value[key] = '✓'
-    } else {
-      deauthResult.value[key] = '✗'
+    const url = `/api/attack/test-deauth?bssid=${encodeURIComponent(bssid)}&mac=${encodeURIComponent(mac)}&channel=${channel}`
+    const es = new EventSource(url)
+    deauthEventSource.value = es
+
+    es.addEventListener('result', (event: MessageEvent) => {
+      try {
+        const data: TestDeauthResponse = JSON.parse(event.data)
+        if (data.success) {
+          if (data.detected) {
+            const delaySec = (data.handshake_delay_ms / 1000).toFixed(1)
+            message.success(`Deauth attack on ${mac}: Handshake captured (${delaySec}s)`, 8000)
+          } else {
+            message.warning(`Deauth attack on ${mac}: Completed, no handshake captured`, 8000)
+          }
+        } else {
+          message.error(`Deauth attack on ${mac} failed`, 8000)
+        }
+      } catch (e) {
+        message.error(`Failed to parse deauth response: ${(e as Error).message}`, 8000)
+      } finally {
+        stopDeauth(key)  // 整个sse就一条消息
+      }
+    })
+
+    es.onerror = () => {
+      if (activeDeauthKey.value === key) {
+        message.warning(`Deauth attack on ${mac} completed or connection closed`, 5000)
+        stopDeauth(key)
+      }
     }
-  } catch {
-    deauthResult.value[key] = '✗'
+  } catch (e) {
+    message.error(`Deauth attack on ${mac} failed: ${(e as Error).message}`, 8000)
+    stopDeauth(key)
   }
-  setTimeout(() => {
-    deauthing.value[key] = false
-    deauthResult.value[key] = ''
-  }, 3000)
 }
 
 const clearDevices = (bssid: string) => {
@@ -483,6 +526,9 @@ onMounted(() => {
 onUnmounted(() => {
   if (deviceEventSource.value) {
     deviceEventSource.value.close()
+  }
+  if (deauthEventSource.value) {
+    deauthEventSource.value.close()
   }
 })
 </script>
