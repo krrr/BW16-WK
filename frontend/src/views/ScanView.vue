@@ -69,12 +69,12 @@
                 <td colspan="8" style="padding:0;background:var(--card-background-color, #f8f9fa);">
                   <div class="dev-table">
                     <div class="dev-table-header" @click="toggleExpanded(ap.bssid)" >
-                      <div :title="isExpanded(ap.bssid) ? 'Collapse' : 'Expand'">
+                      <div :title="isExpanded(ap.bssid) ? 'Collapse' : 'Expand'" style="display: inline-flex; align-items: center; gap: 0.25rem;">
                         <img src="../assets/chevron-up.svg" width="21" height="21"
                           style="transition: transform 0.2s;"
                           :style="isExpanded(ap.bssid) ? 'transform: rotate(180deg);' : 'transform: rotate(90deg);'"
                         />
-                        <small><strong>Discovered Devices (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</strong></small>
+                        <small>Discovered Devices (<span>{{ deviceResults[ap.bssid]?.length || 0 }}</span>)</small>
                       </div>
                       
                       <!-- Middle Area for AP Advanced Properties -->
