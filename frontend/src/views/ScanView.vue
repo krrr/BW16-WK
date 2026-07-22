@@ -5,13 +5,13 @@
         <img src="../assets/radio.svg" />
         <h1>WiFi Scan</h1>
       </header>
-      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
         <button @click="startScan" :aria-busy="scanning" :disabled="scanning" class="contrast" style="min-width:9rem;">
           <span>{{ scanning ? 'Scanning...' : 'Start Scan' }}</span>
         </button>
-        <label title="Save results in the browser">
-          <input type="checkbox" v-model="persistEnabled" @change="savePersisted" role="switch"> Persist Data
-        </label>
+        <button @click="clearAllPersisted" class="outline secondary" title="Clear Scanned Data" style="margin-left: auto; padding: 0.45rem 0.75rem; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="../assets/clean.svg" width="20" height="20" alt="Clear" />
+        </button>
       </div>
 
       <p v-if="scanError" role="alert" class="error">{{ scanError }}</p>
@@ -215,9 +215,7 @@ interface TestDeauthResponse {
 }
 
 const STORAGE_KEY = 'wifi_scan_data'
-const PERSIST_KEY = 'wifi_scan_persist'
 
-const persistEnabled = ref(localStorage.getItem(PERSIST_KEY) === 'true')
 const scanning = ref(false)
 const scanError = ref('')
 const scanResults = ref<NetworkInfo[]>([])
@@ -252,15 +250,24 @@ const loadPersisted = () => {
 }
 
 const savePersisted = () => {
-  localStorage.setItem(PERSIST_KEY, persistEnabled.value ? 'true' : 'false')
-  if (persistEnabled.value) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      scanResults: scanResults.value,
-      deviceResults: deviceResults.value,
-    }))
-  } else {
-    localStorage.removeItem(STORAGE_KEY)
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    scanResults: scanResults.value,
+    deviceResults: deviceResults.value,
+  }))
+}
+
+const clearAllPersisted = () => {
+  if (deviceScanning.value) {
+    stopDeviceScan(deviceScanning.value)
   }
+  stopDeauth()
+  scanResults.value = []
+  deviceResults.value = {}
+  deviceErrors.value = {}
+  scanResultCount.value = null
+  expandedBssids.value = {}
+  localStorage.removeItem(STORAGE_KEY)
+  message.success('Data cleared in the browser')
 }
 
 const startScan = async () => {
@@ -518,9 +525,7 @@ const isVirtualMac = (mac: string): boolean => {
 }
 
 onMounted(() => {
-  if (persistEnabled.value) {
-    loadPersisted()
-  }
+  loadPersisted()
 })
 
 onUnmounted(() => {
