@@ -129,7 +129,7 @@ void startAP(const char* ssid, const char* password, int channel) {
 void setup() {
     Serial.begin(115200);
     delay(1000);
-    Serial.println("\nBW16 WiFi Killer init ...");
+    Serial.println("\nBW16 Stealth Deauther init ...");
 
     loadSettings();
 

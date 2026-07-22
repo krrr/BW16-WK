@@ -2,7 +2,7 @@
   <main class="container">
     <nav class="container-fluid" style="margin-top: 1rem;">
       <ul>
-        <li><strong>BW16 WiFi Killer</strong></li>
+        <li><strong>BW16 Stealth Deauther</strong></li>
       </ul>
       <ul class="tabs">
         <router-link to="/home">

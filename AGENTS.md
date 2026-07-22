@@ -1,4 +1,4 @@
-# BW16 WiFi Killer Project
+# BW16 Stealth Deauther Project
 
 ## 技术栈
 

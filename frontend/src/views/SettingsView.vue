@@ -20,7 +20,7 @@
               v-model="apSsid"
               maxlength="32"
               required
-              placeholder="e.g. BW16-WK"
+              placeholder="e.g. BW16-SD"
               :disabled="savingSettings"
               style="margin-top: 0.25rem"
             />

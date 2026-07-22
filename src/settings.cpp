@@ -35,7 +35,7 @@ static void setDefaultSettings() {
     memset(&g_appSettings, 0, sizeof(AppSettings));
     g_appSettings.magic = SETTINGS_MAGIC;
     g_appSettings.struct_size = sizeof(AppSettings);
-    strncpy(g_appSettings.ap_ssid, "BW16-WK", 32);
+    strncpy(g_appSettings.ap_ssid, "BW16-SD", 32);
     strncpy(g_appSettings.ap_pass, "1234567890", 32);
 }
 

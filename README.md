@@ -1,4 +1,4 @@
-# BW16-WK
+# BW16 Stealth Deauther
 
 A WiFi killer built using the Ai-Thinker BW16 development board, with pure remote web interface control.
 
