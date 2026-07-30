@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "api_all.h"
 #include "settings.h"
+#include "beacon_sync.h"
 #include "wifi_drv.h"
 #include "lwip_netconf.h"
 #include "http/HttpServer.h"
@@ -140,6 +141,8 @@ void setup() {
     Serial.print(g_appSettings.ap_ssid);
     Serial.print(", IP: ");
     Serial.println(WiFi.localIP(WLAN1_IDX));
+
+    tryRestoreRtcFromBeacons();
 
     server.begin();
 }

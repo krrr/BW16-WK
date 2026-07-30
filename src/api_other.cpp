@@ -11,6 +11,7 @@
 #include "sys_api.h"
 #include "OTA.h"
 #include "settings.h"
+#include "beacon_sync.h"
 
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
@@ -71,10 +72,16 @@ void handleSetTimeApi(HttpClient& client) {
 
     JsonDocument doc;
     if (t > 0) {
-        rtc_init();  // setup里init一次后面再write总是返回-1
+        rtc_init();  // setup里init一次后面只write的话会失败，总是返回-1。必须每次写时间都init
         rtc_write(t);
+        bool async_triggered = false;
+        if (g_appSettings.enable_beacon_time_sync == 1) {
+            startAsyncBeaconCapture();
+            async_triggered = true;
+        }
         doc["success"] = true;
         doc["rtc_time"] = rtc_read();
+        doc["beacon_async"] = async_triggered;
     } else {
         doc["success"] = false;
         doc["message"] = "invalid timestamp";
@@ -116,6 +123,8 @@ void handleSettingsApi(HttpClient& client) {
         doc["ota_slot"] = ota.getOTACurAddr();  // 不是设置里的，但是为了方便放这里
         doc["ssid"] = g_appSettings.ap_ssid;
         doc["password"] = g_appSettings.ap_pass;
+        doc["enable_beacon_time_sync"] = (g_appSettings.enable_beacon_time_sync == 1);
+        doc["beacon_record_count"] = g_appSettings.beacon_record_count;
         if (isMacValidUnicast(g_appSettings.ap_mac)) {
             doc["mac"] = formatMac(g_appSettings.ap_mac);
         } else {
@@ -159,6 +168,9 @@ void handleSettingsApi(HttpClient& client) {
         strncpy(g_appSettings.ap_pass, password, 32);
         g_appSettings.ap_pass[32] = '\0';
         memcpy(g_appSettings.ap_mac, new_mac, 6);
+        if (req.containsKey("enable_beacon_time_sync")) {
+            g_appSettings.enable_beacon_time_sync = req["enable_beacon_time_sync"].as<bool>() ? 1 : 0;
+        }
 
         if (!saveSettings()) {
             client.sendJsonFail("Failed to write settings to FlashMemory");

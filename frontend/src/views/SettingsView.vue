@@ -22,7 +22,7 @@
               required
               placeholder="e.g. BW16-SD"
               :disabled="savingSettings"
-              style="margin-top: 0.25rem"
+              style="margin-bottom: 0;"
             />
           </label>
 
@@ -48,12 +48,27 @@
               maxlength="17"
               placeholder="e.g. 02:12:34:56:78:9A (Leave empty for default)"
               :disabled="savingSettings"
-              style="margin-top: 0.25rem; font-family: monospace;"
+              style="margin-bottom: 0; font-family: monospace;"
             />
           </label>
 
           <small style="font-size: 0.85rem; color: var(--pico-muted-color);">
             * SoftAP changes require a device reboot to take effect.
+          </small>
+
+          <label style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 1rem">
+            <input
+              type="checkbox"
+              v-model="enableBeaconTimeSync"
+              :disabled="savingSettings"
+              style="margin-bottom: 0;"
+              role="switch"
+            />
+            <span style="font-weight: 600; font-size: 0.9rem">Beacon Time Auto-Restore</span>
+          </label>
+          <small style="display: block; font-size: 0.85rem; color: var(--pico-muted-color); margin-top: -0.5rem; margin-bottom: 0.75rem;">
+            When enabled, syncing time samples surrounding Wi-Fi Beacon timestamps to Flash. On power cycle, RTC time is automatically restored from nearby Beacons.
+            <span v-if="enableBeaconTimeSync && beaconRecordCount > 0" style="color: var(--pico-ins-color, #27ae60);"> ({{ beaconRecordCount }} AP records saved)</span>
           </small>
 
           <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
@@ -117,6 +132,8 @@ import { message } from '../utils/message'
 const apSsid = ref('')
 const apPass = ref('')
 const apMac = ref('')
+const enableBeaconTimeSync = ref(false)
+const beaconRecordCount = ref(0)
 const savingSettings = ref(false)
 
 const otaFileInput = ref<HTMLInputElement | null>(null)
@@ -143,6 +160,12 @@ const fetchSettings = async () => {
       if (typeof data.mac === 'string' && data.mac.length > 0) {
         apMac.value = data.mac
       }
+      if (typeof data.enable_beacon_time_sync === 'boolean') {
+        enableBeaconTimeSync.value = data.enable_beacon_time_sync
+      }
+      if (typeof data.beacon_record_count === 'number') {
+        beaconRecordCount.value = data.beacon_record_count
+      }
     }
   } catch (err) {
     console.error('Failed to fetch settings:', err)
@@ -164,15 +187,16 @@ const saveWifiSettings = async () => {
       body: JSON.stringify({
         ssid: apSsid.value,
         password: apPass.value,
-        mac: apMac.value.trim()
+        mac: apMac.value.trim(),
+        enable_beacon_time_sync: enableBeaconTimeSync.value
       })
     })
 
     const data = await res.json()
     if (res.ok && data.success) {
-      message.success('WiFi settings saved successfully! Reboot device to apply.')
+      message.success('Settings saved successfully!')
     } else {
-      message.error(data.message || 'Failed to save WiFi settings')
+      message.error(data.message || 'Failed to save settings')
     }
   } catch (err) {
     message.error('Failed to send save request')
