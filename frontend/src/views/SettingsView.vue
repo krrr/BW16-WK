@@ -87,6 +87,106 @@
       <hr style="margin: 1.5rem 0" />
 
       <div>
+        <h4 style="margin-bottom: 0.5rem">AP Power Saving</h4>
+        <p style="font-size: 0.9rem; margin-bottom: 0.75rem">
+          Duty-cycle the SoftAP: it only stays on for a short window at the start of each cycle, then enters light sleep until the next cycle. It stays on while a device is connected.
+        </p>
+
+        <label style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer">
+          <input
+            type="checkbox"
+            v-model="apPowersaveEnable"
+            :disabled="savingSettings"
+            style="margin-bottom: 0;"
+            role="switch"
+          />
+          <span style="font-weight: 600; font-size: 0.9rem">Enable AP Duty-Cycle Power Saving</span>
+        </label>
+
+        <div
+          v-if="apPowersaveEnable"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;"
+        >
+          <label>
+            <span style="font-weight: 600; font-size: 0.9rem">Cycle Period (sec)</span>
+            <input
+              type="number"
+              v-model.number="dutyPeriodSec"
+              min="10"
+              max="86400"
+              required
+              :disabled="savingSettings"
+              style="margin-bottom: 0;"
+            />
+          </label>
+          <label>
+            <span style="font-weight: 600; font-size: 0.9rem">AP On Time (sec)</span>
+            <input
+              type="number"
+              v-model.number="dutyOnSec"
+              min="1"
+              :max="dutyPeriodSec - 1"
+              required
+              :disabled="savingSettings"
+              style="margin-bottom: 0;"
+            />
+          </label>
+          <label>
+            <span style="font-weight: 600; font-size: 0.9rem">Hold After Disconnect (sec)</span>
+            <input
+              type="number"
+              v-model.number="clientHoldSec"
+              min="0"
+              max="3600"
+              required
+              :disabled="savingSettings"
+              style="margin-bottom: 0;"
+            />
+          </label>
+        </div>
+
+        <label style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer">
+          <input
+            type="checkbox"
+            v-model="scheduleEnable"
+            :disabled="savingSettings || !apPowersaveEnable"
+            style="margin-bottom: 0;"
+            role="switch"
+          />
+          <span style="font-weight: 600; font-size: 0.9rem">Enable Hour Schedule</span>
+        </label>
+        <small style="display: block; font-size: 0.85rem; color: var(--pico-muted-color); margin-bottom: 0.75rem;">
+          The AP is only allowed to turn on during the selected hours. Requires a valid RTC time.
+        </small>
+
+        <div v-if="scheduleEnable" style="margin-bottom: 0.75rem;">
+          <div class="hour-grid">
+            <button
+              v-for="h in 24"
+              :key="h"
+              type="button"
+              class="outline hour-chip"
+              :class="{ 'hour-chip-on': isHourSelected(h - 1) }"
+              :disabled="savingSettings"
+              @click="toggleHour(h - 1)"
+            >
+              {{ h - 1 }}
+            </button>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <button type="button" class="outline btn-sm" :disabled="savingSettings" @click="selectAllHours">Select all</button>
+            <button type="button" class="outline btn-sm" :disabled="savingSettings" @click="clearAllHours">Clear</button>
+          </div>
+        </div>
+
+        <small v-if="rtcInvalid" style="display: block; font-size: 0.85rem; color: var(--pico-del-color, #b42318);">
+          * RTC time is not set. Hour schedule will be ignored until you sync time.
+        </small>
+      </div>
+
+      <hr style="margin: 1.5rem 0" />
+
+      <div>
         <h4 style="margin-bottom: 0.5rem">OTA Firmware Update</h4>
         <div style="font-size: 0.9rem; margin-bottom: 0.5rem">
           <p style="margin-bottom: 0.25rem">Select the compiled firmware <code>OTA_All.bin</code> to upload and update the system.</p>
@@ -131,7 +231,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { message } from '../utils/message'
 
 const apSsid = ref('')
@@ -139,7 +239,16 @@ const apPass = ref('')
 const apMac = ref('')
 const enableBeaconTimeSync = ref(false)
 const beaconRecordCount = ref(0)
+const apPowersaveEnable = ref(false)
+const dutyPeriodSec = ref(120)
+const dutyOnSec = ref(10)
+const clientHoldSec = ref(15)
+const scheduleEnable = ref(false)
+const scheduleHoursMask = ref(0)
+const rtcTime = ref(0)
 const savingSettings = ref(false)
+
+const rtcInvalid = computed(() => rtcTime.value <= 1600000000)
 
 const otaFileInput = ref<HTMLInputElement | null>(null)
 const otaUploading = ref(false)
@@ -172,9 +281,38 @@ const fetchSettings = async () => {
       if (typeof data.beacon_record_count === 'number') {
         beaconRecordCount.value = data.beacon_record_count
       }
+      if (typeof data.ap_powersave_enable === 'boolean') {
+        apPowersaveEnable.value = data.ap_powersave_enable
+      }
+      if (typeof data.duty_period_sec === 'number') {
+        dutyPeriodSec.value = data.duty_period_sec
+      }
+      if (typeof data.duty_on_sec === 'number') {
+        dutyOnSec.value = data.duty_on_sec
+      }
+      if (typeof data.client_hold_sec === 'number') {
+        clientHoldSec.value = data.client_hold_sec
+      }
+      if (typeof data.schedule_enable === 'boolean') {
+        scheduleEnable.value = data.schedule_enable
+      }
+      if (typeof data.schedule_hours_mask === 'number') {
+        scheduleHoursMask.value = data.schedule_hours_mask
+      }
     }
   } catch (err) {
     console.error('Failed to fetch settings:', err)
+  }
+  try {
+    const res = await fetch('/api/status')
+    if (res.ok) {
+      const data = await res.json()
+      if (typeof data.rtc_time === 'number') {
+        rtcTime.value = data.rtc_time
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch status:', err)
   }
 }
 
@@ -183,6 +321,14 @@ onMounted(() => {
 })
 
 const saveWifiSettings = async () => {
+  if (apPowersaveEnable.value && dutyOnSec.value >= dutyPeriodSec.value) {
+    message.error('AP on time must be shorter than the cycle period')
+    return
+  }
+  if (apPowersaveEnable.value && scheduleEnable.value && scheduleHoursMask.value === 0) {
+    message.error('Select at least one hour for the schedule')
+    return
+  }
   savingSettings.value = true
   try {
     const res = await fetch('/api/settings', {
@@ -194,7 +340,13 @@ const saveWifiSettings = async () => {
         ssid: apSsid.value,
         password: apPass.value,
         mac: apMac.value.trim(),
-        enable_beacon_time_sync: enableBeaconTimeSync.value
+        enable_beacon_time_sync: enableBeaconTimeSync.value,
+        ap_powersave_enable: apPowersaveEnable.value,
+        duty_period_sec: dutyPeriodSec.value,
+        duty_on_sec: dutyOnSec.value,
+        client_hold_sec: clientHoldSec.value,
+        schedule_enable: scheduleEnable.value,
+        schedule_hours_mask: scheduleHoursMask.value
       })
     })
 
@@ -209,6 +361,22 @@ const saveWifiSettings = async () => {
   } finally {
     savingSettings.value = false
   }
+}
+
+const isHourSelected = (hour: number) => {
+  return (scheduleHoursMask.value >> hour) & 1
+}
+
+const toggleHour = (hour: number) => {
+  scheduleHoursMask.value ^= 1 << hour
+}
+
+const selectAllHours = () => {
+  scheduleHoursMask.value = 0xffffff
+}
+
+const clearAllHours = () => {
+  scheduleHoursMask.value = 0
 }
 
 const rebootDevice = async () => {
@@ -303,3 +471,24 @@ const startOta = () => {
   xhr.send(file)
 }
 </script>
+
+<style scoped>
+.hour-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.hour-chip {
+  width: 2.6rem;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+.hour-chip-on {
+  background: var(--pico-primary);
+  border-color: var(--pico-primary);
+  color: var(--pico-primary-inverse, #fff);
+}
+</style>

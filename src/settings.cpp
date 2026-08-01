@@ -37,6 +37,13 @@ static void setDefaultSettings() {
     g_appSettings.struct_size = sizeof(AppSettings);
     strncpy(g_appSettings.ap_ssid, "BW16-SD", 32);
     strncpy(g_appSettings.ap_pass, "1234567890", 32);
+    // AP 占空比省电默认关闭，周期 2 分钟、开启 10 秒、断开保持 15 秒
+    g_appSettings.ap_powersave_enable = 0;
+    g_appSettings.duty_period_sec = 120;
+    g_appSettings.duty_on_sec = 10;
+    g_appSettings.client_hold_sec = 15;
+    g_appSettings.schedule_enable = 0;
+    g_appSettings.schedule_hours_mask = 0;
 }
 
 void loadSettings() {

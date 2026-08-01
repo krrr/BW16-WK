@@ -23,6 +23,15 @@ struct AppSettings {
     uint8_t beacon_record_count;     // Number of valid beacon records (0..4)
     uint8_t reserved[2];             // Alignment padding to 4-byte boundary
     BeaconTimeRecord beacon_records[4];
+
+    // === AP 占空比省电 & 时段调度 ===
+    uint8_t ap_powersave_enable; // 0 = disabled (default), 1 = enabled
+    uint8_t schedule_enable;     // 0 = disabled, 1 = enabled
+    uint16_t duty_period_sec;    // 占空比周期（秒），默认 120
+    uint16_t duty_on_sec;        // 每周期 AP 开启时长（秒），默认 10
+    uint16_t client_hold_sec;    // 客户端全部断开后的保持宽限（秒），默认 15
+    uint32_t schedule_hours_mask;// bit0..23 = 0..23 点是否允许开启 AP
+    uint8_t reserved2[4];        // Alignment padding
     uint32_t checksum;      // CRC-32 checksum at the end
 };
 #pragma pack(pop)

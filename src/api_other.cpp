@@ -12,6 +12,7 @@
 #include "OTA.h"
 #include "settings.h"
 #include "beacon_sync.h"
+#include "ap_powersave.h"
 #include <PowerSave.h>
 
 const char COMPILE_DATE[] = __DATE__;
@@ -98,6 +99,10 @@ void handleStatusApi(HttpClient& client) {
     doc["rtc_time"] = rtc_read();
     doc["ap_channel"] = ap_channel;
     doc["free_heap"] = xPortGetFreeHeapSize();
+    doc["ap_saver_state"] = apPowerSaveStateName();
+    doc["ap_saver_suspended"] = apPowerSaveIsSuspended();
+    doc["ap_saver_clients"] = apPowerSaveClientCount();
+    doc["ap_saver_next_on_sec"] = apPowerSaveNextOnInSec();
     client.sendJson(doc);
 }
 
@@ -148,6 +153,13 @@ void handleSettingsApi(HttpClient& client) {
         } else {
             doc["mac"] = "";
         }
+        // AP 占空比省电 & 时段调度
+        doc["ap_powersave_enable"] = (g_appSettings.ap_powersave_enable == 1);
+        doc["duty_period_sec"] = g_appSettings.duty_period_sec;
+        doc["duty_on_sec"] = g_appSettings.duty_on_sec;
+        doc["client_hold_sec"] = g_appSettings.client_hold_sec;
+        doc["schedule_enable"] = (g_appSettings.schedule_enable == 1);
+        doc["schedule_hours_mask"] = g_appSettings.schedule_hours_mask;
         client.sendJson(doc);
     } else if (client.method() == "POST") {
         JsonDocument req;
@@ -188,6 +200,50 @@ void handleSettingsApi(HttpClient& client) {
         memcpy(g_appSettings.ap_mac, new_mac, 6);
         if (req.containsKey("enable_beacon_time_sync")) {
             g_appSettings.enable_beacon_time_sync = req["enable_beacon_time_sync"].as<bool>() ? 1 : 0;
+        }
+
+        // === AP 占空比省电 & 时段调度 ===
+        if (req.containsKey("ap_powersave_enable")) {
+            g_appSettings.ap_powersave_enable = req["ap_powersave_enable"].as<bool>() ? 1 : 0;
+        }
+        if (req.containsKey("duty_period_sec")) {
+            int64_t period = req["duty_period_sec"].as<int64_t>();
+            if (period < 10 || period > 86400) {
+                client.sendJsonFail("duty_period_sec must be between 10 and 86400");
+                return;
+            }
+            g_appSettings.duty_period_sec = (uint16_t)period;
+        }
+        if (req.containsKey("duty_on_sec")) {
+            int64_t on_sec = req["duty_on_sec"].as<int64_t>();
+            if (on_sec < 1 || on_sec >= g_appSettings.duty_period_sec) {
+                client.sendJsonFail("duty_on_sec must be between 1 and duty_period_sec-1");
+                return;
+            }
+            g_appSettings.duty_on_sec = (uint16_t)on_sec;
+        }
+        if (req.containsKey("client_hold_sec")) {
+            int64_t hold = req["client_hold_sec"].as<int64_t>();
+            if (hold < 0 || hold > 3600) {
+                client.sendJsonFail("client_hold_sec must be between 0 and 3600");
+                return;
+            }
+            g_appSettings.client_hold_sec = (uint16_t)hold;
+        }
+        if (req.containsKey("schedule_enable")) {
+            g_appSettings.schedule_enable = req["schedule_enable"].as<bool>() ? 1 : 0;
+        }
+        if (req.containsKey("schedule_hours_mask")) {
+            int64_t mask = req["schedule_hours_mask"].as<int64_t>();
+            if (mask < 0 || mask > 0xFFFFFF) {
+                client.sendJsonFail("schedule_hours_mask only supports bits 0-23");
+                return;
+            }
+            g_appSettings.schedule_hours_mask = (uint32_t)mask;
+        }
+        if (g_appSettings.schedule_enable == 1 && g_appSettings.schedule_hours_mask == 0) {
+            client.sendJsonFail("schedule enabled but no hour selected");
+            return;
         }
 
         if (!saveSettings()) {

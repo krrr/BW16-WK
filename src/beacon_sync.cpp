@@ -30,6 +30,7 @@
 #include "wifi_structures.h"
 #include "wifi_drv.h"
 #include "utils.h"
+#include "ap_powersave.h"
 
 #define MAX_SAMPLED_BEACONS 32
 #define BEACON_CHANNEL_DWELL_MS 120
@@ -168,6 +169,7 @@ static void beaconCaptureTask(void* param) {
     (void)param;
     captureAndSaveBeaconRecords();
     g_beacon_capture_running = false;
+    apPowerSaveRelease();  // 释放射频占用：允许省电调度继续
     vTaskDelete(NULL);
 }
 
@@ -180,6 +182,8 @@ void startAsyncBeaconCapture() {
     if (xTaskCreate(beaconCaptureTask, "beacon_cap", 1024, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS) {
         Serial.println("[BeaconSync] Failed to create beacon capture task!");
         g_beacon_capture_running = false;
+    } else {
+        apPowerSaveHold();  // 抓取期间占用射频，禁止省电调度挂起 softAP
     }
 }
 

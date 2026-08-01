@@ -1,6 +1,8 @@
 param(
     [switch]$Upload,
-    [switch]$Monitor
+    [switch]$Monitor,
+    [switch]$Ota,
+    [string]$OtaIp = "192.168.4.1"
 )
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -26,6 +28,33 @@ if ($LASTEXITCODE -ne 0) { exit 1 }
 Write-Host "`n=== 4. Generate OTA image (ota_all.bin) ===" -ForegroundColor Cyan
 python (Join-Path (Join-Path $root "scripts") "make_ota_bin.py")
 if ($LASTEXITCODE -ne 0) { exit 1 }
+
+if ($Ota) {
+    Write-Host "`n=== 5. Upload OTA firmware ===" -ForegroundColor Cyan
+    $otaPath = Join-Path $root ".pio\build\bw16\ota_all.bin"
+    if (-not (Test-Path $otaPath)) {
+        Write-Host "[ERROR] OTA file not found: $otaPath" -ForegroundColor Red
+        exit 1
+    }
+
+    $uri = "http://${OtaIp}/api/ota"
+    Write-Host "Uploading $otaPath to $uri ..." -ForegroundColor Yellow
+
+    try {
+        $response = Invoke-RestMethod -Uri $uri -Method Post -InFile $otaPath -ContentType "application/octet-stream" -TimeoutSec 60
+        Write-Host "[SUCCESS] OTA Upload Completed!" -ForegroundColor Green
+        if ($response) {
+            if ($response.message) {
+                Write-Host "Server response: $($response.message)" -ForegroundColor Green
+            } else {
+                Write-Host "Server response: $($response | ConvertTo-Json -Compress)" -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "[ERROR] OTA Upload Failed: $_" -ForegroundColor Red
+        exit 1
+    }
+}
 
 Write-Host "`n=== DONE ===" -ForegroundColor Green
 

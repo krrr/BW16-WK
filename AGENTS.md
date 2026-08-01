@@ -27,6 +27,7 @@
 .\build-all.ps1              # 完整构建
 .\build-all.ps1 -Upload      # 构建+烧录
 .\build-all.ps1 -Monitor     # 构建+串口监视
+.\build-all.ps1 -Ota         # 构建+OTA上传 (至192.168.4.1)
 ```
 
 ### 文档位置

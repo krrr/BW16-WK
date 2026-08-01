@@ -10,6 +10,7 @@
 #include "api_all.h"
 #include "settings.h"
 #include "beacon_sync.h"
+#include "ap_powersave.h"
 #include "wifi_drv.h"
 #include "lwip_netconf.h"
 #include "http/HttpServer.h"
@@ -110,6 +111,7 @@ static void dispatchRequest(HttpClient& client) {
 void startAP(const char* ssid, const char* password, int channel) {
     // 设置AP热点
     // 本单片机有两个虚拟接口，WLAN0和WLAN1，分别用于STA和AP。但其实共享同一个 PHY，频道切换是联动的
+    // 虽然不连任何AP，但是也要开启AP+STA并发，不然混杂模式抓包会干扰AP
     WiFi.enableConcurrent();
     IPAddress ip(192, 168, 4, 1);
     IPAddress gw(192, 168, 4, 1);
@@ -149,18 +151,24 @@ void setup() {
     tryRestoreRtcFromBeacons();
 
     server.begin();
+
+    // 初始化 powersave（IPS+LPS）：softAP 挂起期间驱动自动关 RF，
+    // 配合 FreeRTOS tickless 让主 CPU 进入浅睡眠
+    apPowerSaveInit();
 }
 
 void loop() {
     HttpClient client = server.available();
-    if (!client) return;
-
-    if (!client.parseRequest()) {
+    if (client) {
+        if (client.parseRequest()) {
+            dispatchRequest(client);
+        }
         client.stop();
-        return;
     }
 
-    dispatchRequest(client);
+    // 占空比省电状态机（睡眠期间内部会分块阻塞等待唤醒）
+    apPowerSaveTick();
 
-    client.stop();
+    // 让出 CPU：配合 tickless 在空闲时进入浅睡眠，同时避免忙轮询
+    delay(1);
 }
