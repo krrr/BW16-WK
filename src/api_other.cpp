@@ -12,6 +12,7 @@
 #include "OTA.h"
 #include "settings.h"
 #include "beacon_sync.h"
+#include <PowerSave.h>
 
 const char COMPILE_DATE[] = __DATE__;
 const char COMPILE_TIME[] = __TIME__;
@@ -114,6 +115,23 @@ void handleRebootApi(HttpClient& client) {
 
     delay(500);
     sys_reset();
+}
+
+void handleDeepSleepApi(HttpClient& client) {
+    if (client.method() != "POST") {
+        client.sendJsonFail("Only POST method is allowed");
+        return;
+    }
+
+    JsonDocument doc;
+    doc["success"] = true;
+    doc["message"] = "Entering deep sleep...";
+    client.sendJson(doc);
+    client.stop();
+
+    delay(500);
+    PowerSave.begin(DEEPSLEEP_MODE);
+    PowerSave.enable();
 }
 
 void handleSettingsApi(HttpClient& client) {

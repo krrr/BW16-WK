@@ -111,11 +111,16 @@
       <div>
         <h4 style="margin-bottom: 0.5rem">System Control</h4>
         <p style="font-size: 0.9rem">
-          Manually trigger a hardware reboot for the MCU.
+          Manually trigger a hardware reboot or deep sleep for the MCU.
         </p>
-        <button @click="rebootDevice" :disabled="rebooting" :aria-busy="rebooting" class="outline secondary" style="width: auto; margin-bottom: 0">
-          {{ rebooting ? 'Rebooting...' : 'Reboot Device' }}
-        </button>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button @click="rebootDevice" :disabled="rebooting || deepSleeping" :aria-busy="rebooting" class="outline secondary" style="width: auto; margin-bottom: 0">
+            {{ rebooting ? 'Rebooting...' : 'Reboot Device' }}
+          </button>
+          <button @click="deepSleepDevice" :disabled="rebooting || deepSleeping" :aria-busy="deepSleeping" class="outline contrast" style="width: auto; margin-bottom: 0">
+            {{ deepSleeping ? 'Entering Deep Sleep...' : 'Deep Sleep (Debug)' }}
+          </button>
+        </div>
       </div>
 
       <footer>
@@ -141,6 +146,7 @@ const otaUploading = ref(false)
 const otaProgress = ref<number | null>(null)
 const otaStatusText = ref('')
 const rebooting = ref(false)
+const deepSleeping = ref(false)
 const otaSlot = ref<number | null>(null)
 
 const fetchSettings = async () => {
@@ -222,6 +228,26 @@ const rebootDevice = async () => {
   } catch (err) {
     message.error('Failed to send reboot request')
     rebooting.value = false
+  }
+}
+
+const deepSleepDevice = async () => {
+  if (!confirm('Once in deep sleep mode, the device cannot be woken up automatically. Are you sure?')) {
+    return
+  }
+  deepSleeping.value = true
+  try {
+    const res = await fetch('/api/deepsleep', { method: 'POST' })
+    const data = await res.json()
+    if (data.success) {
+      message.success('Device is entering deep sleep...')
+    } else {
+      message.error(data.message || 'Failed to enter deep sleep')
+      deepSleeping.value = false
+    }
+  } catch (err) {
+    message.error('Failed to send deep sleep request')
+    deepSleeping.value = false
   }
 }
 

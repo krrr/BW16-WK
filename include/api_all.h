@@ -12,3 +12,4 @@ void handleSetTimeApi(HttpClient& client);
 void handleSettingsApi(HttpClient& client);
 void handleOtaApi(HttpClient& client);
 void handleRebootApi(HttpClient& client);
+void handleDeepSleepApi(HttpClient& client);
