@@ -1,0 +1,815 @@
+
+rtl8721d_freertos_pmu.o:     file format elf32-littlearm
+
+
+Disassembly of section .text.pmu_exec_sleep_hook_funs:
+
+00000000 <pmu_exec_sleep_hook_funs>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	2500      	movs	r5, #0
+   4:	4c06      	ldr	r4, [pc, #24]	; (20 <pmu_exec_sleep_hook_funs+0x20>)
+   6:	6823      	ldr	r3, [r4, #0]
+   8:	b11b      	cbz	r3, 12 <pmu_exec_sleep_hook_funs+0x12>
+   a:	6861      	ldr	r1, [r4, #4]
+   c:	2000      	movs	r0, #0
+   e:	4798      	blx	r3
+  10:	b118      	cbz	r0, 1a <pmu_exec_sleep_hook_funs+0x1a>
+  12:	3501      	adds	r5, #1
+  14:	3414      	adds	r4, #20
+  16:	2d1f      	cmp	r5, #31
+  18:	d1f5      	bne.n	6 <pmu_exec_sleep_hook_funs+0x6>
+  1a:	0028      	movs	r0, r5
+  1c:	bd70      	pop	{r4, r5, r6, pc}
+  1e:	bf00      	nop
+  20:	00000004 	.word	0x00000004
+
+Disassembly of section .text.pmu_exec_wakeup_hook_funs:
+
+00000000 <pmu_exec_wakeup_hook_funs>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	0006      	movs	r6, r0
+   4:	b150      	cbz	r0, 1c <pmu_exec_wakeup_hook_funs+0x1c>
+   6:	2500      	movs	r5, #0
+   8:	4c05      	ldr	r4, [pc, #20]	; (20 <pmu_exec_wakeup_hook_funs+0x20>)
+   a:	6823      	ldr	r3, [r4, #0]
+   c:	3501      	adds	r5, #1
+   e:	b113      	cbz	r3, 16 <pmu_exec_wakeup_hook_funs+0x16>
+  10:	6861      	ldr	r1, [r4, #4]
+  12:	2000      	movs	r0, #0
+  14:	4798      	blx	r3
+  16:	3414      	adds	r4, #20
+  18:	42ae      	cmp	r6, r5
+  1a:	d1f6      	bne.n	a <pmu_exec_wakeup_hook_funs+0xa>
+  1c:	bd70      	pop	{r4, r5, r6, pc}
+  1e:	bf00      	nop
+  20:	0000000c 	.word	0x0000000c
+
+Disassembly of section .text.freertos_systick_check:
+
+00000000 <freertos_systick_check>:
+   0:	1a0a      	subs	r2, r1, r0
+   2:	4288      	cmp	r0, r1
+   4:	d900      	bls.n	8 <freertos_systick_check+0x8>
+   6:	1a42      	subs	r2, r0, r1
+   8:	f64f 73fe 	movw	r3, #65534	; 0xfffe
+   c:	f6c7 73ff 	movt	r3, #32767	; 0x7fff
+  10:	429a      	cmp	r2, r3
+  12:	d904      	bls.n	1e <freertos_systick_check+0x1e>
+  14:	2300      	movs	r3, #0
+  16:	4281      	cmp	r1, r0
+  18:	415b      	adcs	r3, r3
+  1a:	0018      	movs	r0, r3
+  1c:	4770      	bx	lr
+  1e:	2300      	movs	r3, #0
+  20:	4288      	cmp	r0, r1
+  22:	415b      	adcs	r3, r3
+  24:	0018      	movs	r0, r3
+  26:	e7f9      	b.n	1c <freertos_systick_check+0x1c>
+
+Disassembly of section .text.pmu_set_sysactive_time:
+
+00000000 <pmu_set_sysactive_time>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	b570      	push	{r4, r5, r6, lr}
+   a:	681c      	ldr	r4, [r3, #0]
+   c:	f240 0300 	movw	r3, #0
+  10:	f2c0 0300 	movt	r3, #0
+  14:	b134      	cbz	r4, 24 <pmu_set_sysactive_time+0x24>
+  16:	681a      	ldr	r2, [r3, #0]
+  18:	2401      	movs	r4, #1
+  1a:	4282      	cmp	r2, r0
+  1c:	d200      	bcs.n	20 <pmu_set_sysactive_time+0x20>
+  1e:	6018      	str	r0, [r3, #0]
+  20:	0020      	movs	r0, r4
+  22:	bd70      	pop	{r4, r5, r6, pc}
+  24:	681e      	ldr	r6, [r3, #0]
+  26:	4286      	cmp	r6, r0
+  28:	d310      	bcc.n	4c <pmu_set_sysactive_time+0x4c>
+  2a:	2200      	movs	r2, #0
+  2c:	f240 0500 	movw	r5, #0
+  30:	601a      	str	r2, [r3, #0]
+  32:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+  36:	f2c0 0500 	movt	r5, #0
+  3a:	1986      	adds	r6, r0, r6
+  3c:	6829      	ldr	r1, [r5, #0]
+  3e:	0030      	movs	r0, r6
+  40:	f7ff fffe 	bl	0 <pmu_set_sysactive_time>
+  44:	2800      	cmp	r0, #0
+  46:	d0eb      	beq.n	20 <pmu_set_sysactive_time+0x20>
+  48:	602e      	str	r6, [r5, #0]
+  4a:	e7e9      	b.n	20 <pmu_set_sysactive_time+0x20>
+  4c:	0006      	movs	r6, r0
+  4e:	e7ec      	b.n	2a <pmu_set_sysactive_time+0x2a>
+
+Disassembly of section .text.pmu_register_sleep_callback:
+
+00000000 <pmu_register_sleep_callback>:
+   0:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+   2:	0004      	movs	r4, r0
+   4:	000d      	movs	r5, r1
+   6:	0017      	movs	r7, r2
+   8:	001e      	movs	r6, r3
+   a:	281e      	cmp	r0, #30
+   c:	d810      	bhi.n	30 <pmu_register_sleep_callback+0x30>
+   e:	b1c5      	cbz	r5, 42 <pmu_register_sleep_callback+0x42>
+  10:	f240 0200 	movw	r2, #0
+  14:	f2c0 0200 	movt	r2, #0
+  18:	4694      	mov	ip, r2
+  1a:	00a3      	lsls	r3, r4, #2
+  1c:	191b      	adds	r3, r3, r4
+  1e:	009b      	lsls	r3, r3, #2
+  20:	509c      	str	r4, [r3, r2]
+  22:	9a06      	ldr	r2, [sp, #24]
+  24:	4463      	add	r3, ip
+  26:	605d      	str	r5, [r3, #4]
+  28:	609f      	str	r7, [r3, #8]
+  2a:	60de      	str	r6, [r3, #12]
+  2c:	611a      	str	r2, [r3, #16]
+  2e:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+  30:	f240 0000 	movw	r0, #0
+  34:	2177      	movs	r1, #119	; 0x77
+  36:	f2c0 0000 	movt	r0, #0
+  3a:	f7ff fffe 	bl	0 <io_assert_failed>
+  3e:	2d00      	cmp	r5, #0
+  40:	d1e6      	bne.n	10 <pmu_register_sleep_callback+0x10>
+  42:	2e00      	cmp	r6, #0
+  44:	d1e4      	bne.n	10 <pmu_register_sleep_callback+0x10>
+  46:	f240 0000 	movw	r0, #0
+  4a:	2178      	movs	r1, #120	; 0x78
+  4c:	f2c0 0000 	movt	r0, #0
+  50:	f7ff fffe 	bl	0 <io_assert_failed>
+  54:	e7dc      	b.n	10 <pmu_register_sleep_callback+0x10>
+  56:	bf00      	nop
+
+Disassembly of section .text.pmu_unregister_sleep_callback:
+
+00000000 <pmu_unregister_sleep_callback>:
+   0:	b510      	push	{r4, lr}
+   2:	0004      	movs	r4, r0
+   4:	281e      	cmp	r0, #30
+   6:	d906      	bls.n	16 <pmu_unregister_sleep_callback+0x16>
+   8:	f240 0000 	movw	r0, #0
+   c:	2186      	movs	r1, #134	; 0x86
+   e:	f2c0 0000 	movt	r0, #0
+  12:	f7ff fffe 	bl	0 <io_assert_failed>
+  16:	f240 0300 	movw	r3, #0
+  1a:	f2c0 0300 	movt	r3, #0
+  1e:	469c      	mov	ip, r3
+  20:	f240 0300 	movw	r3, #0
+  24:	00a0      	lsls	r0, r4, #2
+  26:	1900      	adds	r0, r0, r4
+  28:	0080      	lsls	r0, r0, #2
+  2a:	4460      	add	r0, ip
+  2c:	2214      	movs	r2, #20
+  2e:	2100      	movs	r1, #0
+  30:	f2c0 0300 	movt	r3, #0
+  34:	4798      	blx	r3
+  36:	bd10      	pop	{r4, pc}
+
+Disassembly of section .text.pmu_yield_os_check:
+
+00000000 <pmu_yield_os_check>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6818      	ldr	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.freertos_ready_to_sleep:
+
+00000000 <freertos_ready_to_sleep>:
+   0:	b510      	push	{r4, lr}
+   2:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+   6:	f240 0300 	movw	r3, #0
+   a:	f2c0 0300 	movt	r3, #0
+   e:	681b      	ldr	r3, [r3, #0]
+  10:	1a19      	subs	r1, r3, r0
+  12:	4298      	cmp	r0, r3
+  14:	d900      	bls.n	18 <freertos_ready_to_sleep+0x18>
+  16:	1ac1      	subs	r1, r0, r3
+  18:	f64f 72fe 	movw	r2, #65534	; 0xfffe
+  1c:	f6c7 72ff 	movt	r2, #32767	; 0x7fff
+  20:	2400      	movs	r4, #0
+  22:	4291      	cmp	r1, r2
+  24:	d81b      	bhi.n	5e <freertos_ready_to_sleep+0x5e>
+  26:	4298      	cmp	r0, r3
+  28:	4164      	adcs	r4, r4
+  2a:	b1b4      	cbz	r4, 5a <freertos_ready_to_sleep+0x5a>
+  2c:	f240 0300 	movw	r3, #0
+  30:	f2c0 0300 	movt	r3, #0
+  34:	681b      	ldr	r3, [r3, #0]
+  36:	b97b      	cbnz	r3, 58 <freertos_ready_to_sleep+0x58>
+  38:	f240 0300 	movw	r3, #0
+  3c:	f2c0 0300 	movt	r3, #0
+  40:	681a      	ldr	r2, [r3, #0]
+  42:	1c53      	adds	r3, r2, #1
+  44:	d009      	beq.n	5a <freertos_ready_to_sleep+0x5a>
+  46:	f240 0300 	movw	r3, #0
+  4a:	f2c0 0300 	movt	r3, #0
+  4e:	681b      	ldr	r3, [r3, #0]
+  50:	1ac1      	subs	r1, r0, r3
+  52:	1ad3      	subs	r3, r2, r3
+  54:	4299      	cmp	r1, r3
+  56:	d305      	bcc.n	64 <freertos_ready_to_sleep+0x64>
+  58:	2400      	movs	r4, #0
+  5a:	0020      	movs	r0, r4
+  5c:	bd10      	pop	{r4, pc}
+  5e:	4283      	cmp	r3, r0
+  60:	4164      	adcs	r4, r4
+  62:	e7e2      	b.n	2a <freertos_ready_to_sleep+0x2a>
+  64:	1a10      	subs	r0, r2, r0
+  66:	f7ff fffe 	bl	0 <SOCPS_AONTimer>
+  6a:	2101      	movs	r1, #1
+  6c:	2002      	movs	r0, #2
+  6e:	f7ff fffe 	bl	0 <SOCPS_SetWakeEventAON>
+  72:	2001      	movs	r0, #1
+  74:	f7ff fffe 	bl	0 <SOCPS_AONTimerCmd>
+  78:	e7ef      	b.n	5a <freertos_ready_to_sleep+0x5a>
+  7a:	bf00      	nop
+
+Disassembly of section .text.freertos_ready_to_dsleep:
+
+00000000 <freertos_ready_to_dsleep>:
+   0:	b510      	push	{r4, lr}
+   2:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+   6:	f240 0300 	movw	r3, #0
+   a:	f2c0 0300 	movt	r3, #0
+   e:	681a      	ldr	r2, [r3, #0]
+  10:	2300      	movs	r3, #0
+  12:	4290      	cmp	r0, r2
+  14:	d307      	bcc.n	26 <freertos_ready_to_dsleep+0x26>
+  16:	f240 0300 	movw	r3, #0
+  1a:	f2c0 0300 	movt	r3, #0
+  1e:	681b      	ldr	r3, [r3, #0]
+  20:	4258      	negs	r0, r3
+  22:	4143      	adcs	r3, r0
+  24:	b2db      	uxtb	r3, r3
+  26:	0018      	movs	r0, r3
+  28:	bd10      	pop	{r4, pc}
+  2a:	bf00      	nop
+
+Disassembly of section .text.freertos_pre_sleep_processing:
+
+00000000 <freertos_pre_sleep_processing>:
+   0:	b5f0      	push	{r4, r5, r6, r7, lr}
+   2:	46c6      	mov	lr, r8
+   4:	2300      	movs	r3, #0
+   6:	2298      	movs	r2, #152	; 0x98
+   8:	f240 0600 	movw	r6, #0
+   c:	b500      	push	{lr}
+   e:	b082      	sub	sp, #8
+  10:	9301      	str	r3, [sp, #4]
+  12:	f6c4 0200 	movt	r2, #18432	; 0x4800
+  16:	6812      	ldr	r2, [r2, #0]
+  18:	f2c0 0600 	movt	r6, #0
+  1c:	6003      	str	r3, [r0, #0]
+  1e:	4690      	mov	r8, r2
+  20:	f240 0400 	movw	r4, #0
+  24:	47b0      	blx	r6
+  26:	2301      	movs	r3, #1
+  28:	0007      	movs	r7, r0
+  2a:	f2c0 0400 	movt	r4, #0
+  2e:	2001      	movs	r0, #1
+  30:	6023      	str	r3, [r4, #0]
+  32:	f7ff fffe 	bl	0 <SOCPS_SWRLDO_Suspend>
+  36:	f7ff fffe 	bl	0 <SOCPS_SleepInit>
+  3a:	f240 0300 	movw	r3, #0
+  3e:	2000      	movs	r0, #0
+  40:	f2c0 0300 	movt	r3, #0
+  44:	4798      	blx	r3
+  46:	0503      	lsls	r3, r0, #20
+  48:	d55a      	bpl.n	100 <freertos_pre_sleep_processing+0x100>
+  4a:	f240 0300 	movw	r3, #0
+  4e:	f2c0 0300 	movt	r3, #0
+  52:	681b      	ldr	r3, [r3, #0]
+  54:	2b00      	cmp	r3, #0
+  56:	d150      	bne.n	fa <freertos_pre_sleep_processing+0xfa>
+  58:	f7ff fffe 	bl	0 <SOCPS_SleepPG>
+  5c:	47b0      	blx	r6
+  5e:	1bc1      	subs	r1, r0, r7
+  60:	4287      	cmp	r7, r0
+  62:	d301      	bcc.n	68 <freertos_pre_sleep_processing+0x68>
+  64:	43f9      	mvns	r1, r7
+  66:	1809      	adds	r1, r1, r0
+  68:	f240 0600 	movw	r6, #0
+  6c:	f647 75ff 	movw	r5, #32767	; 0x7fff
+  70:	271f      	movs	r7, #31
+  72:	f2c0 0600 	movt	r6, #0
+  76:	6830      	ldr	r0, [r6, #0]
+  78:	1809      	adds	r1, r1, r0
+  7a:	400d      	ands	r5, r1
+  7c:	0bc8      	lsrs	r0, r1, #15
+  7e:	016a      	lsls	r2, r5, #5
+  80:	0143      	lsls	r3, r0, #5
+  82:	1b52      	subs	r2, r2, r5
+  84:	1a1b      	subs	r3, r3, r0
+  86:	0092      	lsls	r2, r2, #2
+  88:	1952      	adds	r2, r2, r5
+  8a:	009b      	lsls	r3, r3, #2
+  8c:	181b      	adds	r3, r3, r0
+  8e:	00d2      	lsls	r2, r2, #3
+  90:	00db      	lsls	r3, r3, #3
+  92:	0bd2      	lsrs	r2, r2, #15
+  94:	18d2      	adds	r2, r2, r3
+  96:	9201      	str	r2, [sp, #4]
+  98:	4039      	ands	r1, r7
+  9a:	9801      	ldr	r0, [sp, #4]
+  9c:	6031      	str	r1, [r6, #0]
+  9e:	f7ff fffe 	bl	0 <vTaskStepTick>
+  a2:	f240 0300 	movw	r3, #0
+  a6:	2298      	movs	r2, #152	; 0x98
+  a8:	f2c0 0300 	movt	r3, #0
+  ac:	6899      	ldr	r1, [r3, #8]
+  ae:	f6c4 0200 	movt	r2, #18432	; 0x4800
+  b2:	6813      	ldr	r3, [r2, #0]
+  b4:	b131      	cbz	r1, c4 <freertos_pre_sleep_processing+0xc4>
+  b6:	f240 0200 	movw	r2, #0
+  ba:	f2c0 0200 	movt	r2, #0
+  be:	6812      	ldr	r2, [r2, #0]
+  c0:	0392      	lsls	r2, r2, #14
+  c2:	d428      	bmi.n	116 <freertos_pre_sleep_processing+0x116>
+  c4:	2300      	movs	r3, #0
+  c6:	6023      	str	r3, [r4, #0]
+  c8:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+  cc:	f240 0200 	movw	r2, #0
+  d0:	f240 0100 	movw	r1, #0
+  d4:	f2c0 0200 	movt	r2, #0
+  d8:	6813      	ldr	r3, [r2, #0]
+  da:	f2c0 0100 	movt	r1, #0
+  de:	2b02      	cmp	r3, #2
+  e0:	d200      	bcs.n	e4 <freertos_pre_sleep_processing+0xe4>
+  e2:	2302      	movs	r3, #2
+  e4:	2400      	movs	r4, #0
+  e6:	181b      	adds	r3, r3, r0
+  e8:	2000      	movs	r0, #0
+  ea:	600b      	str	r3, [r1, #0]
+  ec:	6014      	str	r4, [r2, #0]
+  ee:	f7ff fffe 	bl	0 <SOCPS_SWRLDO_Suspend>
+  f2:	b002      	add	sp, #8
+  f4:	bc04      	pop	{r2}
+  f6:	4690      	mov	r8, r2
+  f8:	bdf0      	pop	{r4, r5, r6, r7, pc}
+  fa:	f7ff fffe 	bl	0 <SOCPS_SleepCG>
+  fe:	e7ad      	b.n	5c <freertos_pre_sleep_processing+0x5c>
+ 100:	2066      	movs	r0, #102	; 0x66
+ 102:	f7ff fffe 	bl	0 <SOCPS_AONTimer>
+ 106:	2101      	movs	r1, #1
+ 108:	2002      	movs	r0, #2
+ 10a:	f7ff fffe 	bl	0 <SOCPS_SetWakeEventAON>
+ 10e:	2001      	movs	r0, #1
+ 110:	f7ff fffe 	bl	0 <SOCPS_AONTimerCmd>
+ 114:	e799      	b.n	4a <freertos_pre_sleep_processing+0x4a>
+ 116:	4640      	mov	r0, r8
+ 118:	4641      	mov	r1, r8
+ 11a:	005a      	lsls	r2, r3, #1
+ 11c:	1a1b      	subs	r3, r3, r0
+ 11e:	f240 0000 	movw	r0, #0
+ 122:	0049      	lsls	r1, r1, #1
+ 124:	0852      	lsrs	r2, r2, #1
+ 126:	0849      	lsrs	r1, r1, #1
+ 128:	f2c0 0000 	movt	r0, #0
+ 12c:	f7ff fffe 	bl	0 <DiagPrintf>
+ 130:	e7c8      	b.n	c4 <freertos_pre_sleep_processing+0xc4>
+ 132:	bf00      	nop
+
+Disassembly of section .text.freertos_post_sleep_processing:
+
+00000000 <freertos_post_sleep_processing>:
+   0:	f240 0100 	movw	r1, #0
+   4:	f240 32e8 	movw	r2, #1000	; 0x3e8
+   8:	b510      	push	{r4, lr}
+   a:	f2c0 0100 	movt	r1, #0
+   e:	f24e 0410 	movw	r4, #57360	; 0xe010
+  12:	680b      	ldr	r3, [r1, #0]
+  14:	f2ce 0400 	movt	r4, #57344	; 0xe000
+  18:	fbb3 f2f2 	udiv	r2, r3, r2
+  1c:	68a3      	ldr	r3, [r4, #8]
+  1e:	fbb3 f3f2 	udiv	r3, r3, r2
+  22:	3301      	adds	r3, #1
+  24:	6003      	str	r3, [r0, #0]
+  26:	bd10      	pop	{r4, pc}
+
+Disassembly of section .text.vPortSuppressTicksAndSleep:
+
+00000000 <vPortSuppressTicksAndSleep>:
+   0:	b530      	push	{r4, r5, lr}
+   2:	f240 0400 	movw	r4, #0
+   6:	2200      	movs	r2, #0
+   8:	f24e 0310 	movw	r3, #57360	; 0xe010
+   c:	2101      	movs	r1, #1
+   e:	f2c0 0400 	movt	r4, #0
+  12:	f2ce 0300 	movt	r3, #57344	; 0xe000
+  16:	6022      	str	r2, [r4, #0]
+  18:	681a      	ldr	r2, [r3, #0]
+  1a:	b083      	sub	sp, #12
+  1c:	438a      	bics	r2, r1
+  1e:	601a      	str	r2, [r3, #0]
+  20:	0005      	movs	r5, r0
+  22:	f7ff fffe 	bl	0 <vPortEnterCritical>
+  26:	f7ff fffe 	bl	0 <eTaskConfirmSleepModeStatus>
+  2a:	b9b8      	cbnz	r0, 32 <vPortExitCritical+0x32>
+  2c:	f7ff fffe 	bl	0 <vPortExitCritical>
+  30:	f24e 0310 	movw	r3, #57360	; 0xe010
+  34:	2101      	movs	r1, #1
+  36:	f2ce 0300 	movt	r3, #57344	; 0xe000
+  3a:	681a      	ldr	r2, [r3, #0]
+  3c:	430a      	orrs	r2, r1
+  3e:	601a      	str	r2, [r3, #0]
+  40:	6021      	str	r1, [r4, #0]
+  42:	f7ff fffe 	bl	0 <km4_wake_event_update>
+  46:	f7ff fffe 	bl	0 <km4_get_wake_event>
+  4a:	b128      	cbz	r0, e <vPortEnterCritical+0xe>
+  4c:	f7ff fffe 	bl	0 <vPortEnterCritical>
+  50:	f7ff fffe 	bl	0 <km4_resume>
+  54:	f7ff fffe 	bl	0 <vPortExitCritical>
+  58:	b003      	add	sp, #12
+  5a:	bd30      	pop	{r4, r5, pc}
+  5c:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+  60:	f240 0300 	movw	r3, #0
+  64:	f2c0 0300 	movt	r3, #0
+  68:	681a      	ldr	r2, [r3, #0]
+  6a:	1a11      	subs	r1, r2, r0
+  6c:	4290      	cmp	r0, r2
+  6e:	d900      	bls.n	72 <vPortSuppressTicksAndSleep+0x72>
+  70:	1a81      	subs	r1, r0, r2
+  72:	f64f 73fe 	movw	r3, #65534	; 0xfffe
+  76:	f6c7 73ff 	movt	r3, #32767	; 0x7fff
+  7a:	4299      	cmp	r1, r3
+  7c:	d843      	bhi.n	106 <vPortSuppressTicksAndSleep+0x106>
+  7e:	2300      	movs	r3, #0
+  80:	4290      	cmp	r0, r2
+  82:	415b      	adcs	r3, r3
+  84:	2b00      	cmp	r3, #0
+  86:	d0d1      	beq.n	2c <vPortSuppressTicksAndSleep+0x2c>
+  88:	f240 0300 	movw	r3, #0
+  8c:	f2c0 0300 	movt	r3, #0
+  90:	681b      	ldr	r3, [r3, #0]
+  92:	2b00      	cmp	r3, #0
+  94:	d1ca      	bne.n	2c <vPortSuppressTicksAndSleep+0x2c>
+  96:	f240 0300 	movw	r3, #0
+  9a:	f2c0 0300 	movt	r3, #0
+  9e:	681a      	ldr	r2, [r3, #0]
+  a0:	1c53      	adds	r3, r2, #1
+  a2:	d012      	beq.n	ca <vPortSuppressTicksAndSleep+0xca>
+  a4:	f240 0300 	movw	r3, #0
+  a8:	f2c0 0300 	movt	r3, #0
+  ac:	681b      	ldr	r3, [r3, #0]
+  ae:	1ac1      	subs	r1, r0, r3
+  b0:	1ad3      	subs	r3, r2, r3
+  b2:	4299      	cmp	r1, r3
+  b4:	d2ba      	bcs.n	2c <vPortSuppressTicksAndSleep+0x2c>
+  b6:	1a10      	subs	r0, r2, r0
+  b8:	f7ff fffe 	bl	0 <SOCPS_AONTimer>
+  bc:	2002      	movs	r0, #2
+  be:	2101      	movs	r1, #1
+  c0:	f7ff fffe 	bl	0 <SOCPS_SetWakeEventAON>
+  c4:	2001      	movs	r0, #1
+  c6:	f7ff fffe 	bl	0 <SOCPS_AONTimerCmd>
+  ca:	a801      	add	r0, sp, #4
+  cc:	9501      	str	r5, [sp, #4]
+  ce:	f7ff fffe 	bl	0 <vPortSuppressTicksAndSleep>
+  d2:	9b01      	ldr	r3, [sp, #4]
+  d4:	b123      	cbz	r3, e0 <vPortSuppressTicksAndSleep+0xe0>
+  d6:	f3bf 8f4f 	dsb	sy
+  da:	bf30      	wfi
+  dc:	f3bf 8f6f 	isb	sy
+  e0:	f240 0100 	movw	r1, #0
+  e4:	f240 32e8 	movw	r2, #1000	; 0x3e8
+  e8:	f2c0 0100 	movt	r1, #0
+  ec:	f24e 0010 	movw	r0, #57360	; 0xe010
+  f0:	680b      	ldr	r3, [r1, #0]
+  f2:	f2ce 0000 	movt	r0, #57344	; 0xe000
+  f6:	fbb3 f2f2 	udiv	r2, r3, r2
+  fa:	6883      	ldr	r3, [r0, #8]
+  fc:	fbb3 f3f2 	udiv	r3, r3, r2
+ 100:	3301      	adds	r3, #1
+ 102:	9301      	str	r3, [sp, #4]
+ 104:	e792      	b.n	2c <vPortSuppressTicksAndSleep+0x2c>
+ 106:	2300      	movs	r3, #0
+ 108:	4282      	cmp	r2, r0
+ 10a:	415b      	adcs	r3, r3
+ 10c:	e7ba      	b.n	84 <vPortSuppressTicksAndSleep+0x84>
+ 10e:	bf00      	nop
+
+Disassembly of section .text.pmu_acquire_wakelock:
+
+00000000 <pmu_acquire_wakelock>:
+   0:	2301      	movs	r3, #1
+   2:	f240 0200 	movw	r2, #0
+   6:	4083      	lsls	r3, r0
+   8:	f2c0 0200 	movt	r2, #0
+   c:	6811      	ldr	r1, [r2, #0]
+   e:	430b      	orrs	r3, r1
+  10:	6013      	str	r3, [r2, #0]
+  12:	4770      	bx	lr
+
+Disassembly of section .text.pmu_release_wakelock:
+
+00000000 <pmu_release_wakelock>:
+   0:	2101      	movs	r1, #1
+   2:	f240 0300 	movw	r3, #0
+   6:	4081      	lsls	r1, r0
+   8:	f2c0 0300 	movt	r3, #0
+   c:	681a      	ldr	r2, [r3, #0]
+   e:	438a      	bics	r2, r1
+  10:	601a      	str	r2, [r3, #0]
+  12:	4770      	bx	lr
+
+Disassembly of section .text.pmu_get_wakelock_status:
+
+00000000 <pmu_get_wakelock_status>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6818      	ldr	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.pmu_set_sleep_type:
+
+00000000 <pmu_set_sleep_type>:
+   0:	f240 0200 	movw	r2, #0
+   4:	f240 0300 	movw	r3, #0
+   8:	f2c0 0200 	movt	r2, #0
+   c:	6912      	ldr	r2, [r2, #16]
+   e:	f2c0 0300 	movt	r3, #0
+  12:	6018      	str	r0, [r3, #0]
+  14:	b10a      	cbz	r2, 1a <pmu_set_sleep_type+0x1a>
+  16:	2200      	movs	r2, #0
+  18:	601a      	str	r2, [r3, #0]
+  1a:	2000      	movs	r0, #0
+  1c:	4770      	bx	lr
+  1e:	bf00      	nop
+
+Disassembly of section .text.pmu_get_sleep_type:
+
+00000000 <pmu_get_sleep_type>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6818      	ldr	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.pmu_set_max_sleep_time:
+
+00000000 <pmu_set_max_sleep_time>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6018      	str	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.pmu_get_max_sleep_time:
+
+00000000 <pmu_get_max_sleep_time>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6818      	ldr	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.pmu_set_dsleep_active_time:
+
+00000000 <pmu_set_dsleep_active_time>:
+   0:	b510      	push	{r4, lr}
+   2:	0004      	movs	r4, r0
+   4:	f7ff fffe 	bl	0 <xTaskGetTickCount>
+   8:	f240 0300 	movw	r3, #0
+   c:	f2c0 0300 	movt	r3, #0
+  10:	681a      	ldr	r2, [r3, #0]
+  12:	1900      	adds	r0, r0, r4
+  14:	4290      	cmp	r0, r2
+  16:	d900      	bls.n	1a <pmu_set_dsleep_active_time+0x1a>
+  18:	6018      	str	r0, [r3, #0]
+  1a:	bd10      	pop	{r4, pc}
+
+Disassembly of section .text.pmu_acquire_deepwakelock:
+
+00000000 <pmu_acquire_deepwakelock>:
+   0:	2301      	movs	r3, #1
+   2:	f240 0200 	movw	r2, #0
+   6:	4083      	lsls	r3, r0
+   8:	f2c0 0200 	movt	r2, #0
+   c:	6811      	ldr	r1, [r2, #0]
+   e:	430b      	orrs	r3, r1
+  10:	6013      	str	r3, [r2, #0]
+  12:	4770      	bx	lr
+
+Disassembly of section .text.pmu_release_deepwakelock:
+
+00000000 <pmu_release_deepwakelock>:
+   0:	2201      	movs	r2, #1
+   2:	f240 0300 	movw	r3, #0
+   6:	4082      	lsls	r2, r0
+   8:	f2c0 0300 	movt	r3, #0
+   c:	6819      	ldr	r1, [r3, #0]
+   e:	4391      	bics	r1, r2
+  10:	6019      	str	r1, [r3, #0]
+  12:	4770      	bx	lr
+
+Disassembly of section .text.pmu_get_deepwakelock_status:
+
+00000000 <pmu_get_deepwakelock_status>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	6818      	ldr	r0, [r3, #0]
+   a:	4770      	bx	lr
+
+Disassembly of section .text.pmu_tickless_debug:
+
+00000000 <pmu_tickless_debug>:
+   0:	f240 0300 	movw	r3, #0
+   4:	f2c0 0300 	movt	r3, #0
+   8:	2801      	cmp	r0, #1
+   a:	d002      	beq.n	12 <pmu_tickless_debug+0x12>
+   c:	2200      	movs	r2, #0
+   e:	601a      	str	r2, [r3, #0]
+  10:	4770      	bx	lr
+  12:	6018      	str	r0, [r3, #0]
+  14:	e7fc      	b.n	10 <pmu_tickless_debug+0x10>
+  16:	bf00      	nop
+
+Disassembly of section .text.pmu_reset_awake:
+
+00000000 <pmu_reset_awake>:
+   0:	2801      	cmp	r0, #1
+   2:	d009      	beq.n	18 <pmu_reset_awake+0x18>
+   4:	2802      	cmp	r0, #2
+   6:	d000      	beq.n	a <pmu_reset_awake+0xa>
+   8:	4770      	bx	lr
+   a:	f240 0300 	movw	r3, #0
+   e:	2200      	movs	r2, #0
+  10:	f2c0 0300 	movt	r3, #0
+  14:	701a      	strb	r2, [r3, #0]
+  16:	e7f7      	b.n	8 <pmu_reset_awake+0x8>
+  18:	f240 0300 	movw	r3, #0
+  1c:	2200      	movs	r2, #0
+  1e:	f2c0 0300 	movt	r3, #0
+  22:	701a      	strb	r2, [r3, #0]
+  24:	f240 0300 	movw	r3, #0
+  28:	f2c0 0300 	movt	r3, #0
+  2c:	701a      	strb	r2, [r3, #0]
+  2e:	e7eb      	b.n	8 <pmu_reset_awake+0x8>
+
+Disassembly of section .text.pmu_degrade_awake:
+
+00000000 <pmu_degrade_awake>:
+   0:	2801      	cmp	r0, #1
+   2:	d00d      	beq.n	20 <pmu_degrade_awake+0x20>
+   4:	2802      	cmp	r0, #2
+   6:	d000      	beq.n	a <pmu_degrade_awake+0xa>
+   8:	4770      	bx	lr
+   a:	f240 0300 	movw	r3, #0
+   e:	f2c0 0300 	movt	r3, #0
+  12:	781a      	ldrb	r2, [r3, #0]
+  14:	b302      	cbz	r2, 58 <pmu_degrade_awake+0x58>
+  16:	2a07      	cmp	r2, #7
+  18:	d8f6      	bhi.n	8 <pmu_degrade_awake+0x8>
+  1a:	3201      	adds	r2, #1
+  1c:	701a      	strb	r2, [r3, #0]
+  1e:	e7f3      	b.n	8 <pmu_degrade_awake+0x8>
+  20:	f240 0200 	movw	r2, #0
+  24:	f2c0 0200 	movt	r2, #0
+  28:	7813      	ldrb	r3, [r2, #0]
+  2a:	b163      	cbz	r3, 46 <pmu_degrade_awake+0x46>
+  2c:	f240 0100 	movw	r1, #0
+  30:	3301      	adds	r3, #1
+  32:	f2c0 0100 	movt	r1, #0
+  36:	3002      	adds	r0, #2
+  38:	b2db      	uxtb	r3, r3
+  3a:	7008      	strb	r0, [r1, #0]
+  3c:	2b07      	cmp	r3, #7
+  3e:	d900      	bls.n	42 <pmu_degrade_awake+0x42>
+  40:	2307      	movs	r3, #7
+  42:	7013      	strb	r3, [r2, #0]
+  44:	e7e0      	b.n	8 <pmu_degrade_awake+0x8>
+  46:	f240 0300 	movw	r3, #0
+  4a:	2103      	movs	r1, #3
+  4c:	f2c0 0300 	movt	r3, #0
+  50:	7019      	strb	r1, [r3, #0]
+  52:	2305      	movs	r3, #5
+  54:	7013      	strb	r3, [r2, #0]
+  56:	e7d7      	b.n	8 <pmu_degrade_awake+0x8>
+  58:	3205      	adds	r2, #5
+  5a:	701a      	strb	r2, [r3, #0]
+  5c:	e7d4      	b.n	8 <pmu_degrade_awake+0x8>
+  5e:	bf00      	nop
+
+Disassembly of section .text.pmu_set_roaming_awake:
+
+00000000 <pmu_set_roaming_awake>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	0004      	movs	r4, r0
+   4:	000e      	movs	r6, r1
+   6:	0015      	movs	r5, r2
+   8:	2801      	cmp	r0, #1
+   a:	d907      	bls.n	1c <pmu_set_roaming_awake+0x1c>
+   c:	f240 0000 	movw	r0, #0
+  10:	f240 2138 	movw	r1, #568	; 0x238
+  14:	f2c0 0000 	movt	r0, #0
+  18:	f7ff fffe 	bl	0 <io_assert_failed>
+  1c:	1e73      	subs	r3, r6, #1
+  1e:	2b62      	cmp	r3, #98	; 0x62
+  20:	d85a      	bhi.n	d8 <pmu_set_roaming_awake+0xd8>
+  22:	1e6b      	subs	r3, r5, #1
+  24:	2b62      	cmp	r3, #98	; 0x62
+  26:	d826      	bhi.n	76 <pmu_set_roaming_awake+0x76>
+  28:	f240 0300 	movw	r3, #0
+  2c:	f2c0 0300 	movt	r3, #0
+  30:	701c      	strb	r4, [r3, #0]
+  32:	2c01      	cmp	r4, #1
+  34:	d02e      	beq.n	94 <pmu_set_roaming_awake+0x94>
+  36:	b96c      	cbnz	r4, 54 <pmu_set_roaming_awake+0x54>
+  38:	f240 0500 	movw	r5, #0
+  3c:	f240 0300 	movw	r3, #0
+  40:	f2c0 0500 	movt	r5, #0
+  44:	6828      	ldr	r0, [r5, #0]
+  46:	f2c0 0300 	movt	r3, #0
+  4a:	701c      	strb	r4, [r3, #0]
+  4c:	b110      	cbz	r0, 54 <pmu_set_roaming_awake+0x54>
+  4e:	f7ff fffe 	bl	0 <vQueueDelete>
+  52:	602c      	str	r4, [r5, #0]
+  54:	f240 0300 	movw	r3, #0
+  58:	2200      	movs	r2, #0
+  5a:	f2c0 0300 	movt	r3, #0
+  5e:	701a      	strb	r2, [r3, #0]
+  60:	f240 0300 	movw	r3, #0
+  64:	f2c0 0300 	movt	r3, #0
+  68:	701a      	strb	r2, [r3, #0]
+  6a:	f240 0300 	movw	r3, #0
+  6e:	f2c0 0300 	movt	r3, #0
+  72:	701a      	strb	r2, [r3, #0]
+  74:	bd70      	pop	{r4, r5, r6, pc}
+  76:	f240 0000 	movw	r0, #0
+  7a:	f240 213a 	movw	r1, #570	; 0x23a
+  7e:	f2c0 0000 	movt	r0, #0
+  82:	f7ff fffe 	bl	0 <io_assert_failed>
+  86:	f240 0300 	movw	r3, #0
+  8a:	f2c0 0300 	movt	r3, #0
+  8e:	701c      	strb	r4, [r3, #0]
+  90:	2c01      	cmp	r4, #1
+  92:	d1d0      	bne.n	36 <pmu_set_roaming_awake+0x36>
+  94:	f240 0300 	movw	r3, #0
+  98:	f2c0 0300 	movt	r3, #0
+  9c:	701e      	strb	r6, [r3, #0]
+  9e:	f240 0400 	movw	r4, #0
+  a2:	f240 0300 	movw	r3, #0
+  a6:	f2c0 0400 	movt	r4, #0
+  aa:	f2c0 0300 	movt	r3, #0
+  ae:	701d      	strb	r5, [r3, #0]
+  b0:	6823      	ldr	r3, [r4, #0]
+  b2:	2b00      	cmp	r3, #0
+  b4:	d1ce      	bne.n	54 <pmu_set_roaming_awake+0x54>
+  b6:	2203      	movs	r2, #3
+  b8:	2100      	movs	r1, #0
+  ba:	2001      	movs	r0, #1
+  bc:	f7ff fffe 	bl	0 <xQueueGenericCreate>
+  c0:	6020      	str	r0, [r4, #0]
+  c2:	b128      	cbz	r0, d0 <pmu_set_roaming_awake+0xd0>
+  c4:	2300      	movs	r3, #0
+  c6:	2200      	movs	r2, #0
+  c8:	2100      	movs	r1, #0
+  ca:	f7ff fffe 	bl	0 <xQueueGenericSend>
+  ce:	6820      	ldr	r0, [r4, #0]
+  d0:	2101      	movs	r1, #1
+  d2:	f7ff fffe 	bl	0 <xQueueSemaphoreTake>
+  d6:	e7bd      	b.n	ffffff7e <pmu_exec_sleep_hook_funs+0xffffff7e>
+  d8:	f240 0000 	movw	r0, #0
+  dc:	f240 2139 	movw	r1, #569	; 0x239
+  e0:	f2c0 0000 	movt	r0, #0
+  e4:	f7ff fffe 	bl	0 <io_assert_failed>
+  e8:	e79b      	b.n	22 <pmu_set_roaming_awake+0x22>
+  ea:	bf00      	nop
+
+Disassembly of section .text.pmu_get_roaming_awake:
+
+00000000 <pmu_get_roaming_awake>:
+   0:	f240 0300 	movw	r3, #0
+   4:	b510      	push	{r4, lr}
+   6:	f2c0 0300 	movt	r3, #0
+   a:	7819      	ldrb	r1, [r3, #0]
+   c:	b301      	cbz	r1, 50 <pmu_get_roaming_awake+0x50>
+   e:	b1f8      	cbz	r0, 50 <pmu_get_roaming_awake+0x50>
+  10:	f240 0300 	movw	r3, #0
+  14:	f2c0 0300 	movt	r3, #0
+  18:	781a      	ldrb	r2, [r3, #0]
+  1a:	000c      	movs	r4, r1
+  1c:	230e      	movs	r3, #14
+  1e:	0052      	lsls	r2, r2, #1
+  20:	439c      	bics	r4, r3
+  22:	401a      	ands	r2, r3
+  24:	3b8e      	subs	r3, #142	; 0x8e
+  26:	4323      	orrs	r3, r4
+  28:	2430      	movs	r4, #48	; 0x30
+  2a:	431a      	orrs	r2, r3
+  2c:	43a2      	bics	r2, r4
+  2e:	b2d3      	uxtb	r3, r2
+  30:	f240 0200 	movw	r2, #0
+  34:	7003      	strb	r3, [r0, #0]
+  36:	f2c0 0200 	movt	r2, #0
+  3a:	7812      	ldrb	r2, [r2, #0]
+  3c:	0112      	lsls	r2, r2, #4
+  3e:	4014      	ands	r4, r2
+  40:	4323      	orrs	r3, r4
+  42:	7003      	strb	r3, [r0, #0]
+  44:	f240 0300 	movw	r3, #0
+  48:	f2c0 0300 	movt	r3, #0
+  4c:	781b      	ldrb	r3, [r3, #0]
+  4e:	7043      	strb	r3, [r0, #1]
+  50:	0008      	movs	r0, r1
+  52:	bd10      	pop	{r4, pc}

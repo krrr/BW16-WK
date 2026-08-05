@@ -1,0 +1,1597 @@
+
+C:\Users\PAN~1.KEC\AppData\Local\Temp\opencode\rtl8721d_hal_init.o:     file format elf32-littlearm
+
+
+Disassembly of section .text.GetHalODMVar8721D:
+
+00000000 <GetHalODMVar8721D>:
+   0:	2901      	cmp	r1, #1
+   2:	d108      	bne.n	16 <GetHalODMVar8721D+0x16>
+   4:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   8:	58c3      	ldr	r3, [r0, r3]
+   a:	f503 530f 	add.w	r3, r3, #9152	; 0x23c0
+   e:	e9d3 010a 	ldrd	r0, r1, [r3, #40]	; 0x28
+  12:	e9c2 0100 	strd	r0, r1, [r2]
+  16:	4770      	bx	lr
+
+Disassembly of section .text.rtl8721d_stop_thread:
+
+00000000 <rtl8721d_stop_thread>:
+   0:	4770      	bx	lr
+   2:	bf00      	nop
+
+Disassembly of section .text.UpdateHalRAMask8721D:
+
+00000000 <UpdateHalRAMask8721D>:
+   0:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+   4:	f242 07c8 	movw	r7, #8392	; 0x20c8
+   8:	b085      	sub	sp, #20
+   a:	4604      	mov	r4, r0
+   c:	460e      	mov	r6, r1
+   e:	59c5      	ldr	r5, [r0, r7]
+  10:	f7ff fffe 	bl	0 <rtw_buddy_adapter_up>
+  14:	b120      	cbz	r0, 20 <UpdateHalRAMask8721D+0x20>
+  16:	f242 23fa 	movw	r3, #8954	; 0x22fa
+  1a:	5ce3      	ldrb	r3, [r4, r3]
+  1c:	2b00      	cmp	r3, #0
+  1e:	d142      	bne.n	a6 <UpdateHalRAMask8721D+0xa6>
+  20:	46a8      	mov	r8, r5
+  22:	2e06      	cmp	r6, #6
+  24:	d83c      	bhi.n	a0 <UpdateHalRAMask8721D+0xa0>
+  26:	eb04 1346 	add.w	r3, r4, r6, lsl #5
+  2a:	f8d3 7738 	ldr.w	r7, [r3, #1848]	; 0x738
+  2e:	b3bf      	cbz	r7, a0 <UpdateHalRAMask8721D+0xa0>
+  30:	2e01      	cmp	r6, #1
+  32:	d03e      	beq.n	b2 <UpdateHalRAMask8721D+0xb2>
+  34:	d357      	bcc.n	e6 <UpdateHalRAMask8721D+0xe6>
+  36:	2e02      	cmp	r6, #2
+  38:	d055      	beq.n	e6 <UpdateHalRAMask8721D+0xe6>
+  3a:	eb04 1946 	add.w	r9, r4, r6, lsl #5
+  3e:	f509 69e9 	add.w	r9, r9, #1864	; 0x748
+  42:	4648      	mov	r0, r9
+  44:	f7ff fffe 	bl	0 <rtw_get_rateset_len>
+  48:	4649      	mov	r1, r9
+  4a:	4602      	mov	r2, r0
+  4c:	4682      	mov	sl, r0
+  4e:	4620      	mov	r0, r4
+  50:	f7ff fffe 	bl	0 <judge_network_type>
+  54:	f000 010f 	and.w	r1, r0, #15
+  58:	4620      	mov	r0, r4
+  5a:	f7ff fffe 	bl	0 <networktype_to_raid_ex>
+  5e:	4651      	mov	r1, sl
+  60:	fa5f f980 	uxtb.w	r9, r0
+  64:	f104 00fa 	add.w	r0, r4, #250	; 0xfa
+  68:	f7ff fffe 	bl	0 <update_supported_rate>
+  6c:	f04f 0b00 	mov.w	fp, #0
+  70:	4682      	mov	sl, r0
+  72:	f02a 4a70 	bic.w	sl, sl, #4026531840	; 0xf0000000
+  76:	4650      	mov	r0, sl
+  78:	f7ff fffe 	bl	0 <get_highest_rate_idx>
+  7c:	f242 337d 	movw	r3, #9085	; 0x237d
+  80:	f818 3003 	ldrb.w	r3, [r8, r3]
+  84:	f000 083f 	and.w	r8, r0, #63	; 0x3f
+  88:	2b01      	cmp	r3, #1
+  8a:	d056      	beq.n	13a <UpdateHalRAMask8721D+0x13a>
+  8c:	f505 550e 	add.w	r5, r5, #9088	; 0x2380
+  90:	3504      	adds	r5, #4
+  92:	4435      	add	r5, r6
+  94:	f887 91f2 	strb.w	r9, [r7, #498]	; 0x1f2
+  98:	f887 81f3 	strb.w	r8, [r7, #499]	; 0x1f3
+  9c:	f885 8022 	strb.w	r8, [r5, #34]	; 0x22
+  a0:	b005      	add	sp, #20
+  a2:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+  a6:	f242 23e8 	movw	r3, #8936	; 0x22e8
+  aa:	58e3      	ldr	r3, [r4, r3]
+  ac:	f853 8007 	ldr.w	r8, [r3, r7]
+  b0:	e7b7      	b.n	22 <UpdateHalRAMask8721D+0x22>
+  b2:	f504 60ed 	add.w	r0, r4, #1896	; 0x768
+  b6:	f7ff fffe 	bl	0 <rtw_get_rateset_len>
+  ba:	f894 3524 	ldrb.w	r3, [r4, #1316]	; 0x524
+  be:	4681      	mov	r9, r0
+  c0:	f013 0f01 	tst.w	r3, #1
+  c4:	bf0c      	ite	eq
+  c6:	2102      	moveq	r1, #2
+  c8:	2101      	movne	r1, #1
+  ca:	4620      	mov	r0, r4
+  cc:	f7ff fffe 	bl	0 <networktype_to_raid_ex>
+  d0:	4649      	mov	r1, r9
+  d2:	fa5f f980 	uxtb.w	r9, r0
+  d6:	f104 00fa 	add.w	r0, r4, #250	; 0xfa
+  da:	f7ff fffe 	bl	0 <update_basic_rate>
+  de:	f04f 0b00 	mov.w	fp, #0
+  e2:	4682      	mov	sl, r0
+  e4:	e7c5      	b.n	72 <UpdateHalRAMask8721D+0x72>
+  e6:	f104 0afa 	add.w	sl, r4, #250	; 0xfa
+  ea:	4650      	mov	r0, sl
+  ec:	f7ff fffe 	bl	0 <rtw_get_rateset_len>
+  f0:	4651      	mov	r1, sl
+  f2:	4602      	mov	r2, r0
+  f4:	4681      	mov	r9, r0
+  f6:	4620      	mov	r0, r4
+  f8:	f7ff fffe 	bl	0 <judge_network_type>
+  fc:	f000 010f 	and.w	r1, r0, #15
+ 100:	4620      	mov	r0, r4
+ 102:	f7ff fffe 	bl	0 <networktype_to_raid_ex>
+ 106:	4649      	mov	r1, r9
+ 108:	fa5f f980 	uxtb.w	r9, r0
+ 10c:	4650      	mov	r0, sl
+ 10e:	f7ff fffe 	bl	0 <update_supported_rate>
+ 112:	4683      	mov	fp, r0
+ 114:	f894 06d9 	ldrb.w	r0, [r4, #1753]	; 0x6d9
+ 118:	b9d8      	cbnz	r0, 152 <UpdateHalRAMask8721D+0x152>
+ 11a:	4682      	mov	sl, r0
+ 11c:	f504 61e0 	add.w	r1, r4, #1792	; 0x700
+ 120:	f894 2522 	ldrb.w	r2, [r4, #1314]	; 0x522
+ 124:	4620      	mov	r0, r4
+ 126:	f7ff fffe 	bl	0 <support_short_GI>
+ 12a:	ea4a 0a0b 	orr.w	sl, sl, fp
+ 12e:	f110 0b00 	adds.w	fp, r0, #0
+ 132:	bf18      	it	ne
+ 134:	f04f 0b01 	movne.w	fp, #1
+ 138:	e79b      	b.n	72 <UpdateHalRAMask8721D+0x72>
+ 13a:	f894 3522 	ldrb.w	r3, [r4, #1314]	; 0x522
+ 13e:	4620      	mov	r0, r4
+ 140:	f8cd a004 	str.w	sl, [sp, #4]
+ 144:	f8cd b000 	str.w	fp, [sp]
+ 148:	464a      	mov	r2, r9
+ 14a:	b2f1      	uxtb	r1, r6
+ 14c:	f7ff fffe 	bl	0 <rtl8721d_set_FwMacIdConfig_cmd>
+ 150:	e79c      	b.n	8c <UpdateHalRAMask8721D+0x8c>
+ 152:	f504 61e0 	add.w	r1, r4, #1792	; 0x700
+ 156:	4608      	mov	r0, r1
+ 158:	9103      	str	r1, [sp, #12]
+ 15a:	f7ff fffe 	bl	0 <update_MCS_rate>
+ 15e:	9903      	ldr	r1, [sp, #12]
+ 160:	4682      	mov	sl, r0
+ 162:	e7dd      	b.n	120 <UpdateHalRAMask8721D+0x120>
+
+Disassembly of section .text.rtl8721d_read_chip_version:
+
+00000000 <rtl8721d_read_chip_version>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	b510      	push	{r4, lr}
+   6:	58c4      	ldr	r4, [r0, r3]
+   8:	4620      	mov	r0, r4
+   a:	f7ff fffe 	bl	0 <ROM_WIFI_ReadChipVersion>
+   e:	2300      	movs	r3, #0
+  10:	f884 3022 	strb.w	r3, [r4, #34]	; 0x22
+  14:	bd10      	pop	{r4, pc}
+  16:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_free_hal_data:
+
+00000000 <rtl8721d_free_hal_data>:
+   0:	b538      	push	{r3, r4, r5, lr}
+   2:	f242 05c8 	movw	r5, #8392	; 0x20c8
+   6:	5943      	ldr	r3, [r0, r5]
+   8:	b13b      	cbz	r3, 1a <rtl8721d_free_hal_data+0x1a>
+   a:	4604      	mov	r4, r0
+   c:	f245 7140 	movw	r1, #22336	; 0x5740
+  10:	4618      	mov	r0, r3
+  12:	f7ff fffe 	bl	0 <rtw_vmfree>
+  16:	2300      	movs	r3, #0
+  18:	5163      	str	r3, [r4, r5]
+  1a:	bd38      	pop	{r3, r4, r5, pc}
+
+Disassembly of section .text.SetHalODMVar8721D:
+
+00000000 <SetHalODMVar8721D>:
+   0:	b4f0      	push	{r4, r5, r6, r7}
+   2:	f242 07c8 	movw	r7, #8392	; 0x20c8
+   6:	f242 36c8 	movw	r6, #9160	; 0x23c8
+   a:	59c4      	ldr	r4, [r0, r7]
+   c:	4615      	mov	r5, r2
+   e:	4434      	add	r4, r6
+  10:	b151      	cbz	r1, 28 <SetHalODMVar8721D+0x28>
+  12:	2901      	cmp	r1, #1
+  14:	d106      	bne.n	24 <SetHalODMVar8721D+0x24>
+  16:	e9d2 2300 	ldrd	r2, r3, [r2]
+  1a:	4620      	mov	r0, r4
+  1c:	bcf0      	pop	{r4, r5, r6, r7}
+  1e:	215f      	movs	r1, #95	; 0x5f
+  20:	f7ff bffe 	b.w	0 <odm_cmn_info_update>
+  24:	bcf0      	pop	{r4, r5, r6, r7}
+  26:	4770      	bx	lr
+  28:	f242 22fa 	movw	r2, #8954	; 0x22fa
+  2c:	5c82      	ldrb	r2, [r0, r2]
+  2e:	b12a      	cbz	r2, 3c <SetHalODMVar8721D+0x3c>
+  30:	f242 22e8 	movw	r2, #8936	; 0x22e8
+  34:	5882      	ldr	r2, [r0, r2]
+  36:	b10a      	cbz	r2, 3c <SetHalODMVar8721D+0x3c>
+  38:	59d4      	ldr	r4, [r2, r7]
+  3a:	4434      	add	r4, r6
+  3c:	b183      	cbz	r3, 60 <SetHalODMVar8721D+0x60>
+  3e:	2201      	movs	r2, #1
+  40:	f895 310a 	ldrb.w	r3, [r5, #266]	; 0x10a
+  44:	f8a5 20e8 	strh.w	r2, [r5, #232]	; 0xe8
+  48:	f043 0320 	orr.w	r3, r3, #32
+  4c:	4620      	mov	r0, r4
+  4e:	f885 310a 	strb.w	r3, [r5, #266]	; 0x10a
+  52:	f105 02e8 	add.w	r2, r5, #232	; 0xe8
+  56:	f895 10eb 	ldrb.w	r1, [r5, #235]	; 0xeb
+  5a:	bcf0      	pop	{r4, r5, r6, r7}
+  5c:	f7ff bffe 	b.w	0 <phydm_cmn_sta_info_hook>
+  60:	f8a5 30e8 	strh.w	r3, [r5, #232]	; 0xe8
+  64:	f895 10eb 	ldrb.w	r1, [r5, #235]	; 0xeb
+  68:	4620      	mov	r0, r4
+  6a:	bcf0      	pop	{r4, r5, r6, r7}
+  6c:	461a      	mov	r2, r3
+  6e:	f7ff bffe 	b.w	0 <phydm_cmn_sta_info_hook>
+  72:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_start_thread:
+
+00000000 <rtl8721d_start_thread>:
+   0:	4770      	bx	lr
+   2:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_InitBeaconParameters:
+
+00000000 <rtl8721d_InitBeaconParameters>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	58c3      	ldr	r3, [r0, r3]
+   6:	6902      	ldr	r2, [r0, #16]
+   8:	f503 510d 	add.w	r1, r3, #9024	; 0x2340
+   c:	4608      	mov	r0, r1
+   e:	f3c2 02c0 	ubfx	r2, r2, #3, #1
+  12:	313f      	adds	r1, #63	; 0x3f
+  14:	303e      	adds	r0, #62	; 0x3e
+  16:	f7ff bffe 	b.w	0 <ROM_WIFI_INIT_BeaconParameters>
+  1a:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_ResumeTxBeacon:
+
+00000000 <rtl8721d_ResumeTxBeacon>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	58c0      	ldr	r0, [r0, r3]
+   6:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+   a:	4608      	mov	r0, r1
+   c:	313f      	adds	r1, #63	; 0x3f
+   e:	303e      	adds	r0, #62	; 0x3e
+  10:	f7ff bffe 	b.w	0 <ROM_WIFI_RESUME_TxBeacon>
+
+Disassembly of section .text.rtl8721d_StopTxBeacon:
+
+00000000 <rtl8721d_StopTxBeacon>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	58c0      	ldr	r0, [r0, r3]
+   6:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+   a:	4608      	mov	r0, r1
+   c:	313f      	adds	r1, #63	; 0x3f
+   e:	303e      	adds	r0, #62	; 0x3e
+  10:	f7ff bffe 	b.w	0 <ROM_WIFI_STOP_TXBeacon>
+
+Disassembly of section .text.rtl8721d_set_hal_ops:
+
+00000000 <rtl8721d_set_hal_ops>:
+   0:	2300      	movs	r3, #0
+   2:	b4f0      	push	{r4, r5, r6, r7}
+   4:	4923      	ldr	r1, [pc, #140]	; (94 <rtl8721d_set_hal_ops+0x94>)
+   6:	4e24      	ldr	r6, [pc, #144]	; (98 <rtl8721d_set_hal_ops+0x98>)
+   8:	4d24      	ldr	r5, [pc, #144]	; (9c <rtl8721d_set_hal_ops+0x9c>)
+   a:	4c25      	ldr	r4, [pc, #148]	; (a0 <rtl8721d_set_hal_ops+0xa0>)
+   c:	4a25      	ldr	r2, [pc, #148]	; (a4 <rtl8721d_set_hal_ops+0xa4>)
+   e:	4f26      	ldr	r7, [pc, #152]	; (a8 <rtl8721d_set_hal_ops+0xa8>)
+  10:	6106      	str	r6, [r0, #16]
+  12:	63c5      	str	r5, [r0, #60]	; 0x3c
+  14:	4e25      	ldr	r6, [pc, #148]	; (ac <rtl8721d_set_hal_ops+0xac>)
+  16:	4d26      	ldr	r5, [pc, #152]	; (b0 <rtl8721d_set_hal_ops+0xb0>)
+  18:	6404      	str	r4, [r0, #64]	; 0x40
+  1a:	f8c0 1080 	str.w	r1, [r0, #128]	; 0x80
+  1e:	4c25      	ldr	r4, [pc, #148]	; (b4 <rtl8721d_set_hal_ops+0xb4>)
+  20:	4925      	ldr	r1, [pc, #148]	; (b8 <rtl8721d_set_hal_ops+0xb8>)
+  22:	67c2      	str	r2, [r0, #124]	; 0x7c
+  24:	4a25      	ldr	r2, [pc, #148]	; (bc <rtl8721d_set_hal_ops+0xbc>)
+  26:	f8c0 70a0 	str.w	r7, [r0, #160]	; 0xa0
+  2a:	6446      	str	r6, [r0, #68]	; 0x44
+  2c:	4f24      	ldr	r7, [pc, #144]	; (c0 <rtl8721d_set_hal_ops+0xc0>)
+  2e:	4e25      	ldr	r6, [pc, #148]	; (c4 <rtl8721d_set_hal_ops+0xc4>)
+  30:	f8c0 509c 	str.w	r5, [r0, #156]	; 0x9c
+  34:	6704      	str	r4, [r0, #112]	; 0x70
+  36:	4d24      	ldr	r5, [pc, #144]	; (c8 <rtl8721d_set_hal_ops+0xc8>)
+  38:	4c24      	ldr	r4, [pc, #144]	; (cc <rtl8721d_set_hal_ops+0xcc>)
+  3a:	6741      	str	r1, [r0, #116]	; 0x74
+  3c:	6782      	str	r2, [r0, #120]	; 0x78
+  3e:	4924      	ldr	r1, [pc, #144]	; (d0 <rtl8721d_set_hal_ops+0xd0>)
+  40:	4a24      	ldr	r2, [pc, #144]	; (d4 <rtl8721d_set_hal_ops+0xd4>)
+  42:	f8c0 70c0 	str.w	r7, [r0, #192]	; 0xc0
+  46:	f8c0 60c4 	str.w	r6, [r0, #196]	; 0xc4
+  4a:	4f23      	ldr	r7, [pc, #140]	; (d8 <rtl8721d_set_hal_ops+0xd8>)
+  4c:	4e23      	ldr	r6, [pc, #140]	; (dc <rtl8721d_set_hal_ops+0xdc>)
+  4e:	f8c0 50c8 	str.w	r5, [r0, #200]	; 0xc8
+  52:	f8c0 40cc 	str.w	r4, [r0, #204]	; 0xcc
+  56:	4d22      	ldr	r5, [pc, #136]	; (e0 <rtl8721d_set_hal_ops+0xe0>)
+  58:	4c22      	ldr	r4, [pc, #136]	; (e4 <rtl8721d_set_hal_ops+0xe4>)
+  5a:	f8c0 10a8 	str.w	r1, [r0, #168]	; 0xa8
+  5e:	f8c0 20ac 	str.w	r2, [r0, #172]	; 0xac
+  62:	4921      	ldr	r1, [pc, #132]	; (e8 <rtl8721d_set_hal_ops+0xe8>)
+  64:	4a21      	ldr	r2, [pc, #132]	; (ec <rtl8721d_set_hal_ops+0xec>)
+  66:	f8c0 70d0 	str.w	r7, [r0, #208]	; 0xd0
+  6a:	f8c0 60d8 	str.w	r6, [r0, #216]	; 0xd8
+  6e:	f8c0 5094 	str.w	r5, [r0, #148]	; 0x94
+  72:	f8c0 4098 	str.w	r4, [r0, #152]	; 0x98
+  76:	f8c0 10f0 	str.w	r1, [r0, #240]	; 0xf0
+  7a:	f8c0 20f4 	str.w	r2, [r0, #244]	; 0xf4
+  7e:	f8c0 30d4 	str.w	r3, [r0, #212]	; 0xd4
+  82:	f8c0 30dc 	str.w	r3, [r0, #220]	; 0xdc
+  86:	f8c0 30e4 	str.w	r3, [r0, #228]	; 0xe4
+  8a:	f8c0 30e8 	str.w	r3, [r0, #232]	; 0xe8
+  8e:	bcf0      	pop	{r4, r5, r6, r7}
+  90:	4770      	bx	lr
+  92:	bf00      	nop
+	...
+
+Disassembly of section .text.rtl8721d_var_set_opmode:
+
+00000000 <rtl8721d_var_set_opmode>:
+   0:	f242 23f0 	movw	r3, #8944	; 0x22f0
+   4:	b5f0      	push	{r4, r5, r6, r7, lr}
+   6:	5cc6      	ldrb	r6, [r0, r3]
+   8:	b085      	sub	sp, #20
+   a:	2e01      	cmp	r6, #1
+   c:	4604      	mov	r4, r0
+   e:	7815      	ldrb	r5, [r2, #0]
+  10:	d07e      	beq.n	110 <rtl8721d_var_set_opmode+0x110>
+  12:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+  16:	f7ff fffe 	bl	0 <rtw_read8>
+  1a:	f040 0210 	orr.w	r2, r0, #16
+  1e:	b2d2      	uxtb	r2, r2
+  20:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+  24:	4620      	mov	r0, r4
+  26:	f7ff fffe 	bl	0 <rtw_write8>
+  2a:	f44f 7181 	mov.w	r1, #258	; 0x102
+  2e:	4620      	mov	r0, r4
+  30:	f7ff fffe 	bl	0 <rtw_read8>
+  34:	f000 020c 	and.w	r2, r0, #12
+  38:	432a      	orrs	r2, r5
+  3a:	f44f 7181 	mov.w	r1, #258	; 0x102
+  3e:	4620      	mov	r0, r4
+  40:	f7ff fffe 	bl	0 <rtw_write8>
+  44:	f015 0ffd 	tst.w	r5, #253	; 0xfd
+  48:	d122      	bne.n	90 <rtl8721d_var_set_opmode+0x90>
+  4a:	2103      	movs	r1, #3
+  4c:	4620      	mov	r0, r4
+  4e:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+  52:	4605      	mov	r5, r0
+  54:	b9a0      	cbnz	r0, 80 <rtl8721d_var_set_opmode+0x80>
+  56:	f242 03c8 	movw	r3, #8392	; 0x20c8
+  5a:	58e0      	ldr	r0, [r4, r3]
+  5c:	4e84      	ldr	r6, [pc, #528]	; (270 <rtl8721d_var_set_opmode+0x270>)
+  5e:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+  62:	4608      	mov	r0, r1
+  64:	313f      	adds	r1, #63	; 0x3f
+  66:	303e      	adds	r0, #62	; 0x3e
+  68:	f7ff fffe 	bl	0 <ROM_WIFI_STOP_TXBeacon>
+  6c:	4b81      	ldr	r3, [pc, #516]	; (274 <rtl8721d_var_set_opmode+0x274>)
+  6e:	aa02      	add	r2, sp, #8
+  70:	4669      	mov	r1, sp
+  72:	4620      	mov	r0, r4
+  74:	9500      	str	r5, [sp, #0]
+  76:	9501      	str	r5, [sp, #4]
+  78:	9602      	str	r6, [sp, #8]
+  7a:	9303      	str	r3, [sp, #12]
+  7c:	f7ff fffe 	bl	0 <UpdateInterruptMask8721d>
+  80:	4620      	mov	r0, r4
+  82:	2219      	movs	r2, #25
+  84:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+  88:	f7ff fffe 	bl	0 <rtw_write8>
+  8c:	b005      	add	sp, #20
+  8e:	bdf0      	pop	{r4, r5, r6, r7, pc}
+  90:	2d01      	cmp	r5, #1
+  92:	f000 80cb 	beq.w	22c <rtl8721d_var_set_opmode+0x22c>
+  96:	2d03      	cmp	r5, #3
+  98:	d1f8      	bne.n	8c <rtl8721d_var_set_opmode+0x8c>
+  9a:	f240 1101 	movw	r1, #257	; 0x101
+  9e:	4620      	mov	r0, r4
+  a0:	f7ff fffe 	bl	0 <rtw_read8>
+  a4:	f040 0201 	orr.w	r2, r0, #1
+  a8:	b2d2      	uxtb	r2, r2
+  aa:	f240 1101 	movw	r1, #257	; 0x101
+  ae:	4620      	mov	r0, r4
+  b0:	f7ff fffe 	bl	0 <rtw_write8>
+  b4:	f44f 7140 	mov.w	r1, #768	; 0x300
+  b8:	4620      	mov	r0, r4
+  ba:	f7ff fffe 	bl	0 <rtw_read32>
+  be:	2500      	movs	r5, #0
+  c0:	f440 3280 	orr.w	r2, r0, #65536	; 0x10000
+  c4:	f44f 7140 	mov.w	r1, #768	; 0x300
+  c8:	4620      	mov	r0, r4
+  ca:	f7ff fffe 	bl	0 <rtw_write32>
+  ce:	4e68      	ldr	r6, [pc, #416]	; (270 <rtl8721d_var_set_opmode+0x270>)
+  d0:	4b68      	ldr	r3, [pc, #416]	; (274 <rtl8721d_var_set_opmode+0x274>)
+  d2:	aa02      	add	r2, sp, #8
+  d4:	4669      	mov	r1, sp
+  d6:	4620      	mov	r0, r4
+  d8:	9301      	str	r3, [sp, #4]
+  da:	9502      	str	r5, [sp, #8]
+  dc:	9503      	str	r5, [sp, #12]
+  de:	9600      	str	r6, [sp, #0]
+  e0:	f7ff fffe 	bl	0 <UpdateInterruptMask8721d>
+  e4:	f242 03c8 	movw	r3, #8392	; 0x20c8
+  e8:	58e0      	ldr	r0, [r4, r3]
+  ea:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+  ee:	4608      	mov	r0, r1
+  f0:	313f      	adds	r1, #63	; 0x3f
+  f2:	303e      	adds	r0, #62	; 0x3e
+  f4:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+  f8:	4620      	mov	r0, r4
+  fa:	2205      	movs	r2, #5
+  fc:	f44f 61ab 	mov.w	r1, #1368	; 0x558
+ 100:	f7ff fffe 	bl	0 <rtw_write8>
+ 104:	462a      	mov	r2, r5
+ 106:	4628      	mov	r0, r5
+ 108:	2101      	movs	r1, #1
+ 10a:	f7ff fffe 	bl	0 <ROM_WIFI_SetOpmodeAP>
+ 10e:	e7bd      	b.n	8c <rtl8721d_var_set_opmode+0x8c>
+ 110:	f240 5151 	movw	r1, #1361	; 0x551
+ 114:	f7ff fffe 	bl	0 <rtw_read8>
+ 118:	f040 0210 	orr.w	r2, r0, #16
+ 11c:	b2d2      	uxtb	r2, r2
+ 11e:	f240 5151 	movw	r1, #1361	; 0x551
+ 122:	4620      	mov	r0, r4
+ 124:	f7ff fffe 	bl	0 <rtw_write8>
+ 128:	f44f 7181 	mov.w	r1, #258	; 0x102
+ 12c:	4620      	mov	r0, r4
+ 12e:	f7ff fffe 	bl	0 <rtw_read8>
+ 132:	f000 0203 	and.w	r2, r0, #3
+ 136:	ea42 0285 	orr.w	r2, r2, r5, lsl #2
+ 13a:	b2d2      	uxtb	r2, r2
+ 13c:	f44f 7181 	mov.w	r1, #258	; 0x102
+ 140:	4620      	mov	r0, r4
+ 142:	f7ff fffe 	bl	0 <rtw_write8>
+ 146:	f015 0ffd 	tst.w	r5, #253	; 0xfd
+ 14a:	d122      	bne.n	192 <rtl8721d_var_set_opmode+0x192>
+ 14c:	2103      	movs	r1, #3
+ 14e:	4620      	mov	r0, r4
+ 150:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+ 154:	4605      	mov	r5, r0
+ 156:	b9a0      	cbnz	r0, 182 <rtl8721d_var_set_opmode+0x182>
+ 158:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 15c:	58e0      	ldr	r0, [r4, r3]
+ 15e:	4e44      	ldr	r6, [pc, #272]	; (270 <rtl8721d_var_set_opmode+0x270>)
+ 160:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 164:	4608      	mov	r0, r1
+ 166:	313f      	adds	r1, #63	; 0x3f
+ 168:	303e      	adds	r0, #62	; 0x3e
+ 16a:	f7ff fffe 	bl	0 <ROM_WIFI_STOP_TXBeacon>
+ 16e:	4b41      	ldr	r3, [pc, #260]	; (274 <rtl8721d_var_set_opmode+0x274>)
+ 170:	aa02      	add	r2, sp, #8
+ 172:	4669      	mov	r1, sp
+ 174:	4620      	mov	r0, r4
+ 176:	9500      	str	r5, [sp, #0]
+ 178:	9501      	str	r5, [sp, #4]
+ 17a:	9602      	str	r6, [sp, #8]
+ 17c:	9303      	str	r3, [sp, #12]
+ 17e:	f7ff fffe 	bl	0 <UpdateInterruptMask8721d>
+ 182:	4620      	mov	r0, r4
+ 184:	2211      	movs	r2, #17
+ 186:	f240 5151 	movw	r1, #1361	; 0x551
+ 18a:	f7ff fffe 	bl	0 <rtw_write8>
+ 18e:	b005      	add	sp, #20
+ 190:	bdf0      	pop	{r4, r5, r6, r7, pc}
+ 192:	2d01      	cmp	r5, #1
+ 194:	d05b      	beq.n	24e <rtl8721d_var_set_opmode+0x24e>
+ 196:	2d03      	cmp	r5, #3
+ 198:	f47f af78 	bne.w	8c <rtl8721d_var_set_opmode+0x8c>
+ 19c:	f240 1101 	movw	r1, #257	; 0x101
+ 1a0:	4620      	mov	r0, r4
+ 1a2:	f7ff fffe 	bl	0 <rtw_read8>
+ 1a6:	f040 0201 	orr.w	r2, r0, #1
+ 1aa:	b2d2      	uxtb	r2, r2
+ 1ac:	f240 1101 	movw	r1, #257	; 0x101
+ 1b0:	4620      	mov	r0, r4
+ 1b2:	f7ff fffe 	bl	0 <rtw_write8>
+ 1b6:	f44f 7140 	mov.w	r1, #768	; 0x300
+ 1ba:	4620      	mov	r0, r4
+ 1bc:	f7ff fffe 	bl	0 <rtw_read32>
+ 1c0:	f44f 7140 	mov.w	r1, #768	; 0x300
+ 1c4:	f440 3280 	orr.w	r2, r0, #65536	; 0x10000
+ 1c8:	4620      	mov	r0, r4
+ 1ca:	f7ff fffe 	bl	0 <rtw_write32>
+ 1ce:	f240 51b2 	movw	r1, #1458	; 0x5b2
+ 1d2:	4620      	mov	r0, r4
+ 1d4:	f7ff fffe 	bl	0 <rtw_read8>
+ 1d8:	2500      	movs	r5, #0
+ 1da:	f040 0220 	orr.w	r2, r0, #32
+ 1de:	b2d2      	uxtb	r2, r2
+ 1e0:	f240 51b2 	movw	r1, #1458	; 0x5b2
+ 1e4:	4620      	mov	r0, r4
+ 1e6:	f7ff fffe 	bl	0 <rtw_write8>
+ 1ea:	4f21      	ldr	r7, [pc, #132]	; (270 <rtl8721d_var_set_opmode+0x270>)
+ 1ec:	4b21      	ldr	r3, [pc, #132]	; (274 <rtl8721d_var_set_opmode+0x274>)
+ 1ee:	aa02      	add	r2, sp, #8
+ 1f0:	4669      	mov	r1, sp
+ 1f2:	4620      	mov	r0, r4
+ 1f4:	9301      	str	r3, [sp, #4]
+ 1f6:	9502      	str	r5, [sp, #8]
+ 1f8:	9503      	str	r5, [sp, #12]
+ 1fa:	9700      	str	r7, [sp, #0]
+ 1fc:	f7ff fffe 	bl	0 <UpdateInterruptMask8721d>
+ 200:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 204:	58e0      	ldr	r0, [r4, r3]
+ 206:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 20a:	4608      	mov	r0, r1
+ 20c:	313f      	adds	r1, #63	; 0x3f
+ 20e:	303e      	adds	r0, #62	; 0x3e
+ 210:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+ 214:	4620      	mov	r0, r4
+ 216:	2205      	movs	r2, #5
+ 218:	f44f 61ab 	mov.w	r1, #1368	; 0x558
+ 21c:	f7ff fffe 	bl	0 <rtw_write8>
+ 220:	462a      	mov	r2, r5
+ 222:	4631      	mov	r1, r6
+ 224:	4630      	mov	r0, r6
+ 226:	f7ff fffe 	bl	0 <ROM_WIFI_SetOpmodeAP>
+ 22a:	e72f      	b.n	8c <rtl8721d_var_set_opmode+0x8c>
+ 22c:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 230:	58e0      	ldr	r0, [r4, r3]
+ 232:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 236:	4608      	mov	r0, r1
+ 238:	313f      	adds	r1, #63	; 0x3f
+ 23a:	303e      	adds	r0, #62	; 0x3e
+ 23c:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+ 240:	4620      	mov	r0, r4
+ 242:	221a      	movs	r2, #26
+ 244:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+ 248:	f7ff fffe 	bl	0 <rtw_write8>
+ 24c:	e71e      	b.n	8c <rtl8721d_var_set_opmode+0x8c>
+ 24e:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 252:	58e0      	ldr	r0, [r4, r3]
+ 254:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 258:	4608      	mov	r0, r1
+ 25a:	313f      	adds	r1, #63	; 0x3f
+ 25c:	303e      	adds	r0, #62	; 0x3e
+ 25e:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+ 262:	4620      	mov	r0, r4
+ 264:	221a      	movs	r2, #26
+ 266:	f240 5151 	movw	r1, #1361	; 0x551
+ 26a:	f7ff fffe 	bl	0 <rtw_write8>
+ 26e:	e70d      	b.n	8c <rtl8721d_var_set_opmode+0x8c>
+ 270:	00180101 	.word	0x00180101
+ 274:	01010000 	.word	0x01010000
+
+Disassembly of section .text.rtl8721d_var_set_correct_tsf:
+
+00000000 <rtl8721d_var_set_correct_tsf>:
+   0:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
+   4:	4606      	mov	r6, r0
+   6:	f242 07c8 	movw	r7, #8392	; 0x20c8
+   a:	f8b0 36ce 	ldrh.w	r3, [r0, #1742]	; 0x6ce
+   e:	f600 0058 	addw	r0, r0, #2136	; 0x858
+  12:	029b      	lsls	r3, r3, #10
+  14:	e9d0 4500 	ldrd	r4, r5, [r0]
+  18:	b084      	sub	sp, #16
+  1a:	4620      	mov	r0, r4
+  1c:	4688      	mov	r8, r1
+  1e:	4691      	mov	r9, r2
+  20:	4629      	mov	r1, r5
+  22:	461a      	mov	r2, r3
+  24:	17db      	asrs	r3, r3, #31
+  26:	59f7      	ldr	r7, [r6, r7]
+  28:	f7ff fffe 	bl	0 <rtw_modular64>
+  2c:	f5b4 6480 	subs.w	r4, r4, #1024	; 0x400
+  30:	f8d6 3624 	ldr.w	r3, [r6, #1572]	; 0x624
+  34:	f145 35ff 	adc.w	r5, r5, #4294967295
+  38:	1a24      	subs	r4, r4, r0
+  3a:	eb65 0501 	sbc.w	r5, r5, r1
+  3e:	f013 0a01 	ands.w	sl, r3, #1
+  42:	d11c      	bne.n	7e <rtl8721d_var_set_correct_tsf+0x7e>
+  44:	f003 0303 	and.w	r3, r3, #3
+  48:	2b02      	cmp	r3, #2
+  4a:	9402      	str	r4, [sp, #8]
+  4c:	9503      	str	r5, [sp, #12]
+  4e:	d027      	beq.n	a0 <rtl8721d_var_set_correct_tsf+0xa0>
+  50:	2000      	movs	r0, #0
+  52:	f242 23f0 	movw	r3, #8944	; 0x22f0
+  56:	ac02      	add	r4, sp, #8
+  58:	5cf1      	ldrb	r1, [r6, r3]
+  5a:	4642      	mov	r2, r8
+  5c:	464b      	mov	r3, r9
+  5e:	9400      	str	r4, [sp, #0]
+  60:	f7ff fffe 	bl	0 <ROM_WIFI_SET_TSF>
+  64:	f1ba 0f00 	cmp.w	sl, #0
+  68:	d006      	beq.n	78 <rtl8721d_var_set_correct_tsf+0x78>
+  6a:	f507 510d 	add.w	r1, r7, #9024	; 0x2340
+  6e:	4608      	mov	r0, r1
+  70:	313f      	adds	r1, #63	; 0x3f
+  72:	303e      	adds	r0, #62	; 0x3e
+  74:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+  78:	b004      	add	sp, #16
+  7a:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
+  7e:	f507 510d 	add.w	r1, r7, #9024	; 0x2340
+  82:	4608      	mov	r0, r1
+  84:	313f      	adds	r1, #63	; 0x3f
+  86:	303e      	adds	r0, #62	; 0x3e
+  88:	f7ff fffe 	bl	0 <ROM_WIFI_STOP_TXBeacon>
+  8c:	f8d6 3624 	ldr.w	r3, [r6, #1572]	; 0x624
+  90:	f04f 0a01 	mov.w	sl, #1
+  94:	f003 0303 	and.w	r3, r3, #3
+  98:	2b02      	cmp	r3, #2
+  9a:	9402      	str	r4, [sp, #8]
+  9c:	9503      	str	r5, [sp, #12]
+  9e:	d1d7      	bne.n	50 <rtl8721d_var_set_correct_tsf+0x50>
+  a0:	2110      	movs	r1, #16
+  a2:	4630      	mov	r0, r6
+  a4:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+  a8:	2800      	cmp	r0, #0
+  aa:	d0d1      	beq.n	50 <rtl8721d_var_set_correct_tsf+0x50>
+  ac:	f242 22e8 	movw	r2, #8936	; 0x22e8
+  b0:	f242 3315 	movw	r3, #8981	; 0x2315
+  b4:	58b2      	ldr	r2, [r6, r2]
+  b6:	5cd0      	ldrb	r0, [r2, r3]
+  b8:	fab0 f080 	clz	r0, r0
+  bc:	0940      	lsrs	r0, r0, #5
+  be:	e7c8      	b.n	52 <rtl8721d_var_set_correct_tsf+0x52>
+
+Disassembly of section .text.rtl8721d_var_set_mlme_disconnect:
+
+00000000 <rtl8721d_var_set_mlme_disconnect>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	460d      	mov	r5, r1
+   4:	2100      	movs	r1, #0
+   6:	4616      	mov	r6, r2
+   8:	4604      	mov	r4, r0
+   a:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+   e:	b128      	cbz	r0, 1c <rtl8721d_var_set_mlme_disconnect+0x1c>
+  10:	2200      	movs	r2, #0
+  12:	f240 61a4 	movw	r1, #1700	; 0x6a4
+  16:	4620      	mov	r0, r4
+  18:	f7ff fffe 	bl	0 <rtw_write16>
+  1c:	f242 23f0 	movw	r3, #8944	; 0x22f0
+  20:	4632      	mov	r2, r6
+  22:	4629      	mov	r1, r5
+  24:	5ce0      	ldrb	r0, [r4, r3]
+  26:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+  2a:	f7ff bffe 	b.w	0 <ROM_WIFI_DISCONNECT>
+  2e:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_var_set_mlme_sitesurvey:
+
+00000000 <rtl8721d_var_set_mlme_sitesurvey>:
+   0:	f242 23f0 	movw	r3, #8944	; 0x22f0
+   4:	f242 01c8 	movw	r1, #8392	; 0x20c8
+   8:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
+   c:	5cc6      	ldrb	r6, [r0, r3]
+   e:	6903      	ldr	r3, [r0, #16]
+  10:	2e01      	cmp	r6, #1
+  12:	f240 5551 	movw	r5, #1361	; 0x551
+  16:	bf18      	it	ne
+  18:	f44f 65aa 	movne.w	r5, #1360	; 0x550
+  1c:	06db      	lsls	r3, r3, #27
+  1e:	4604      	mov	r4, r0
+  20:	4690      	mov	r8, r2
+  22:	5846      	ldr	r6, [r0, r1]
+  24:	d402      	bmi.n	2c <rtl8721d_var_set_mlme_sitesurvey+0x2c>
+  26:	2110      	movs	r1, #16
+  28:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+  2c:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  30:	4620      	mov	r0, r4
+  32:	f7ff fffe 	bl	0 <rtw_read32>
+  36:	f898 3000 	ldrb.w	r3, [r8]
+  3a:	4607      	mov	r7, r0
+  3c:	2b00      	cmp	r3, #0
+  3e:	d14c      	bne.n	da <rtl8721d_var_set_mlme_sitesurvey+0xda>
+  40:	6923      	ldr	r3, [r4, #16]
+  42:	f013 0f11 	tst.w	r3, #17
+  46:	d02f      	beq.n	a8 <rtl8721d_var_set_mlme_sitesurvey+0xa8>
+  48:	f64f 72ff 	movw	r2, #65535	; 0xffff
+  4c:	f240 61a4 	movw	r1, #1700	; 0x6a4
+  50:	4620      	mov	r0, r4
+  52:	f7ff fffe 	bl	0 <rtw_write16>
+  56:	6923      	ldr	r3, [r4, #16]
+  58:	f013 0f68 	tst.w	r3, #104	; 0x68
+  5c:	d009      	beq.n	72 <rtl8721d_var_set_mlme_sitesurvey+0x72>
+  5e:	4629      	mov	r1, r5
+  60:	4620      	mov	r0, r4
+  62:	f7ff fffe 	bl	0 <rtw_read8>
+  66:	4629      	mov	r1, r5
+  68:	f000 02ef 	and.w	r2, r0, #239	; 0xef
+  6c:	4620      	mov	r0, r4
+  6e:	f7ff fffe 	bl	0 <rtw_write8>
+  72:	f7ff fffe 	bl	0 <rtw_get_indicate_mgnt>
+  76:	2802      	cmp	r0, #2
+  78:	bf18      	it	ne
+  7a:	f047 0780 	orrne.w	r7, r7, #128	; 0x80
+  7e:	463a      	mov	r2, r7
+  80:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  84:	4620      	mov	r0, r4
+  86:	f506 560e 	add.w	r6, r6, #9088	; 0x2380
+  8a:	f7ff fffe 	bl	0 <rtw_write32>
+  8e:	f44f 6188 	mov.w	r1, #1088	; 0x440
+  92:	8832      	ldrh	r2, [r6, #0]
+  94:	4620      	mov	r0, r4
+  96:	f7ff fffe 	bl	0 <rtw_write16>
+  9a:	2103      	movs	r1, #3
+  9c:	4620      	mov	r0, r4
+  9e:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+  a2:	b940      	cbnz	r0, b6 <rtl8721d_var_set_mlme_sitesurvey+0xb6>
+  a4:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+  a8:	2111      	movs	r1, #17
+  aa:	4620      	mov	r0, r4
+  ac:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+  b0:	2800      	cmp	r0, #0
+  b2:	d1c9      	bne.n	48 <rtl8721d_var_set_mlme_sitesurvey+0x48>
+  b4:	e7cf      	b.n	56 <rtl8721d_var_set_mlme_sitesurvey+0x56>
+  b6:	2101      	movs	r1, #1
+  b8:	4620      	mov	r0, r4
+  ba:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+  be:	2800      	cmp	r0, #0
+  c0:	d0f0      	beq.n	a4 <rtl8721d_var_set_mlme_sitesurvey+0xa4>
+  c2:	f242 03c8 	movw	r3, #8392	; 0x20c8
+  c6:	58e0      	ldr	r0, [r4, r3]
+  c8:	e8bd 41f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, lr}
+  cc:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+  d0:	4608      	mov	r0, r1
+  d2:	313f      	adds	r1, #63	; 0x3f
+  d4:	303e      	adds	r0, #62	; 0x3e
+  d6:	f7ff bffe 	b.w	0 <ROM_WIFI_RESUME_TxBeacon>
+  da:	f020 0280 	bic.w	r2, r0, #128	; 0x80
+  de:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  e2:	4620      	mov	r0, r4
+  e4:	f7ff fffe 	bl	0 <rtw_write32>
+  e8:	2200      	movs	r2, #0
+  ea:	f240 61a4 	movw	r1, #1700	; 0x6a4
+  ee:	4620      	mov	r0, r4
+  f0:	f7ff fffe 	bl	0 <rtw_write16>
+  f4:	6923      	ldr	r3, [r4, #16]
+  f6:	f013 0f68 	tst.w	r3, #104	; 0x68
+  fa:	d00a      	beq.n	112 <rtl8721d_var_set_mlme_sitesurvey+0x112>
+  fc:	4629      	mov	r1, r5
+  fe:	4620      	mov	r0, r4
+ 100:	f7ff fffe 	bl	0 <rtw_read8>
+ 104:	f040 0210 	orr.w	r2, r0, #16
+ 108:	b2d2      	uxtb	r2, r2
+ 10a:	4629      	mov	r1, r5
+ 10c:	4620      	mov	r0, r4
+ 10e:	f7ff fffe 	bl	0 <rtw_write8>
+ 112:	f44f 6188 	mov.w	r1, #1088	; 0x440
+ 116:	4620      	mov	r0, r4
+ 118:	f7ff fffe 	bl	0 <rtw_read16>
+ 11c:	f506 560e 	add.w	r6, r6, #9088	; 0x2380
+ 120:	8030      	strh	r0, [r6, #0]
+ 122:	2103      	movs	r1, #3
+ 124:	4620      	mov	r0, r4
+ 126:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+ 12a:	2800      	cmp	r0, #0
+ 12c:	d0ba      	beq.n	a4 <rtl8721d_var_set_mlme_sitesurvey+0xa4>
+ 12e:	2101      	movs	r1, #1
+ 130:	4620      	mov	r0, r4
+ 132:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+ 136:	2800      	cmp	r0, #0
+ 138:	d0b4      	beq.n	a4 <rtl8721d_var_set_mlme_sitesurvey+0xa4>
+ 13a:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 13e:	58e0      	ldr	r0, [r4, r3]
+ 140:	e8bd 41f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, lr}
+ 144:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 148:	4608      	mov	r0, r1
+ 14a:	313f      	adds	r1, #63	; 0x3f
+ 14c:	303e      	adds	r0, #62	; 0x3e
+ 14e:	f7ff bffe 	b.w	0 <ROM_WIFI_STOP_TXBeacon>
+ 152:	bf00      	nop
+
+Disassembly of section .text.rtl8721d_var_set_mlme_join:
+
+00000000 <rtl8721d_var_set_mlme_join>:
+   0:	b538      	push	{r3, r4, r5, lr}
+   2:	7813      	ldrb	r3, [r2, #0]
+   4:	4604      	mov	r4, r0
+   6:	b3a3      	cbz	r3, 72 <rtl8721d_var_set_mlme_join+0x72>
+   8:	2b01      	cmp	r3, #1
+   a:	f000 8088 	beq.w	11e <rtl8721d_var_set_mlme_join+0x11e>
+   e:	2b02      	cmp	r3, #2
+  10:	d009      	beq.n	26 <rtl8721d_var_set_mlme_join+0x26>
+  12:	f243 0530 	movw	r5, #12336	; 0x3030
+  16:	462a      	mov	r2, r5
+  18:	4620      	mov	r0, r4
+  1a:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
+  1e:	f240 412a 	movw	r1, #1066	; 0x42a
+  22:	f7ff bffe 	b.w	0 <rtw_write16>
+  26:	f242 23f0 	movw	r3, #8944	; 0x22f0
+  2a:	5cc3      	ldrb	r3, [r0, r3]
+  2c:	2b01      	cmp	r3, #1
+  2e:	d061      	beq.n	f4 <rtl8721d_var_set_mlme_join+0xf4>
+  30:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+  34:	f7ff fffe 	bl	0 <rtw_read8>
+  38:	f44f 61aa 	mov.w	r1, #1360	; 0x550
+  3c:	f000 02ef 	and.w	r2, r0, #239	; 0xef
+  40:	4620      	mov	r0, r4
+  42:	f7ff fffe 	bl	0 <rtw_write8>
+  46:	6923      	ldr	r3, [r4, #16]
+  48:	f013 0f60 	tst.w	r3, #96	; 0x60
+  4c:	d15e      	bne.n	10c <rtl8721d_var_set_mlme_join+0x10c>
+  4e:	f243 0530 	movw	r5, #12336	; 0x3030
+  52:	2103      	movs	r1, #3
+  54:	4620      	mov	r0, r4
+  56:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+  5a:	2800      	cmp	r0, #0
+  5c:	d0db      	beq.n	16 <rtl8721d_var_set_mlme_join+0x16>
+  5e:	2101      	movs	r1, #1
+  60:	4620      	mov	r0, r4
+  62:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+  66:	2800      	cmp	r0, #0
+  68:	d0d5      	beq.n	16 <rtl8721d_var_set_mlme_join+0x16>
+  6a:	f242 03c8 	movw	r3, #8392	; 0x20c8
+  6e:	58e0      	ldr	r0, [r4, r3]
+  70:	e06c      	b.n	14c <rtl8721d_var_set_mlme_join+0x14c>
+  72:	2103      	movs	r1, #3
+  74:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+  78:	2800      	cmp	r0, #0
+  7a:	d175      	bne.n	168 <rtl8721d_var_set_mlme_join+0x168>
+  7c:	f240 61a4 	movw	r1, #1700	; 0x6a4
+  80:	f64f 72ff 	movw	r2, #65535	; 0xffff
+  84:	4620      	mov	r0, r4
+  86:	f7ff fffe 	bl	0 <rtw_write16>
+  8a:	2103      	movs	r1, #3
+  8c:	4620      	mov	r0, r4
+  8e:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+  92:	bb10      	cbnz	r0, 48 <rtw_get_indicate_mgnt+0x48>
+  94:	f7ff fffe 	bl	0 <rtw_get_indicate_mgnt>
+  98:	2802      	cmp	r0, #2
+  9a:	d00b      	beq.n	b4 <rtl8721d_var_set_mlme_join+0xb4>
+  9c:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  a0:	4620      	mov	r0, r4
+  a2:	f7ff fffe 	bl	0 <rtw_read32>
+  a6:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  aa:	f040 02c0 	orr.w	r2, r0, #192	; 0xc0
+  ae:	4620      	mov	r0, r4
+  b0:	f7ff fffe 	bl	0 <rtw_write32>
+  b4:	6923      	ldr	r3, [r4, #16]
+  b6:	071b      	lsls	r3, r3, #28
+  b8:	d505      	bpl.n	c6 <rtl8721d_var_set_mlme_join+0xc6>
+  ba:	f504 53e5 	add.w	r3, r4, #7328	; 0x1ca0
+  be:	3318      	adds	r3, #24
+  c0:	891b      	ldrh	r3, [r3, #8]
+  c2:	2b12      	cmp	r3, #18
+  c4:	d1a5      	bne.n	12 <rtl8721d_var_set_mlme_join+0x12>
+  c6:	f240 7507 	movw	r5, #1799	; 0x707
+  ca:	4620      	mov	r0, r4
+  cc:	462a      	mov	r2, r5
+  ce:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
+  d2:	f240 412a 	movw	r1, #1066	; 0x42a
+  d6:	f7ff bffe 	b.w	0 <rtw_write16>
+  da:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  de:	4620      	mov	r0, r4
+  e0:	f7ff fffe 	bl	0 <rtw_read32>
+  e4:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  e8:	f040 0280 	orr.w	r2, r0, #128	; 0x80
+  ec:	4620      	mov	r0, r4
+  ee:	f7ff fffe 	bl	0 <rtw_write32>
+  f2:	e7df      	b.n	b4 <rtl8721d_var_set_mlme_join+0xb4>
+  f4:	f240 5151 	movw	r1, #1361	; 0x551
+  f8:	f7ff fffe 	bl	0 <rtw_read8>
+  fc:	f240 5151 	movw	r1, #1361	; 0x551
+ 100:	f000 02ef 	and.w	r2, r0, #239	; 0xef
+ 104:	4620      	mov	r0, r4
+ 106:	f7ff fffe 	bl	0 <rtw_write8>
+ 10a:	e79c      	b.n	46 <rtl8721d_var_set_mlme_join+0x46>
+ 10c:	2202      	movs	r2, #2
+ 10e:	f240 5142 	movw	r1, #1346	; 0x542
+ 112:	4620      	mov	r0, r4
+ 114:	f7ff fffe 	bl	0 <rtw_write8>
+ 118:	f240 7507 	movw	r5, #1799	; 0x707
+ 11c:	e799      	b.n	52 <rtl8721d_var_set_mlme_join+0x52>
+ 11e:	2100      	movs	r1, #0
+ 120:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+ 124:	bb88      	cbnz	r0, 18a <rtl8721d_var_set_mlme_join+0x18a>
+ 126:	2103      	movs	r1, #3
+ 128:	4620      	mov	r0, r4
+ 12a:	f7ff fffe 	bl	0 <check_buddy_mlmeinfo_state>
+ 12e:	2800      	cmp	r0, #0
+ 130:	f43f af6f 	beq.w	12 <rtl8721d_var_set_mlme_join+0x12>
+ 134:	2101      	movs	r1, #1
+ 136:	4620      	mov	r0, r4
+ 138:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+ 13c:	2800      	cmp	r0, #0
+ 13e:	f43f af68 	beq.w	12 <rtl8721d_var_set_mlme_join+0x12>
+ 142:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 146:	f243 0530 	movw	r5, #12336	; 0x3030
+ 14a:	58e0      	ldr	r0, [r4, r3]
+ 14c:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 150:	4608      	mov	r0, r1
+ 152:	313f      	adds	r1, #63	; 0x3f
+ 154:	303e      	adds	r0, #62	; 0x3e
+ 156:	f7ff fffe 	bl	0 <ROM_WIFI_RESUME_TxBeacon>
+ 15a:	2203      	movs	r2, #3
+ 15c:	f240 5153 	movw	r1, #1363	; 0x553
+ 160:	4620      	mov	r0, r4
+ 162:	f7ff fffe 	bl	0 <rtw_write8>
+ 166:	e756      	b.n	16 <rtl8721d_var_set_mlme_join+0x16>
+ 168:	2101      	movs	r1, #1
+ 16a:	4620      	mov	r0, r4
+ 16c:	f7ff fffe 	bl	0 <check_buddy_fwstate>
+ 170:	2800      	cmp	r0, #0
+ 172:	d083      	beq.n	7c <rtl8721d_var_set_mlme_join+0x7c>
+ 174:	f242 03c8 	movw	r3, #8392	; 0x20c8
+ 178:	58e0      	ldr	r0, [r4, r3]
+ 17a:	f500 510d 	add.w	r1, r0, #9024	; 0x2340
+ 17e:	4608      	mov	r0, r1
+ 180:	313f      	adds	r1, #63	; 0x3f
+ 182:	303e      	adds	r0, #62	; 0x3e
+ 184:	f7ff fffe 	bl	0 <ROM_WIFI_STOP_TXBeacon>
+ 188:	e778      	b.n	7c <rtl8721d_var_set_mlme_join+0x7c>
+ 18a:	2200      	movs	r2, #0
+ 18c:	f240 61a4 	movw	r1, #1700	; 0x6a4
+ 190:	4620      	mov	r0, r4
+ 192:	f7ff fffe 	bl	0 <rtw_write16>
+ 196:	e7c6      	b.n	126 <rtl8721d_var_set_mlme_join+0x126>
+
+Disassembly of section .text.SetHwReg8721D:
+
+00000000 <SetHwReg8721D>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	b570      	push	{r4, r5, r6, lr}
+   6:	4604      	mov	r4, r0
+   8:	4615      	mov	r5, r2
+   a:	58c6      	ldr	r6, [r0, r3]
+   c:	2963      	cmp	r1, #99	; 0x63
+   e:	f200 8218 	bhi.w	442 <SetHwReg8721D+0x442>
+  12:	e8df f011 	tbh	[pc, r1, lsl #1]
+  16:	011f      	.short	0x011f
+  18:	0115011a 	.word	0x0115011a
+  1c:	01cb01d3 	.word	0x01cb01d3
+  20:	00b10216 	.word	0x00b10216
+  24:	00a200aa 	.word	0x00a200aa
+  28:	0098009d 	.word	0x0098009d
+  2c:	0087008f 	.word	0x0087008f
+  30:	021600e3 	.word	0x021600e3
+  34:	00d80216 	.word	0x00d80216
+  38:	00cc00d1 	.word	0x00cc00d1
+  3c:	00f300fe 	.word	0x00f300fe
+  40:	02160216 	.word	0x02160216
+  44:	02160216 	.word	0x02160216
+  48:	02160216 	.word	0x02160216
+  4c:	02160216 	.word	0x02160216
+  50:	01100209 	.word	0x01100209
+  54:	00c50216 	.word	0x00c50216
+  58:	01a601b1 	.word	0x01a601b1
+  5c:	006a019f 	.word	0x006a019f
+  60:	02160211 	.word	0x02160211
+  64:	007e0216 	.word	0x007e0216
+  68:	02160216 	.word	0x02160216
+  6c:	006f0073 	.word	0x006f0073
+  70:	021601f2 	.word	0x021601f2
+  74:	02160216 	.word	0x02160216
+  78:	02160216 	.word	0x02160216
+  7c:	01e00216 	.word	0x01e00216
+  80:	02160216 	.word	0x02160216
+  84:	02160216 	.word	0x02160216
+  88:	02160216 	.word	0x02160216
+  8c:	01fe01db 	.word	0x01fe01db
+  90:	02160216 	.word	0x02160216
+  94:	01b801f7 	.word	0x01b801f7
+  98:	02160064 	.word	0x02160064
+  9c:	01bd0216 	.word	0x01bd0216
+  a0:	02160064 	.word	0x02160064
+  a4:	01980216 	.word	0x01980216
+  a8:	01850216 	.word	0x01850216
+  ac:	017c0216 	.word	0x017c0216
+  b0:	02160216 	.word	0x02160216
+  b4:	01710216 	.word	0x01710216
+  b8:	02160216 	.word	0x02160216
+  bc:	02160216 	.word	0x02160216
+  c0:	01570168 	.word	0x01570168
+  c4:	014a0152 	.word	0x014a0152
+  c8:	01400145 	.word	0x01400145
+  cc:	0216013c 	.word	0x0216013c
+  d0:	02160216 	.word	0x02160216
+  d4:	01340216 	.word	0x01340216
+  d8:	01240216 	.word	0x01240216
+  dc:	0065      	.short	0x0065
+  de:	bd70      	pop	{r4, r5, r6, pc}
+  e0:	6812      	ldr	r2, [r2, #0]
+  e2:	f44f 6185 	mov.w	r1, #1064	; 0x428
+  e6:	f7ff fffe 	bl	0 <rtw_write32>
+  ea:	7828      	ldrb	r0, [r5, #0]
+  ec:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+  f0:	f7ff bffe 	b.w	0 <ROM_WIFI_ACM_CTRL>
+  f4:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+  f8:	f7ff bffe 	b.w	0 <rtl8721d_set_FwPsTuneParam_cmd>
+  fc:	f641 43ac 	movw	r3, #7340	; 0x1cac
+ 100:	5cc3      	ldrb	r3, [r0, r3]
+ 102:	2b00      	cmp	r3, #0
+ 104:	f000 81a1 	beq.w	44a <SetHwReg8721D+0x44a>
+ 108:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 10c:	4611      	mov	r1, r2
+ 10e:	f7ff bffe 	b.w	0 <rtl8721d_ucps_cmd>
+ 112:	7812      	ldrb	r2, [r2, #0]
+ 114:	f240 31d9 	movw	r1, #985	; 0x3d9
+ 118:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 11c:	f002 02c1 	and.w	r2, r2, #193	; 0xc1
+ 120:	f7ff bffe 	b.w	0 <rtw_write8>
+ 124:	210c      	movs	r1, #12
+ 126:	f7ff fffe 	bl	0 <SetHwReg8721D>
+ 12a:	4620      	mov	r0, r4
+ 12c:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 130:	f7ff bffe 	b.w	0 <rtw_btcoex_wifionly_scan_notify>
+ 134:	210b      	movs	r1, #11
+ 136:	f7ff fffe 	bl	0 <SetHwReg8721D>
+ 13a:	4620      	mov	r0, r4
+ 13c:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 140:	2107      	movs	r1, #7
+ 142:	f7ff bffe 	b.w	0 <rtw_coex_wifi_info_update>
+ 146:	4610      	mov	r0, r2
+ 148:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 14c:	f7ff bffe 	b.w	0 <ROM_WIFI_CHECK_BSSID>
+ 150:	2109      	movs	r1, #9
+ 152:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 156:	f7ff bffe 	b.w	0 <SetHwReg8721D>
+ 15a:	f242 23f0 	movw	r3, #8944	; 0x22f0
+ 15e:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 162:	5cc0      	ldrb	r0, [r0, r3]
+ 164:	2108      	movs	r1, #8
+ 166:	f7ff bffe 	b.w	0 <ROM_WIFI_BCN_FUNC>
+ 16a:	7812      	ldrb	r2, [r2, #0]
+ 16c:	f240 5122 	movw	r1, #1314	; 0x522
+ 170:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 174:	f7ff bffe 	b.w	0 <rtw_write8>
+ 178:	4610      	mov	r0, r2
+ 17a:	f106 011e 	add.w	r1, r6, #30
+ 17e:	f7ff fffe 	bl	0 <ROM_WIFI_BASIC_RATE>
+ 182:	4620      	mov	r0, r4
+ 184:	f44f 6188 	mov.w	r1, #1088	; 0x440
+ 188:	f7ff fffe 	bl	0 <rtw_read32>
+ 18c:	4602      	mov	r2, r0
+ 18e:	f506 500f 	add.w	r0, r6, #9152	; 0x23c0
+ 192:	3008      	adds	r0, #8
+ 194:	2300      	movs	r3, #0
+ 196:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 19a:	2170      	movs	r1, #112	; 0x70
+ 19c:	f7ff bffe 	b.w	0 <odm_cmn_info_update>
+ 1a0:	6812      	ldr	r2, [r2, #0]
+ 1a2:	f44f 61a0 	mov.w	r1, #1280	; 0x500
+ 1a6:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 1aa:	f7ff bffe 	b.w	0 <rtw_write32>
+ 1ae:	4610      	mov	r0, r2
+ 1b0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 1b4:	f7ff bffe 	b.w	0 <ROM_WIFI_RESP_SIFS>
+ 1b8:	7812      	ldrb	r2, [r2, #0]
+ 1ba:	f240 511b 	movw	r1, #1307	; 0x51b
+ 1be:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 1c2:	f7ff bffe 	b.w	0 <rtw_write8>
+ 1c6:	6843      	ldr	r3, [r0, #4]
+ 1c8:	8812      	ldrh	r2, [r2, #0]
+ 1ca:	2b03      	cmp	r3, #3
+ 1cc:	f000 8160 	beq.w	490 <SetHwReg8721D+0x490>
+ 1d0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 1d4:	f240 5154 	movw	r1, #1364	; 0x554
+ 1d8:	f7ff bffe 	b.w	0 <rtw_write16>
+ 1dc:	210d      	movs	r1, #13
+ 1de:	f7ff fffe 	bl	0 <SetHwReg8721D>
+ 1e2:	4620      	mov	r0, r4
+ 1e4:	f7ff fffe 	bl	0 <rtw_btcoex_wifionly_connect_notify>
+ 1e8:	782b      	ldrb	r3, [r5, #0]
+ 1ea:	2b01      	cmp	r3, #1
+ 1ec:	f000 8172 	beq.w	4d4 <SetHwReg8721D+0x4d4>
+ 1f0:	f0c0 816a 	bcc.w	4c8 <SetHwReg8721D+0x4c8>
+ 1f4:	2b02      	cmp	r3, #2
+ 1f6:	f000 8161 	beq.w	4bc <SetHwReg8721D+0x4bc>
+ 1fa:	bd70      	pop	{r4, r5, r6, pc}
+ 1fc:	6843      	ldr	r3, [r0, #4]
+ 1fe:	2b03      	cmp	r3, #3
+ 200:	f000 8155 	beq.w	4ae <SetHwReg8721D+0x4ae>
+ 204:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 208:	7812      	ldrb	r2, [r2, #0]
+ 20a:	f44f 61d0 	mov.w	r1, #1664	; 0x680
+ 20e:	f7ff bffe 	b.w	0 <rtw_write8>
+ 212:	7813      	ldrb	r3, [r2, #0]
+ 214:	f240 616a 	movw	r1, #1642	; 0x66a
+ 218:	2b00      	cmp	r3, #0
+ 21a:	f000 811e 	beq.w	45a <SetHwReg8721D+0x45a>
+ 21e:	f7ff fffe 	bl	0 <rtw_read8>
+ 222:	f040 0202 	orr.w	r2, r0, #2
+ 226:	b2d2      	uxtb	r2, r2
+ 228:	4620      	mov	r0, r4
+ 22a:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 22e:	f240 616a 	movw	r1, #1642	; 0x66a
+ 232:	f7ff bffe 	b.w	0 <rtw_write8>
+ 236:	4610      	mov	r0, r2
+ 238:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 23c:	f7ff bffe 	b.w	0 <ROM_WIFI_CAM_WRITE>
+ 240:	2102      	movs	r1, #2
+ 242:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 246:	f7ff bffe 	b.w	0 <SetHwReg8721D>
+ 24a:	4610      	mov	r0, r2
+ 24c:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 250:	f7ff bffe 	b.w	0 <ROM_WIFI_MEDIA_STATUS1>
+ 254:	4610      	mov	r0, r2
+ 256:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 25a:	f7ff bffe 	b.w	0 <ROM_WIFI_MEDIA_STATUS>
+ 25e:	f44f 6199 	mov.w	r1, #1224	; 0x4c8
+ 262:	f7ff fffe 	bl	0 <rtw_read32>
+ 266:	782a      	ldrb	r2, [r5, #0]
+ 268:	f420 107c 	bic.w	r0, r0, #4128768	; 0x3f0000
+ 26c:	ea40 4202 	orr.w	r2, r0, r2, lsl #16
+ 270:	f44f 6199 	mov.w	r1, #1224	; 0x4c8
+ 274:	4620      	mov	r0, r4
+ 276:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 27a:	f7ff bffe 	b.w	0 <rtw_write32>
+ 27e:	f24a 422b 	movw	r2, #42027	; 0xa42b
+ 282:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 286:	f44f 61a1 	mov.w	r1, #1288	; 0x508
+ 28a:	f7ff bffe 	b.w	0 <rtw_write32>
+ 28e:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 292:	f7ff bffe 	b.w	0 <btc_pta_init_8721d>
+ 296:	7810      	ldrb	r0, [r2, #0]
+ 298:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 29c:	f7ff bffe 	b.w	0 <btc_set_gnt_bt_with_clk_source_8721d>
+ 2a0:	7810      	ldrb	r0, [r2, #0]
+ 2a2:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 2a6:	f7ff bffe 	b.w	0 <btc_set_gnt_bt_8721d>
+ 2aa:	7811      	ldrb	r1, [r2, #0]
+ 2ac:	2900      	cmp	r1, #0
+ 2ae:	f43f af16 	beq.w	de <SetHwReg8721D+0xde>
+ 2b2:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 2b6:	f7ff bffe 	b.w	0 <rtl8721d_ucps_closeRF>
+ 2ba:	7811      	ldrb	r1, [r2, #0]
+ 2bc:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 2c0:	f7ff bffe 	b.w	0 <rtl8721d_ucps_cmd>
+ 2c4:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+ 2c8:	f7ff fffe 	bl	0 <rtw_read32>
+ 2cc:	782b      	ldrb	r3, [r5, #0]
+ 2ce:	2b00      	cmp	r3, #0
+ 2d0:	f000 80c0 	beq.w	454 <SetHwReg8721D+0x454>
+ 2d4:	f440 7200 	orr.w	r2, r0, #512	; 0x200
+ 2d8:	4620      	mov	r0, r4
+ 2da:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 2de:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+ 2e2:	f7ff bffe 	b.w	0 <rtw_write32>
+ 2e6:	7810      	ldrb	r0, [r2, #0]
+ 2e8:	f504 6179 	add.w	r1, r4, #3984	; 0xf90
+ 2ec:	f604 7294 	addw	r2, r4, #3988	; 0xf94
+ 2f0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 2f4:	f7ff bffe 	b.w	0 <ROM_WIFI_PROMISC_Cmd>
+ 2f8:	6903      	ldr	r3, [r0, #16]
+ 2fa:	2101      	movs	r1, #1
+ 2fc:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 300:	f013 0f08 	tst.w	r3, #8
+ 304:	bf0c      	ite	eq
+ 306:	2204      	moveq	r2, #4
+ 308:	2201      	movne	r2, #1
+ 30a:	f7ff bffe 	b.w	0 <rtl8721d_download_rsvd_page>
+ 30e:	7813      	ldrb	r3, [r2, #0]
+ 310:	2b00      	cmp	r3, #0
+ 312:	f000 80ad 	beq.w	470 <SetHwReg8721D+0x470>
+ 316:	f242 3355 	movw	r3, #9045	; 0x2355
+ 31a:	2201      	movs	r2, #1
+ 31c:	54f2      	strb	r2, [r6, r3]
+ 31e:	bd70      	pop	{r4, r5, r6, pc}
+ 320:	f242 23f0 	movw	r3, #8944	; 0x22f0
+ 324:	5cc3      	ldrb	r3, [r0, r3]
+ 326:	f240 212a 	movw	r1, #554	; 0x22a
+ 32a:	2b01      	cmp	r3, #1
+ 32c:	f000 80a4 	beq.w	478 <SetHwReg8721D+0x478>
+ 330:	f7ff fffe 	bl	0 <rtw_read8>
+ 334:	f240 212a 	movw	r1, #554	; 0x22a
+ 338:	f000 02ef 	and.w	r2, r0, #239	; 0xef
+ 33c:	4620      	mov	r0, r4
+ 33e:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 342:	f7ff bffe 	b.w	0 <rtw_write8>
+ 346:	8811      	ldrh	r1, [r2, #0]
+ 348:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 34c:	0a0a      	lsrs	r2, r1, #8
+ 34e:	b2c9      	uxtb	r1, r1
+ 350:	f7ff bffe 	b.w	0 <rtl8721d_set_FwMediaStatusRpt_cmd>
+ 354:	6812      	ldr	r2, [r2, #0]
+ 356:	f240 510c 	movw	r1, #1292	; 0x50c
+ 35a:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 35e:	f7ff bffe 	b.w	0 <rtw_write32>
+ 362:	f242 3358 	movw	r3, #9048	; 0x2358
+ 366:	6812      	ldr	r2, [r2, #0]
+ 368:	f44f 61a1 	mov.w	r1, #1288	; 0x508
+ 36c:	50f2      	str	r2, [r6, r3]
+ 36e:	682a      	ldr	r2, [r5, #0]
+ 370:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 374:	f7ff bffe 	b.w	0 <rtw_write32>
+ 378:	6812      	ldr	r2, [r2, #0]
+ 37a:	f240 5104 	movw	r1, #1284	; 0x504
+ 37e:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 382:	f7ff bffe 	b.w	0 <rtw_write32>
+ 386:	f245 7303 	movw	r3, #22275	; 0x5703
+ 38a:	7812      	ldrb	r2, [r2, #0]
+ 38c:	54f2      	strb	r2, [r6, r3]
+ 38e:	bd70      	pop	{r4, r5, r6, pc}
+ 390:	6813      	ldr	r3, [r2, #0]
+ 392:	f5b3 4fff 	cmp.w	r3, #32640	; 0x7f80
+ 396:	f63f aea2 	bhi.w	de <SetHwReg8721D+0xde>
+ 39a:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 39e:	337f      	adds	r3, #127	; 0x7f
+ 3a0:	f3c3 12c7 	ubfx	r2, r3, #7, #8
+ 3a4:	f240 6152 	movw	r1, #1618	; 0x652
+ 3a8:	f7ff bffe 	b.w	0 <rtw_write8>
+ 3ac:	f242 23f0 	movw	r3, #8944	; 0x22f0
+ 3b0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 3b4:	5cc0      	ldrb	r0, [r0, r3]
+ 3b6:	2104      	movs	r1, #4
+ 3b8:	f7ff bffe 	b.w	0 <ROM_WIFI_BSSID_SET>
+ 3bc:	f242 23f0 	movw	r3, #8944	; 0x22f0
+ 3c0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 3c4:	5cc0      	ldrb	r0, [r0, r3]
+ 3c6:	2103      	movs	r1, #3
+ 3c8:	f7ff bffe 	b.w	0 <ROM_WIFI_MACADDR_SET>
+ 3cc:	8813      	ldrh	r3, [r2, #0]
+ 3ce:	f506 46ae 	add.w	r6, r6, #22272	; 0x5700
+ 3d2:	8033      	strh	r3, [r6, #0]
+ 3d4:	bd70      	pop	{r4, r5, r6, pc}
+ 3d6:	7811      	ldrb	r1, [r2, #0]
+ 3d8:	f506 43a8 	add.w	r3, r6, #21504	; 0x5400
+ 3dc:	29ff      	cmp	r1, #255	; 0xff
+ 3de:	f103 034c 	add.w	r3, r3, #76	; 0x4c
+ 3e2:	d05b      	beq.n	49c <SetHwReg8721D+0x49c>
+ 3e4:	f893 2026 	ldrb.w	r2, [r3, #38]	; 0x26
+ 3e8:	f506 500f 	add.w	r0, r6, #9152	; 0x23c0
+ 3ec:	f883 202c 	strb.w	r2, [r3, #44]	; 0x2c
+ 3f0:	3008      	adds	r0, #8
+ 3f2:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 3f6:	f7ff bffe 	b.w	0 <odm_write_dig>
+ 3fa:	7811      	ldrb	r1, [r2, #0]
+ 3fc:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 400:	f7ff bffe 	b.w	0 <rtl8721d_set_FwJoinBssRpt_cmd>
+ 404:	f242 23f0 	movw	r3, #8944	; 0x22f0
+ 408:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 40c:	5cc0      	ldrb	r0, [r0, r3]
+ 40e:	f7ff bffe 	b.w	0 <ROM_WIFI_CHECK_TXBUF>
+ 412:	f500 53df 	add.w	r3, r0, #7136	; 0x1be0
+ 416:	3318      	adds	r3, #24
+ 418:	f893 1081 	ldrb.w	r1, [r3, #129]	; 0x81
+ 41c:	f600 40a2 	addw	r0, r0, #3234	; 0xca2
+ 420:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 424:	f7ff bffe 	b.w	0 <ROM_WIFI_FIFO_CLEARN_UP>
+ 428:	f04f 4240 	mov.w	r2, #3221225472	; 0xc0000000
+ 42c:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 430:	f44f 61ce 	mov.w	r1, #1648	; 0x670
+ 434:	f7ff bffe 	b.w	0 <rtw_write32>
+ 438:	f245 7302 	movw	r3, #22274	; 0x5702
+ 43c:	7812      	ldrb	r2, [r2, #0]
+ 43e:	54f2      	strb	r2, [r6, r3]
+ 440:	bd70      	pop	{r4, r5, r6, pc}
+ 442:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 446:	f7ff bffe 	b.w	0 <SetHwReg>
+ 44a:	7811      	ldrb	r1, [r2, #0]
+ 44c:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 450:	f7ff bffe 	b.w	0 <rtl8721d_set_FwPwrMode_cmd>
+ 454:	f420 7200 	bic.w	r2, r0, #512	; 0x200
+ 458:	e73e      	b.n	fffffe80 <rtw_read8+0xfffffe80>
+ 45a:	f7ff fffe 	bl	0 <rtw_read8>
+ 45e:	f240 616a 	movw	r1, #1642	; 0x66a
+ 462:	f000 02fd 	and.w	r2, r0, #253	; 0xfd
+ 466:	4620      	mov	r0, r4
+ 468:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 46c:	f7ff bffe 	b.w	0 <rtw_write8>
+ 470:	f242 3255 	movw	r2, #9045	; 0x2355
+ 474:	54b3      	strb	r3, [r6, r2]
+ 476:	bd70      	pop	{r4, r5, r6, pc}
+ 478:	f7ff fffe 	bl	0 <rtw_read8>
+ 47c:	f040 0210 	orr.w	r2, r0, #16
+ 480:	b2d2      	uxtb	r2, r2
+ 482:	4620      	mov	r0, r4
+ 484:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 488:	f240 212a 	movw	r1, #554	; 0x22a
+ 48c:	f7ff bffe 	b.w	0 <rtw_write8>
+ 490:	f44f 61bb 	mov.w	r1, #1496	; 0x5d8
+ 494:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 498:	f7ff bffe 	b.w	0 <rtw_write16>
+ 49c:	f506 500f 	add.w	r0, r6, #9152	; 0x23c0
+ 4a0:	f893 102c 	ldrb.w	r1, [r3, #44]	; 0x2c
+ 4a4:	3008      	adds	r0, #8
+ 4a6:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 4aa:	f7ff bffe 	b.w	0 <odm_write_dig>
+ 4ae:	222c      	movs	r2, #44	; 0x2c
+ 4b0:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 4b4:	f44f 61d0 	mov.w	r1, #1664	; 0x680
+ 4b8:	f7ff bffe 	b.w	0 <rtw_write8>
+ 4bc:	4620      	mov	r0, r4
+ 4be:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 4c2:	2105      	movs	r1, #5
+ 4c4:	f7ff bffe 	b.w	0 <rtw_coex_wifi_info_update>
+ 4c8:	4620      	mov	r0, r4
+ 4ca:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 4ce:	2104      	movs	r1, #4
+ 4d0:	f7ff bffe 	b.w	0 <rtw_coex_wifi_info_update>
+ 4d4:	4620      	mov	r0, r4
+ 4d6:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+ 4da:	2106      	movs	r1, #6
+ 4dc:	f7ff bffe 	b.w	0 <rtw_coex_wifi_info_update>
+
+Disassembly of section .text.GetHwReg8721D:
+
+00000000 <GetHwReg8721D>:
+   0:	b538      	push	{r3, r4, r5, lr}
+   2:	f242 05c8 	movw	r5, #8392	; 0x20c8
+   6:	1f8b      	subs	r3, r1, #6
+   8:	4614      	mov	r4, r2
+   a:	5942      	ldr	r2, [r0, r5]
+   c:	2b5c      	cmp	r3, #92	; 0x5c
+   e:	f200 8097 	bhi.w	140 <GetHwReg8721D+0x140>
+  12:	e8df f003 	tbb	[pc, r3]
+  16:	9537      	.short	0x9537
+  18:	95959595 	.word	0x95959595
+  1c:	95959595 	.word	0x95959595
+  20:	95959595 	.word	0x95959595
+  24:	3a959595 	.word	0x3a959595
+  28:	95959595 	.word	0x95959595
+  2c:	95959595 	.word	0x95959595
+  30:	95959595 	.word	0x95959595
+  34:	95959595 	.word	0x95959595
+  38:	95953e95 	.word	0x95953e95
+  3c:	95449595 	.word	0x95449595
+  40:	95959595 	.word	0x95959595
+  44:	955e9558 	.word	0x955e9558
+  48:	63959595 	.word	0x63959595
+  4c:	95959595 	.word	0x95959595
+  50:	756d9568 	.word	0x756d9568
+  54:	95959595 	.word	0x95959595
+  58:	95957d95 	.word	0x95957d95
+  5c:	95959595 	.word	0x95959595
+  60:	95959595 	.word	0x95959595
+  64:	95959595 	.word	0x95959595
+  68:	95959595 	.word	0x95959595
+  6c:	918d8985 	.word	0x918d8985
+  70:	9595      	.short	0x9595
+  72:	2f          	.byte	0x2f
+  73:	00          	.byte	0x00
+  74:	f240 41ca 	movw	r1, #1226	; 0x4ca
+  78:	f7ff fffe 	bl	0 <rtw_read8>
+  7c:	f000 003f 	and.w	r0, r0, #63	; 0x3f
+  80:	7020      	strb	r0, [r4, #0]
+  82:	bd38      	pop	{r3, r4, r5, pc}
+  84:	8bd3      	ldrh	r3, [r2, #30]
+  86:	8023      	strh	r3, [r4, #0]
+  88:	bd38      	pop	{r3, r4, r5, pc}
+  8a:	f892 3022 	ldrb.w	r3, [r2, #34]	; 0x22
+  8e:	7023      	strb	r3, [r4, #0]
+  90:	bd38      	pop	{r3, r4, r5, pc}
+  92:	f240 31d9 	movw	r1, #985	; 0x3d9
+  96:	f7ff fffe 	bl	0 <rtw_read8>
+  9a:	7020      	strb	r0, [r4, #0]
+  9c:	bd38      	pop	{r3, r4, r5, pc}
+  9e:	f242 13d4 	movw	r3, #8660	; 0x21d4
+  a2:	58c3      	ldr	r3, [r0, r3]
+  a4:	2b01      	cmp	r3, #1
+  a6:	d050      	beq.n	14a <GetHwReg8721D+0x14a>
+  a8:	f641 4374 	movw	r3, #7284	; 0x1c74
+  ac:	5cc3      	ldrb	r3, [r0, r3]
+  ae:	2b02      	cmp	r3, #2
+  b0:	d04b      	beq.n	14a <GetHwReg8721D+0x14a>
+  b2:	f44f 61c1 	mov.w	r1, #1544	; 0x608
+  b6:	f7ff fffe 	bl	0 <rtw_read32>
+  ba:	f410 3f40 	tst.w	r0, #196608	; 0x30000
+  be:	d044      	beq.n	14a <GetHwReg8721D+0x14a>
+  c0:	2300      	movs	r3, #0
+  c2:	7023      	strb	r3, [r4, #0]
+  c4:	bd38      	pop	{r3, r4, r5, pc}
+  c6:	4b22      	ldr	r3, [pc, #136]	; (150 <GetHwReg8721D+0x150>)
+  c8:	781b      	ldrb	r3, [r3, #0]
+  ca:	f003 037f 	and.w	r3, r3, #127	; 0x7f
+  ce:	7023      	strb	r3, [r4, #0]
+  d0:	bd38      	pop	{r3, r4, r5, pc}
+  d2:	f245 63f9 	movw	r3, #22265	; 0x56f9
+  d6:	5cd3      	ldrb	r3, [r2, r3]
+  d8:	7023      	strb	r3, [r4, #0]
+  da:	bd38      	pop	{r3, r4, r5, pc}
+  dc:	f502 42ae 	add.w	r2, r2, #22272	; 0x5700
+  e0:	8813      	ldrh	r3, [r2, #0]
+  e2:	8023      	strh	r3, [r4, #0]
+  e4:	bd38      	pop	{r3, r4, r5, pc}
+  e6:	f245 7303 	movw	r3, #22275	; 0x5703
+  ea:	5cd3      	ldrb	r3, [r2, r3]
+  ec:	7023      	strb	r3, [r4, #0]
+  ee:	bd38      	pop	{r3, r4, r5, pc}
+  f0:	f240 11c7 	movw	r1, #455	; 0x1c7
+  f4:	f7ff fffe 	bl	0 <rtw_read8>
+  f8:	28ea      	cmp	r0, #234	; 0xea
+  fa:	7020      	strb	r0, [r4, #0]
+  fc:	d0e0      	beq.n	c0 <GetHwReg8721D+0xc0>
+  fe:	bd38      	pop	{r3, r4, r5, pc}
+ 100:	f240 31d9 	movw	r1, #985	; 0x3d9
+ 104:	f7ff fffe 	bl	0 <rtw_read8>
+ 108:	f020 007f 	bic.w	r0, r0, #127	; 0x7f
+ 10c:	7020      	strb	r0, [r4, #0]
+ 10e:	bd38      	pop	{r3, r4, r5, pc}
+ 110:	f240 411a 	movw	r1, #1050	; 0x41a
+ 114:	f7ff fffe 	bl	0 <rtw_read16>
+ 118:	f3c0 2080 	ubfx	r0, r0, #10, #1
+ 11c:	7020      	strb	r0, [r4, #0]
+ 11e:	bd38      	pop	{r3, r4, r5, pc}
+ 120:	f7ff fffe 	bl	0 <Hal_BT_Is_Supported>
+ 124:	7020      	strb	r0, [r4, #0]
+ 126:	bd38      	pop	{r3, r4, r5, pc}
+ 128:	f7ff fffe 	bl	0 <Hal_BT_Mesh_Is_Supported>
+ 12c:	7020      	strb	r0, [r4, #0]
+ 12e:	bd38      	pop	{r3, r4, r5, pc}
+ 130:	f7ff fffe 	bl	0 <bt_get_patch_code_8721d>
+ 134:	6020      	str	r0, [r4, #0]
+ 136:	bd38      	pop	{r3, r4, r5, pc}
+ 138:	f7ff fffe 	bl	0 <bt_get_patch_code_len_8721d>
+ 13c:	6020      	str	r0, [r4, #0]
+ 13e:	bd38      	pop	{r3, r4, r5, pc}
+ 140:	4622      	mov	r2, r4
+ 142:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
+ 146:	f7ff bffe 	b.w	0 <GetHwReg>
+ 14a:	2301      	movs	r3, #1
+ 14c:	7023      	strb	r3, [r4, #0]
+ 14e:	bd38      	pop	{r3, r4, r5, pc}
+ 150:	40083450 	.word	0x40083450
+
+Disassembly of section .text.SetHalDefVar8721D:
+
+00000000 <SetHalDefVar8721D>:
+   0:	2001      	movs	r0, #1
+   2:	4770      	bx	lr
+
+Disassembly of section .text.GetHalDefVar8721D:
+
+00000000 <GetHalDefVar8721D>:
+   0:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   4:	58c3      	ldr	r3, [r0, r3]
+   6:	2912      	cmp	r1, #18
+   8:	d80d      	bhi.n	26 <GetHalDefVar8721D+0x26>
+   a:	e8df f001 	tbb	[pc, r1]
+   e:	1420      	.short	0x1420
+  10:	0c0c0c0e 	.word	0x0c0c0c0e
+  14:	0c0c0c0c 	.word	0x0c0c0c0c
+  18:	0c0c0c0c 	.word	0x0c0c0c0c
+  1c:	0c0c0c0c 	.word	0x0c0c0c0c
+  20:	0a          	.byte	0x0a
+  21:	00          	.byte	0x00
+  22:	2301      	movs	r3, #1
+  24:	6013      	str	r3, [r2, #0]
+  26:	2001      	movs	r0, #1
+  28:	4770      	bx	lr
+  2a:	f245 61f9 	movw	r1, #22265	; 0x56f9
+  2e:	5c5b      	ldrb	r3, [r3, r1]
+  30:	7013      	strb	r3, [r2, #0]
+  32:	2001      	movs	r0, #1
+  34:	4770      	bx	lr
+  36:	7819      	ldrb	r1, [r3, #0]
+  38:	3901      	subs	r1, #1
+  3a:	2901      	cmp	r1, #1
+  3c:	d90d      	bls.n	5a <GetHalDefVar8721D+0x5a>
+  3e:	f245 61fa 	movw	r1, #22266	; 0x56fa
+  42:	5c5b      	ldrb	r3, [r3, r1]
+  44:	3300      	adds	r3, #0
+  46:	bf18      	it	ne
+  48:	2301      	movne	r3, #1
+  4a:	7013      	strb	r3, [r2, #0]
+  4c:	e7f1      	b.n	32 <GetHalDefVar8721D+0x32>
+  4e:	f242 3188 	movw	r1, #9096	; 0x2388
+  52:	585b      	ldr	r3, [r3, r1]
+  54:	2001      	movs	r0, #1
+  56:	6013      	str	r3, [r2, #0]
+  58:	4770      	bx	lr
+  5a:	7959      	ldrb	r1, [r3, #5]
+  5c:	2902      	cmp	r1, #2
+  5e:	d1ee      	bne.n	3e <GetHalDefVar8721D+0x3e>
+  60:	2300      	movs	r3, #0
+  62:	7013      	strb	r3, [r2, #0]
+  64:	e7e5      	b.n	32 <GetHalDefVar8721D+0x32>
+  66:	bf00      	nop
+
+Disassembly of section .text.Hal_DetectWoWMode:
+
+00000000 <Hal_DetectWoWMode>:
+   0:	f641 4353 	movw	r3, #7251	; 0x1c53
+   4:	2201      	movs	r2, #1
+   6:	54c2      	strb	r2, [r0, r3]
+   8:	4770      	bx	lr
+   a:	bf00      	nop
+
+Disassembly of section .image2.ram.text:
+
+00000000 <sw_pta_internal_dev_stop>:
+   0:	2101      	movs	r1, #1
+   2:	b510      	push	{r4, lr}
+   4:	4608      	mov	r0, r1
+   6:	f7ff fffe 	bl	0 <btc_set_gnt_bt_atmoic_8721d>
+   a:	b1a8      	cbz	r0, 38 <sw_pta_internal_dev_stop+0x38>
+   c:	f44f 3480 	mov.w	r4, #65536	; 0x10000
+  10:	2001      	movs	r0, #1
+  12:	4b0a      	ldr	r3, [pc, #40]	; (3c <sw_pta_internal_dev_stop+0x3c>)
+  14:	4a0a      	ldr	r2, [pc, #40]	; (40 <sw_pta_internal_dev_stop+0x40>)
+  16:	781b      	ldrb	r3, [r3, #0]
+  18:	490a      	ldr	r1, [pc, #40]	; (44 <sw_pta_internal_dev_stop+0x44>)
+  1a:	f003 037f 	and.w	r3, r3, #127	; 0x7f
+  1e:	7013      	strb	r3, [r2, #0]
+  20:	680b      	ldr	r3, [r1, #0]
+  22:	f443 1340 	orr.w	r3, r3, #3145728	; 0x300000
+  26:	600b      	str	r3, [r1, #0]
+  28:	f8d2 32fd 	ldr.w	r3, [r2, #765]	; 0x2fd
+  2c:	f443 7380 	orr.w	r3, r3, #256	; 0x100
+  30:	f8c2 32fd 	str.w	r3, [r2, #765]	; 0x2fd
+  34:	f841 4c4c 	str.w	r4, [r1, #-76]
+  38:	bd10      	pop	{r4, pc}
+  3a:	bf00      	nop
+  3c:	40080523 	.word	0x40080523
+  40:	40082d23 	.word	0x40082d23
+  44:	4008308c 	.word	0x4008308c
+
+00000048 <sw_pta_internal_dev_resume>:
+  48:	4a29      	ldr	r2, [pc, #164]	; (f0 <sw_pta_internal_dev_resume+0xa8>)
+  4a:	b508      	push	{r3, lr}
+  4c:	6813      	ldr	r3, [r2, #0]
+  4e:	4929      	ldr	r1, [pc, #164]	; (f4 <sw_pta_internal_dev_resume+0xac>)
+  50:	f443 7380 	orr.w	r3, r3, #256	; 0x100
+  54:	6013      	str	r3, [r2, #0]
+  56:	780b      	ldrb	r3, [r1, #0]
+  58:	f003 037f 	and.w	r3, r3, #127	; 0x7f
+  5c:	2b3d      	cmp	r3, #61	; 0x3d
+  5e:	d926      	bls.n	ae <sw_pta_internal_dev_resume+0x66>
+  60:	2b43      	cmp	r3, #67	; 0x43
+  62:	d910      	bls.n	86 <sw_pta_internal_dev_resume+0x3e>
+  64:	2b4f      	cmp	r3, #79	; 0x4f
+  66:	d931      	bls.n	cc <sw_pta_internal_dev_resume+0x84>
+  68:	2b53      	cmp	r3, #83	; 0x53
+  6a:	d927      	bls.n	bc <sw_pta_internal_dev_resume+0x74>
+  6c:	2b63      	cmp	r3, #99	; 0x63
+  6e:	ea4f 0353 	mov.w	r3, r3, lsr #1
+  72:	d933      	bls.n	dc <sw_pta_internal_dev_resume+0x94>
+  74:	2b37      	cmp	r3, #55	; 0x37
+  76:	d838      	bhi.n	ea <sw_pta_internal_dev_resume+0xa2>
+  78:	f1c3 0338 	rsb	r3, r3, #56	; 0x38
+  7c:	b2db      	uxtb	r3, r3
+  7e:	015b      	lsls	r3, r3, #5
+  80:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  84:	e006      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  86:	085b      	lsrs	r3, r3, #1
+  88:	f1c3 03e2 	rsb	r3, r3, #226	; 0xe2
+  8c:	b2db      	uxtb	r3, r3
+  8e:	015b      	lsls	r3, r3, #5
+  90:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  94:	2100      	movs	r1, #0
+  96:	4818      	ldr	r0, [pc, #96]	; (f8 <sw_pta_internal_dev_resume+0xb0>)
+  98:	4a18      	ldr	r2, [pc, #96]	; (fc <sw_pta_internal_dev_resume+0xb4>)
+  9a:	6003      	str	r3, [r0, #0]
+  9c:	6813      	ldr	r3, [r2, #0]
+  9e:	4608      	mov	r0, r1
+  a0:	f423 1340 	bic.w	r3, r3, #3145728	; 0x300000
+  a4:	6013      	str	r3, [r2, #0]
+  a6:	f7ff fffe 	bl	0 <btc_set_gnt_bt_atmoic_8721d>
+  aa:	2001      	movs	r0, #1
+  ac:	bd08      	pop	{r3, pc}
+  ae:	ea6f 0353 	mvn.w	r3, r3, lsr #1
+  b2:	b2db      	uxtb	r3, r3
+  b4:	015b      	lsls	r3, r3, #5
+  b6:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  ba:	e7eb      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  bc:	085b      	lsrs	r3, r3, #1
+  be:	f1c3 038d 	rsb	r3, r3, #141	; 0x8d
+  c2:	b2db      	uxtb	r3, r3
+  c4:	015b      	lsls	r3, r3, #5
+  c6:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  ca:	e7e3      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  cc:	085b      	lsrs	r3, r3, #1
+  ce:	f1c3 03aa 	rsb	r3, r3, #170	; 0xaa
+  d2:	b2db      	uxtb	r3, r3
+  d4:	015b      	lsls	r3, r3, #5
+  d6:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  da:	e7db      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  dc:	f1c3 0372 	rsb	r3, r3, #114	; 0x72
+  e0:	b2db      	uxtb	r3, r3
+  e2:	015b      	lsls	r3, r3, #5
+  e4:	f443 3340 	orr.w	r3, r3, #196608	; 0x30000
+  e8:	e7d4      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  ea:	f44f 3340 	mov.w	r3, #196608	; 0x30000
+  ee:	e7d1      	b.n	94 <sw_pta_internal_dev_resume+0x4c>
+  f0:	40083020 	.word	0x40083020
+  f4:	40083450 	.word	0x40083450
+  f8:	40083040 	.word	0x40083040
+  fc:	4008308c 	.word	0x4008308c
+
+00000100 <sw_pta_wifi_is_ips>:
+ 100:	4b0a      	ldr	r3, [pc, #40]	; (12c <sw_pta_wifi_is_ips+0x2c>)
+ 102:	7c1a      	ldrb	r2, [r3, #16]
+ 104:	b182      	cbz	r2, 128 <sw_pta_wifi_is_ips+0x28>
+ 106:	681b      	ldr	r3, [r3, #0]
+ 108:	691b      	ldr	r3, [r3, #16]
+ 10a:	681b      	ldr	r3, [r3, #0]
+ 10c:	f503 53df 	add.w	r3, r3, #7136	; 0x1be0
+ 110:	f893 0051 	ldrb.w	r0, [r3, #81]	; 0x51
+ 114:	3318      	adds	r3, #24
+ 116:	b140      	cbz	r0, 12a <sw_pta_wifi_is_ips+0x2a>
+ 118:	f893 007c 	ldrb.w	r0, [r3, #124]	; 0x7c
+ 11c:	f1a0 0002 	sub.w	r0, r0, #2
+ 120:	fab0 f080 	clz	r0, r0
+ 124:	0940      	lsrs	r0, r0, #5
+ 126:	4770      	bx	lr
+ 128:	2001      	movs	r0, #1
+ 12a:	4770      	bx	lr
+ 12c:	00000000 	.word	0x00000000

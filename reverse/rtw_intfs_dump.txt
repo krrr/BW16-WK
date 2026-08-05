@@ -1,0 +1,423 @@
+
+reverse\rtw_intfs.o:     file format elf32-littlearm
+
+
+Disassembly of section .text.rtw_init_default_value:
+
+00000000 <rtw_init_default_value>:
+   0:	f241 0270 	movw	r2, #4208	; 0x1070
+   4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+   6:	f04f 0c1e 	mov.w	ip, #30
+   a:	2500      	movs	r5, #0
+   c:	2701      	movs	r7, #1
+   e:	f500 56db 	add.w	r6, r0, #7008	; 0x1b60
+  12:	f896 102f 	ldrb.w	r1, [r6, #47]	; 0x2f
+  16:	1883      	adds	r3, r0, r2
+  18:	f880 1adc 	strb.w	r1, [r0, #2780]	; 0xadc
+  1c:	f896 1030 	ldrb.w	r1, [r6, #48]	; 0x30
+  20:	f8c0 c42c 	str.w	ip, [r0, #1068]	; 0x42c
+  24:	f880 74ab 	strb.w	r7, [r0, #1195]	; 0x4ab
+  28:	f8c0 545c 	str.w	r5, [r0, #1116]	; 0x45c
+  2c:	f880 1add 	strb.w	r1, [r0, #2781]	; 0xadd
+  30:	f880 1ade 	strb.w	r1, [r0, #2782]	; 0xade
+  34:	f883 5535 	strb.w	r5, [r3, #1333]	; 0x535
+  38:	f896 103c 	ldrb.w	r1, [r6, #60]	; 0x3c
+  3c:	4604      	mov	r4, r0
+  3e:	f8c3 153c 	str.w	r1, [r3, #1340]	; 0x53c
+  42:	f896 103d 	ldrb.w	r1, [r6, #61]	; 0x3d
+  46:	f8c3 1540 	str.w	r1, [r3, #1344]	; 0x540
+  4a:	5085      	str	r5, [r0, r2]
+  4c:	605d      	str	r5, [r3, #4]
+  4e:	609d      	str	r5, [r3, #8]
+  50:	f8c3 509c 	str.w	r5, [r3, #156]	; 0x9c
+  54:	f8c3 70a4 	str.w	r7, [r3, #164]	; 0xa4
+  58:	f8c3 554c 	str.w	r5, [r3, #1356]	; 0x54c
+  5c:	f8c3 7550 	str.w	r7, [r3, #1360]	; 0x550
+  60:	f8c3 5554 	str.w	r5, [r3, #1364]	; 0x554
+  64:	f7ff fffe 	bl	0 <rtw_hal_def_value_init>
+  68:	f242 20e7 	movw	r0, #8935	; 0x22e7
+  6c:	f242 320c 	movw	r2, #8972	; 0x230c
+  70:	21ff      	movs	r1, #255	; 0xff
+  72:	f242 330e 	movw	r3, #8974	; 0x230e
+  76:	5425      	strb	r5, [r4, r0]
+  78:	54a1      	strb	r1, [r4, r2]
+  7a:	f896 2041 	ldrb.w	r2, [r6, #65]	; 0x41
+  7e:	f504 500c 	add.w	r0, r4, #8960	; 0x2300
+  82:	54e2      	strb	r2, [r4, r3]
+  84:	4629      	mov	r1, r5
+  86:	3018      	adds	r0, #24
+  88:	f7ff fffe 	bl	0 <ATOMIC_SET>
+  8c:	f504 500c 	add.w	r0, r4, #8960	; 0x2300
+  90:	4629      	mov	r1, r5
+  92:	301c      	adds	r0, #28
+  94:	f7ff fffe 	bl	0 <ATOMIC_SET>
+  98:	4638      	mov	r0, r7
+  9a:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+
+Disassembly of section .text.rtw_cancel_dynamic_chk_timer:
+
+00000000 <rtw_cancel_dynamic_chk_timer>:
+   0:	f200 409c 	addw	r0, r0, #1180	; 0x49c
+   4:	f7ff bffe 	b.w	0 <rtw_cancel_timer>
+
+Disassembly of section .text.rtw_resume_dynamic_chk_timer:
+
+00000000 <rtw_resume_dynamic_chk_timer>:
+   0:	f200 409c 	addw	r0, r0, #1180	; 0x49c
+   4:	f44f 61fa 	mov.w	r1, #2000	; 0x7d0
+   8:	f7ff bffe 	b.w	0 <rtw_set_timer>
+
+Disassembly of section .text.rtw_cancel_all_timer:
+
+00000000 <rtw_cancel_all_timer>:
+   0:	f242 23fa 	movw	r3, #8954	; 0x22fa
+   4:	b570      	push	{r4, r5, r6, lr}
+   6:	5cc3      	ldrb	r3, [r0, r3]
+   8:	4604      	mov	r4, r0
+   a:	2b00      	cmp	r3, #0
+   c:	d03f      	beq.n	8e <rtw_cancel_all_timer+0x8e>
+   e:	f604 0064 	addw	r0, r4, #2148	; 0x864
+  12:	f7ff fffe 	bl	0 <rtw_del_timer>
+  16:	f504 6015 	add.w	r0, r4, #2384	; 0x950
+  1a:	f7ff fffe 	bl	0 <rtw_del_timer>
+  1e:	f604 2014 	addw	r0, r4, #2580	; 0xa14
+  22:	f7ff fffe 	bl	0 <rtw_del_timer>
+  26:	6923      	ldr	r3, [r4, #16]
+  28:	06da      	lsls	r2, r3, #27
+  2a:	d521      	bpl.n	70 <rtw_cancel_all_timer+0x70>
+  2c:	f504 55d0 	add.w	r5, r4, #6656	; 0x1a00
+  30:	462e      	mov	r6, r5
+  32:	3508      	adds	r5, #8
+  34:	361c      	adds	r6, #28
+  36:	f855 0b04 	ldr.w	r0, [r5], #4
+  3a:	f500 7059 	add.w	r0, r0, #868	; 0x364
+  3e:	f7ff fffe 	bl	0 <rtw_del_timer>
+  42:	42ae      	cmp	r6, r5
+  44:	d1f7      	bne.n	36 <rtw_cancel_all_timer+0x36>
+  46:	4b15      	ldr	r3, [pc, #84]	; (9c <rtw_cancel_all_timer+0x9c>)
+  48:	781b      	ldrb	r3, [r3, #0]
+  4a:	b123      	cbz	r3, 56 <rtw_cancel_all_timer+0x56>
+  4c:	f504 50cc 	add.w	r0, r4, #6528	; 0x1980
+  50:	3008      	adds	r0, #8
+  52:	f7ff fffe 	bl	0 <rtw_del_timer>
+  56:	f504 605b 	add.w	r0, r4, #3504	; 0xdb0
+  5a:	f7ff fffe 	bl	0 <rtw_del_timer>
+  5e:	f604 0048 	addw	r0, r4, #2120	; 0x848
+  62:	f7ff fffe 	bl	0 <rtw_cancel_timer>
+  66:	4620      	mov	r0, r4
+  68:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+  6c:	f7ff bffe 	b.w	0 <rtw_hal_dm_deinit>
+  70:	071b      	lsls	r3, r3, #28
+  72:	d5e8      	bpl.n	46 <rtw_cancel_all_timer+0x46>
+  74:	f641 2508 	movw	r5, #6664	; 0x1a08
+  78:	5960      	ldr	r0, [r4, r5]
+  7a:	f500 7059 	add.w	r0, r0, #868	; 0x364
+  7e:	f7ff fffe 	bl	0 <rtw_del_timer>
+  82:	5960      	ldr	r0, [r4, r5]
+  84:	f500 705d 	add.w	r0, r0, #884	; 0x374
+  88:	f7ff fffe 	bl	0 <rtw_del_timer>
+  8c:	e7db      	b.n	46 <rtw_cancel_all_timer+0x46>
+  8e:	f500 50e2 	add.w	r0, r0, #7232	; 0x1c40
+  92:	301c      	adds	r0, #28
+  94:	f7ff fffe 	bl	0 <rtw_del_timer>
+  98:	e7b9      	b.n	e <rtw_cancel_all_timer+0xe>
+  9a:	bf00      	nop
+  9c:	00000000 	.word	0x00000000
+
+Disassembly of section .text.rtw_free_drv_sw:
+
+00000000 <rtw_free_drv_sw>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   6:	4604      	mov	r4, r0
+   8:	f500 60a0 	add.w	r0, r0, #1280	; 0x500
+   c:	58e6      	ldr	r6, [r4, r3]
+   e:	f7ff fffe 	bl	0 <free_mlme_ext_priv>
+  12:	f504 6023 	add.w	r0, r4, #2608	; 0xa30
+  16:	f7ff fffe 	bl	0 <rtw_free_cmd_priv>
+  1a:	f604 2048 	addw	r0, r4, #2632	; 0xa48
+  1e:	f7ff fffe 	bl	0 <rtw_free_evt_priv>
+  22:	f104 000c 	add.w	r0, r4, #12
+  26:	f7ff fffe 	bl	0 <rtw_free_mlme_priv>
+  2a:	f242 23fa 	movw	r3, #8954	; 0x22fa
+  2e:	5ce3      	ldrb	r3, [r4, r3]
+  30:	b3a3      	cbz	r3, 9c <rtw_free_drv_sw+0x9c>
+  32:	f8d4 3f98 	ldr.w	r3, [r4, #3992]	; 0xf98
+  36:	b35b      	cbz	r3, 90 <rtw_free_drv_sw+0x90>
+  38:	4620      	mov	r0, r4
+  3a:	f7ff fffe 	bl	0 <rtw_get_bcmc_stainfo>
+  3e:	b118      	cbz	r0, 48 <rtw_free_drv_sw+0x48>
+  40:	4601      	mov	r1, r0
+  42:	4620      	mov	r0, r4
+  44:	f7ff fffe 	bl	0 <rtw_free_stainfo>
+  48:	f242 25fa 	movw	r5, #8954	; 0x22fa
+  4c:	f504 6028 	add.w	r0, r4, #2688	; 0xa80
+  50:	f7ff fffe 	bl	0 <_rtw_free_xmit_priv>
+  54:	f604 7098 	addw	r0, r4, #3992	; 0xf98
+  58:	f7ff fffe 	bl	0 <_rtw_free_sta_priv>
+  5c:	f604 40a8 	addw	r0, r4, #3240	; 0xca8
+  60:	f7ff fffe 	bl	0 <_rtw_free_recv_priv>
+  64:	4620      	mov	r0, r4
+  66:	f7ff fffe 	bl	0 <rtw_free_pwrctrl_priv>
+  6a:	f504 5083 	add.w	r0, r4, #4192	; 0x1060
+  6e:	3010      	adds	r0, #16
+  70:	f7ff fffe 	bl	0 <rtw_free_sec_priv>
+  74:	5d63      	ldrb	r3, [r4, r5]
+  76:	b1ab      	cbz	r3, a4 <rtw_free_drv_sw+0xa4>
+  78:	f242 03c8 	movw	r3, #8392	; 0x20c8
+  7c:	2200      	movs	r2, #0
+  7e:	50e2      	str	r2, [r4, r3]
+  80:	f242 23e8 	movw	r3, #8936	; 0x22e8
+  84:	58e2      	ldr	r2, [r4, r3]
+  86:	b10a      	cbz	r2, 8c <rtw_free_drv_sw+0x8c>
+  88:	2100      	movs	r1, #0
+  8a:	50d1      	str	r1, [r2, r3]
+  8c:	2001      	movs	r0, #1
+  8e:	bd70      	pop	{r4, r5, r6, pc}
+  90:	f241 036c 	movw	r3, #4204	; 0x106c
+  94:	5ae3      	ldrh	r3, [r4, r3]
+  96:	2b00      	cmp	r3, #0
+  98:	d0d6      	beq.n	48 <rtw_free_drv_sw+0x48>
+  9a:	e7cd      	b.n	38 <rtw_free_drv_sw+0x38>
+  9c:	4620      	mov	r0, r4
+  9e:	f7ff fffe 	bl	0 <rtw_rfctl_deinit>
+  a2:	e7c6      	b.n	32 <rtw_free_drv_sw+0x32>
+  a4:	f506 500d 	add.w	r0, r6, #9024	; 0x2340
+  a8:	3010      	adds	r0, #16
+  aa:	f7ff fffe 	bl	0 <rtw_spinlock_free>
+  ae:	5d63      	ldrb	r3, [r4, r5]
+  b0:	2b00      	cmp	r3, #0
+  b2:	d1e1      	bne.n	78 <rtw_free_drv_sw+0x78>
+  b4:	4620      	mov	r0, r4
+  b6:	f7ff fffe 	bl	0 <rtw_hal_free_data>
+  ba:	e7e1      	b.n	80 <rtw_free_drv_sw+0x80>
+
+Disassembly of section .text.rtw_reset_drv_sw:
+
+00000000 <rtw_reset_drv_sw>:
+   0:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+   2:	4604      	mov	r4, r0
+   4:	f242 26e7 	movw	r6, #8935	; 0x22e7
+   8:	f7ff fffe 	bl	0 <rtw_hal_def_value_init>
+   c:	251e      	movs	r5, #30
+   e:	2000      	movs	r0, #0
+  10:	2200      	movs	r2, #0
+  12:	2300      	movs	r3, #0
+  14:	f504 51df 	add.w	r1, r4, #7136	; 0x1be0
+  18:	55a0      	strb	r0, [r4, r6]
+  1a:	f604 27e8 	addw	r7, r4, #2792	; 0xae8
+  1e:	f8c4 542c 	str.w	r5, [r4, #1068]	; 0x42c
+  22:	f604 3608 	addw	r6, r4, #2824	; 0xb08
+  26:	6548      	str	r0, [r1, #84]	; 0x54
+  28:	f881 0072 	strb.w	r0, [r1, #114]	; 0x72
+  2c:	6925      	ldr	r5, [r4, #16]
+  2e:	f881 0094 	strb.w	r0, [r1, #148]	; 0x94
+  32:	e9c7 2300 	strd	r2, r3, [r7]
+  36:	e9c6 2300 	strd	r2, r3, [r6]
+  3a:	f504 6731 	add.w	r7, r4, #2832	; 0xb10
+  3e:	f604 3618 	addw	r6, r4, #2840	; 0xb18
+  42:	e9c7 2300 	strd	r2, r3, [r7]
+  46:	e9c6 2300 	strd	r2, r3, [r6]
+  4a:	f504 6732 	add.w	r7, r4, #2848	; 0xb20
+  4e:	f504 6633 	add.w	r6, r4, #2864	; 0xb30
+  52:	e9c7 2300 	strd	r2, r3, [r7]
+  56:	e9c6 2300 	strd	r2, r3, [r6]
+  5a:	f604 3728 	addw	r7, r4, #2856	; 0xb28
+  5e:	f504 664f 	add.w	r6, r4, #3312	; 0xcf0
+  62:	e9c7 2300 	strd	r2, r3, [r7]
+  66:	e9c6 2300 	strd	r2, r3, [r6]
+  6a:	f604 5718 	addw	r7, r4, #3352	; 0xd18
+  6e:	f504 6652 	add.w	r6, r4, #3360	; 0xd20
+  72:	e9c7 2300 	strd	r2, r3, [r7]
+  76:	e9c6 2300 	strd	r2, r3, [r6]
+  7a:	f604 5728 	addw	r7, r4, #3368	; 0xd28
+  7e:	f504 6653 	add.w	r6, r4, #3376	; 0xd30
+  82:	e9c7 2300 	strd	r2, r3, [r7]
+  86:	f425 6508 	bic.w	r5, r5, #2176	; 0x880
+  8a:	e9c6 2300 	strd	r2, r3, [r6]
+  8e:	f604 5738 	addw	r7, r4, #3384	; 0xd38
+  92:	f504 6654 	add.w	r6, r4, #3392	; 0xd40
+  96:	e9c7 2300 	strd	r2, r3, [r7]
+  9a:	e9c6 2300 	strd	r2, r3, [r6]
+  9e:	f884 0494 	strb.w	r0, [r4, #1172]	; 0x494
+  a2:	6125      	str	r5, [r4, #16]
+  a4:	f881 008c 	strb.w	r0, [r1, #140]	; 0x8c
+  a8:	f8d4 1dbc 	ldr.w	r1, [r4, #3516]	; 0xdbc
+  ac:	f8c4 05ec 	str.w	r0, [r4, #1516]	; 0x5ec
+  b0:	f504 605b 	add.w	r0, r4, #3504	; 0xdb0
+  b4:	f7ff fffe 	bl	0 <rtw_set_timer>
+  b8:	2001      	movs	r0, #1
+  ba:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+
+Disassembly of section .text.rtw_init_drv_sw:
+
+00000000 <rtw_init_drv_sw>:
+   0:	b570      	push	{r4, r5, r6, lr}
+   2:	f242 03c8 	movw	r3, #8392	; 0x20c8
+   6:	4604      	mov	r4, r0
+   8:	f500 6023 	add.w	r0, r0, #2608	; 0xa30
+   c:	58e6      	ldr	r6, [r4, r3]
+   e:	f7ff fffe 	bl	0 <rtw_init_cmd_priv>
+  12:	b910      	cbnz	r0, 1a <rtw_init_drv_sw+0x1a>
+  14:	2500      	movs	r5, #0
+  16:	4628      	mov	r0, r5
+  18:	bd70      	pop	{r4, r5, r6, pc}
+  1a:	f8c4 4a40 	str.w	r4, [r4, #2624]	; 0xa40
+  1e:	f604 2048 	addw	r0, r4, #2632	; 0xa48
+  22:	f7ff fffe 	bl	0 <rtw_init_evt_priv>
+  26:	2800      	cmp	r0, #0
+  28:	d0f4      	beq.n	14 <rtw_init_drv_sw+0x14>
+  2a:	4620      	mov	r0, r4
+  2c:	f7ff fffe 	bl	0 <rtw_init_sec_priv>
+  30:	2800      	cmp	r0, #0
+  32:	d0ef      	beq.n	14 <rtw_init_drv_sw+0x14>
+  34:	4620      	mov	r0, r4
+  36:	f7ff fffe 	bl	0 <rtw_init_mlme_priv>
+  3a:	2800      	cmp	r0, #0
+  3c:	d0ea      	beq.n	14 <rtw_init_drv_sw+0x14>
+  3e:	4620      	mov	r0, r4
+  40:	f7ff fffe 	bl	0 <init_mlme_ext_priv>
+  44:	2800      	cmp	r0, #0
+  46:	d0e5      	beq.n	14 <rtw_init_drv_sw+0x14>
+  48:	f242 23fa 	movw	r3, #8954	; 0x22fa
+  4c:	5ce3      	ldrb	r3, [r4, r3]
+  4e:	b36b      	cbz	r3, ac <rtw_init_drv_sw+0xac>
+  50:	4621      	mov	r1, r4
+  52:	f504 6028 	add.w	r0, r4, #2688	; 0xa80
+  56:	f7ff fffe 	bl	0 <_rtw_init_xmit_priv>
+  5a:	2800      	cmp	r0, #0
+  5c:	d0da      	beq.n	14 <rtw_init_drv_sw+0x14>
+  5e:	4621      	mov	r1, r4
+  60:	f604 40a8 	addw	r0, r4, #3240	; 0xca8
+  64:	f7ff fffe 	bl	0 <_rtw_init_recv_priv>
+  68:	2800      	cmp	r0, #0
+  6a:	d0d3      	beq.n	14 <rtw_init_drv_sw+0x14>
+  6c:	4620      	mov	r0, r4
+  6e:	f7ff fffe 	bl	0 <_rtw_init_sta_priv>
+  72:	2800      	cmp	r0, #0
+  74:	d0ce      	beq.n	14 <rtw_init_drv_sw+0x14>
+  76:	f504 5381 	add.w	r3, r4, #4128	; 0x1020
+  7a:	601c      	str	r4, [r3, #0]
+  7c:	4620      	mov	r0, r4
+  7e:	f7ff fffe 	bl	0 <rtw_init_bcmc_stainfo>
+  82:	4620      	mov	r0, r4
+  84:	f7ff fffe 	bl	0 <rtw_init_pwrctrl_priv>
+  88:	4620      	mov	r0, r4
+  8a:	f7ff fffe 	bl	0 <rtw_init_drv_sw>
+  8e:	4605      	mov	r5, r0
+  90:	4620      	mov	r0, r4
+  92:	f7ff fffe 	bl	0 <rtw_hal_dm_init>
+  96:	f242 23fa 	movw	r3, #8954	; 0x22fa
+  9a:	5ce3      	ldrb	r3, [r4, r3]
+  9c:	2b00      	cmp	r3, #0
+  9e:	d1ba      	bne.n	16 <rtw_init_drv_sw+0x16>
+  a0:	f506 500d 	add.w	r0, r6, #9024	; 0x2340
+  a4:	3010      	adds	r0, #16
+  a6:	f7ff fffe 	bl	0 <rtw_spinlock_init>
+  aa:	e7b4      	b.n	16 <rtw_init_drv_sw+0x16>
+  ac:	4620      	mov	r0, r4
+  ae:	f7ff fffe 	bl	0 <rtw_rfctl_init>
+  b2:	e7cd      	b.n	50 <rtw_init_drv_sw+0x50>
+
+Disassembly of section .text.rtw_start_drv_threads:
+
+00000000 <rtw_start_drv_threads>:
+   0:	b530      	push	{r4, r5, lr}
+   2:	4604      	mov	r4, r0
+   4:	4b2c      	ldr	r3, [pc, #176]	; (b8 <rtw_start_drv_threads+0xb8>)
+   6:	b083      	sub	sp, #12
+   8:	f500 5008 	add.w	r0, r0, #8704	; 0x2200
+   c:	9300      	str	r3, [sp, #0]
+   e:	f44f 62b8 	mov.w	r2, #1472	; 0x5c0
+  12:	2301      	movs	r3, #1
+  14:	4929      	ldr	r1, [pc, #164]	; (bc <rtw_start_drv_threads+0xbc>)
+  16:	9401      	str	r4, [sp, #4]
+  18:	3024      	adds	r0, #36	; 0x24
+  1a:	f7ff fffe 	bl	0 <rtw_if_wifi_create_task>
+  1e:	4b28      	ldr	r3, [pc, #160]	; (c0 <rtw_start_drv_threads+0xc0>)
+  20:	4605      	mov	r5, r0
+  22:	f504 5008 	add.w	r0, r4, #8704	; 0x2200
+  26:	9300      	str	r3, [sp, #0]
+  28:	f44f 7280 	mov.w	r2, #256	; 0x100
+  2c:	2301      	movs	r3, #1
+  2e:	4925      	ldr	r1, [pc, #148]	; (c4 <rtw_start_drv_threads+0xc4>)
+  30:	9401      	str	r4, [sp, #4]
+  32:	303c      	adds	r0, #60	; 0x3c
+  34:	f7ff fffe 	bl	0 <rtw_if_wifi_create_task>
+  38:	2801      	cmp	r0, #1
+  3a:	bf04      	itt	eq
+  3c:	3d01      	subeq	r5, #1
+  3e:	fab5 f585 	clzeq	r5, r5
+  42:	4b21      	ldr	r3, [pc, #132]	; (c8 <rtw_start_drv_threads+0xc8>)
+  44:	f504 5007 	add.w	r0, r4, #8640	; 0x21c0
+  48:	e88d 0018 	stmia.w	sp, {r3, r4}
+  4c:	f44f 7280 	mov.w	r2, #256	; 0x100
+  50:	f04f 0302 	mov.w	r3, #2
+  54:	491d      	ldr	r1, [pc, #116]	; (cc <rtw_start_drv_threads+0xcc>)
+  56:	f100 0034 	add.w	r0, r0, #52	; 0x34
+  5a:	bf14      	ite	ne
+  5c:	2500      	movne	r5, #0
+  5e:	096d      	lsreq	r5, r5, #5
+  60:	f7ff fffe 	bl	0 <rtw_if_wifi_create_task>
+  64:	4b1a      	ldr	r3, [pc, #104]	; (d0 <rtw_start_drv_threads+0xd0>)
+  66:	2801      	cmp	r0, #1
+  68:	781a      	ldrb	r2, [r3, #0]
+  6a:	4b1a      	ldr	r3, [pc, #104]	; (d4 <rtw_start_drv_threads+0xd4>)
+  6c:	bf18      	it	ne
+  6e:	2500      	movne	r5, #0
+  70:	f504 5008 	add.w	r0, r4, #8704	; 0x2200
+  74:	2a01      	cmp	r2, #1
+  76:	bf14      	ite	ne
+  78:	f44f 7200 	movne.w	r2, #512	; 0x200
+  7c:	f44f 6280 	moveq.w	r2, #1024	; 0x400
+  80:	9300      	str	r3, [sp, #0]
+  82:	9401      	str	r4, [sp, #4]
+  84:	300c      	adds	r0, #12
+  86:	2302      	movs	r3, #2
+  88:	4913      	ldr	r1, [pc, #76]	; (d8 <rtw_start_drv_threads+0xd8>)
+  8a:	f7ff fffe 	bl	0 <rtw_if_wifi_create_task>
+  8e:	2801      	cmp	r0, #1
+  90:	d006      	beq.n	a0 <rtw_start_drv_threads+0xa0>
+  92:	2500      	movs	r5, #0
+  94:	4620      	mov	r0, r4
+  96:	f7ff fffe 	bl	0 <rtw_hal_start_thread>
+  9a:	4628      	mov	r0, r5
+  9c:	b003      	add	sp, #12
+  9e:	bd30      	pop	{r4, r5, pc}
+  a0:	f504 5008 	add.w	r0, r4, #8704	; 0x2200
+  a4:	3018      	adds	r0, #24
+  a6:	f7ff fffe 	bl	0 <rtw_down_sema>
+  aa:	4620      	mov	r0, r4
+  ac:	f7ff fffe 	bl	0 <rtw_hal_start_thread>
+  b0:	4628      	mov	r0, r5
+  b2:	b003      	add	sp, #12
+  b4:	bd30      	pop	{r4, r5, pc}
+  b6:	bf00      	nop
+	...
+  c4:	00000014 	.word	0x00000014
+  c8:	00000000 	.word	0x00000000
+  cc:	00000028 	.word	0x00000028
+	...
+  d8:	00000040 	.word	0x00000040
+
+Disassembly of section .text.rtw_stop_drv_threads:
+
+00000000 <rtw_stop_drv_threads>:
+   0:	b510      	push	{r4, lr}
+   2:	4604      	mov	r4, r0
+   4:	f500 5008 	add.w	r0, r0, #8704	; 0x2200
+   8:	300c      	adds	r0, #12
+   a:	f7ff fffe 	bl	0 <rtw_if_wifi_delete_task>
+   e:	f504 5007 	add.w	r0, r4, #8640	; 0x21c0
+  12:	3034      	adds	r0, #52	; 0x34
+  14:	f7ff fffe 	bl	0 <rtw_if_wifi_delete_task>
+  18:	f504 5008 	add.w	r0, r4, #8704	; 0x2200
+  1c:	3024      	adds	r0, #36	; 0x24
+  1e:	f7ff fffe 	bl	0 <rtw_if_wifi_delete_task>
+  22:	f504 5008 	add.w	r0, r4, #8704	; 0x2200
+  26:	303c      	adds	r0, #60	; 0x3c
+  28:	f7ff fffe 	bl	0 <rtw_if_wifi_delete_task>
+  2c:	4620      	mov	r0, r4
+  2e:	e8bd 4010 	ldmia.w	sp!, {r4, lr}
+  32:	f7ff bffe 	b.w	0 <rtw_hal_stop_thread>
+  36:	bf00      	nop

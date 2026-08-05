@@ -1,0 +1,421 @@
+
+reverse\libwlan\rs8721d_suspend.o:     file format elf32-littlearm
+
+
+Disassembly of section .text.rs8721d_lxbus_reg_store:
+
+00000000 <rs8721d_lxbus_reg_store>:
+   0:	f04f 0c00 	mov.w	ip, #0
+   4:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
+   8:	4665      	mov	r5, ip
+   a:	b084      	sub	sp, #16
+   c:	4b47      	ldr	r3, [pc, #284]	; (12c <rs8721d_lxbus_reg_store+0x12c>)
+   e:	ac01      	add	r4, sp, #4
+  10:	4607      	mov	r7, r0
+  12:	460e      	mov	r6, r1
+  14:	e893 0007 	ldmia.w	r3, {r0, r1, r2}
+  18:	e884 0007 	stmia.w	r4, {r0, r1, r2}
+  1c:	eb04 030c 	add.w	r3, r4, ip
+  20:	f814 200c 	ldrb.w	r2, [r4, ip]
+  24:	789b      	ldrb	r3, [r3, #2]
+  26:	f10c 0c04 	add.w	ip, ip, #4
+  2a:	1a9b      	subs	r3, r3, r2
+  2c:	442b      	add	r3, r5
+  2e:	f1bc 0f0c 	cmp.w	ip, #12
+  32:	b2dd      	uxtb	r5, r3
+  34:	d1f2      	bne.n	1c <rs8721d_lxbus_reg_store+0x1c>
+  36:	2e00      	cmp	r6, #0
+  38:	d13f      	bne.n	ba <rs8721d_lxbus_reg_store+0xba>
+  3a:	f8df 8100 	ldr.w	r8, [pc, #256]	; 13c <rs8721d_lxbus_reg_store+0x13c>
+  3e:	f8d8 0000 	ldr.w	r0, [r8]
+  42:	b348      	cbz	r0, 98 <rs8721d_lxbus_reg_store+0x98>
+  44:	4b3a      	ldr	r3, [pc, #232]	; (130 <rs8721d_lxbus_reg_store+0x130>)
+  46:	681b      	ldr	r3, [r3, #0]
+  48:	2b00      	cmp	r3, #0
+  4a:	d167      	bne.n	11c <rs8721d_lxbus_reg_store+0x11c>
+  4c:	f64f 72ff 	movw	r2, #65535	; 0xffff
+  50:	4b38      	ldr	r3, [pc, #224]	; (134 <rs8721d_lxbus_reg_store+0x134>)
+  52:	ea5f 0c95 	movs.w	ip, r5, lsr #2
+  56:	801a      	strh	r2, [r3, #0]
+  58:	bf18      	it	ne
+  5a:	f44f 7240 	movne.w	r2, #768	; 0x300
+  5e:	d00f      	beq.n	80 <rs8721d_lxbus_reg_store+0x80>
+  60:	2300      	movs	r3, #0
+  62:	5ae1      	ldrh	r1, [r4, r3]
+  64:	18e5      	adds	r5, r4, r3
+  66:	4291      	cmp	r1, r2
+  68:	f103 0304 	add.w	r3, r3, #4
+  6c:	d802      	bhi.n	74 <rs8721d_lxbus_reg_store+0x74>
+  6e:	8869      	ldrh	r1, [r5, #2]
+  70:	4291      	cmp	r1, r2
+  72:	d814      	bhi.n	9e <rs8721d_lxbus_reg_store+0x9e>
+  74:	2b0c      	cmp	r3, #12
+  76:	d1f4      	bne.n	62 <rs8721d_lxbus_reg_store+0x62>
+  78:	3204      	adds	r2, #4
+  7a:	4566      	cmp	r6, ip
+  7c:	b292      	uxth	r2, r2
+  7e:	d3ef      	bcc.n	60 <rs8721d_lxbus_reg_store+0x60>
+  80:	4a2d      	ldr	r2, [pc, #180]	; (138 <rs8721d_lxbus_reg_store+0x138>)
+  82:	4b2c      	ldr	r3, [pc, #176]	; (134 <rs8721d_lxbus_reg_store+0x134>)
+  84:	8812      	ldrh	r2, [r2, #0]
+  86:	2100      	movs	r1, #0
+  88:	801a      	strh	r2, [r3, #0]
+  8a:	f7ff fffe 	bl	0 <rtw_mfree>
+  8e:	2300      	movs	r3, #0
+  90:	f8c8 3000 	str.w	r3, [r8]
+  94:	f8a7 30d0 	strh.w	r3, [r7, #208]	; 0xd0
+  98:	b004      	add	sp, #16
+  9a:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+  9e:	f850 1026 	ldr.w	r1, [r0, r6, lsl #2]
+  a2:	3601      	adds	r6, #1
+  a4:	f102 4380 	add.w	r3, r2, #1073741824	; 0x40000000
+  a8:	b2f6      	uxtb	r6, r6
+  aa:	f503 2300 	add.w	r3, r3, #524288	; 0x80000
+  ae:	3204      	adds	r2, #4
+  b0:	4566      	cmp	r6, ip
+  b2:	6019      	str	r1, [r3, #0]
+  b4:	b292      	uxth	r2, r2
+  b6:	d3d3      	bcc.n	60 <rs8721d_lxbus_reg_store+0x60>
+  b8:	e7e2      	b.n	80 <rs8721d_lxbus_reg_store+0x80>
+  ba:	4628      	mov	r0, r5
+  bc:	f7ff fffe 	bl	0 <rtw_malloc>
+  c0:	4b1e      	ldr	r3, [pc, #120]	; (13c <rs8721d_lxbus_reg_store+0x13c>)
+  c2:	6018      	str	r0, [r3, #0]
+  c4:	2800      	cmp	r0, #0
+  c6:	d0e7      	beq.n	98 <rs8721d_lxbus_reg_store+0x98>
+  c8:	4a1a      	ldr	r2, [pc, #104]	; (134 <rs8721d_lxbus_reg_store+0x134>)
+  ca:	4b1b      	ldr	r3, [pc, #108]	; (138 <rs8721d_lxbus_reg_store+0x138>)
+  cc:	8812      	ldrh	r2, [r2, #0]
+  ce:	08ad      	lsrs	r5, r5, #2
+  d0:	801a      	strh	r2, [r3, #0]
+  d2:	d0e1      	beq.n	98 <rs8721d_lxbus_reg_store+0x98>
+  d4:	2700      	movs	r7, #0
+  d6:	f44f 7240 	mov.w	r2, #768	; 0x300
+  da:	2300      	movs	r3, #0
+  dc:	5ae1      	ldrh	r1, [r4, r3]
+  de:	18e6      	adds	r6, r4, r3
+  e0:	4291      	cmp	r1, r2
+  e2:	f103 0304 	add.w	r3, r3, #4
+  e6:	d802      	bhi.n	ee <rs8721d_lxbus_reg_store+0xee>
+  e8:	8871      	ldrh	r1, [r6, #2]
+  ea:	4291      	cmp	r1, r2
+  ec:	d808      	bhi.n	100 <rs8721d_lxbus_reg_store+0x100>
+  ee:	2b0c      	cmp	r3, #12
+  f0:	d1f4      	bne.n	dc <rs8721d_lxbus_reg_store+0xdc>
+  f2:	3204      	adds	r2, #4
+  f4:	42bd      	cmp	r5, r7
+  f6:	b292      	uxth	r2, r2
+  f8:	d8ef      	bhi.n	da <rs8721d_lxbus_reg_store+0xda>
+  fa:	b004      	add	sp, #16
+  fc:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+ 100:	f102 4380 	add.w	r3, r2, #1073741824	; 0x40000000
+ 104:	f503 2300 	add.w	r3, r3, #524288	; 0x80000
+ 108:	6819      	ldr	r1, [r3, #0]
+ 10a:	1c7b      	adds	r3, r7, #1
+ 10c:	f840 1027 	str.w	r1, [r0, r7, lsl #2]
+ 110:	b2df      	uxtb	r7, r3
+ 112:	3204      	adds	r2, #4
+ 114:	42bd      	cmp	r5, r7
+ 116:	b292      	uxth	r2, r2
+ 118:	d8df      	bhi.n	da <rs8721d_lxbus_reg_store+0xda>
+ 11a:	e7ee      	b.n	fa <rs8721d_lxbus_reg_store+0xfa>
+ 11c:	4631      	mov	r1, r6
+ 11e:	f7ff fffe 	bl	0 <rtw_mfree>
+ 122:	f8c8 6000 	str.w	r6, [r8]
+ 126:	b004      	add	sp, #16
+ 128:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+ 12c:	00000000 	.word	0x00000000
+ 130:	40080308 	.word	0x40080308
+ 134:	40080300 	.word	0x40080300
+	...
+
+Disassembly of section .text.rs8721d_check_remain_pkt:
+
+00000000 <rs8721d_check_remain_pkt>:
+   0:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+   2:	2100      	movs	r1, #0
+   4:	4605      	mov	r5, r0
+   6:	f7ff fffe 	bl	0 <rs8721d_check_rxdesc_remain>
+   a:	4604      	mov	r4, r0
+   c:	b128      	cbz	r0, 1a <rs8721d_check_remain_pkt+0x1a>
+   e:	f105 008c 	add.w	r0, r5, #140	; 0x8c
+  12:	f7ff fffe 	bl	0 <rtw_up_sema>
+  16:	4620      	mov	r0, r4
+  18:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+  1a:	250a      	movs	r5, #10
+  1c:	4e08      	ldr	r6, [pc, #32]	; (40 <rs8721d_check_remain_pkt+0x40>)
+  1e:	4f09      	ldr	r7, [pc, #36]	; (44 <rs8721d_check_remain_pkt+0x44>)
+  20:	6833      	ldr	r3, [r6, #0]
+  22:	f3c3 420a 	ubfx	r2, r3, #16, #11
+  26:	f3c3 030a 	ubfx	r3, r3, #0, #11
+  2a:	429a      	cmp	r2, r3
+  2c:	d0f3      	beq.n	16 <rs8721d_check_remain_pkt+0x16>
+  2e:	2005      	movs	r0, #5
+  30:	47b8      	blx	r7
+  32:	1e6b      	subs	r3, r5, #1
+  34:	f013 05ff 	ands.w	r5, r3, #255	; 0xff
+  38:	d1f2      	bne.n	20 <rs8721d_check_remain_pkt+0x20>
+  3a:	2401      	movs	r4, #1
+  3c:	e7eb      	b.n	16 <rs8721d_check_remain_pkt+0x16>
+  3e:	bf00      	nop
+  40:	400803a0 	.word	0x400803a0
+  44:	00000000 	.word	0x00000000
+
+Disassembly of section .text.rs8721d_check_wow_ctrl:
+
+00000000 <rs8721d_check_wow_ctrl>:
+   0:	b5f0      	push	{r4, r5, r6, r7, lr}
+   2:	460e      	mov	r6, r1
+   4:	b083      	sub	sp, #12
+   6:	f241 3488 	movw	r4, #5000	; 0x1388
+   a:	4d13      	ldr	r5, [pc, #76]	; (58 <rs8721d_check_wow_ctrl+0x58>)
+   c:	4f13      	ldr	r7, [pc, #76]	; (5c <rs8721d_check_wow_ctrl+0x5c>)
+   e:	b181      	cbz	r1, 32 <rs8721d_check_wow_ctrl+0x32>
+  10:	e004      	b.n	1c <rs8721d_check_wow_ctrl+0x1c>
+  12:	3c01      	subs	r4, #1
+  14:	2002      	movs	r0, #2
+  16:	b2a4      	uxth	r4, r4
+  18:	47b8      	blx	r7
+  1a:	b174      	cbz	r4, 3a <rs8721d_check_wow_ctrl+0x3a>
+  1c:	782b      	ldrb	r3, [r5, #0]
+  1e:	079a      	lsls	r2, r3, #30
+  20:	d5f7      	bpl.n	12 <rs8721d_check_wow_ctrl+0x12>
+  22:	2001      	movs	r0, #1
+  24:	b003      	add	sp, #12
+  26:	bdf0      	pop	{r4, r5, r6, r7, pc}
+  28:	3c01      	subs	r4, #1
+  2a:	2002      	movs	r0, #2
+  2c:	b2a4      	uxth	r4, r4
+  2e:	47b8      	blx	r7
+  30:	b11c      	cbz	r4, 3a <rs8721d_check_wow_ctrl+0x3a>
+  32:	782b      	ldrb	r3, [r5, #0]
+  34:	079b      	lsls	r3, r3, #30
+  36:	d5f4      	bpl.n	22 <rs8721d_check_wow_ctrl+0x22>
+  38:	e7f6      	b.n	28 <rs8721d_check_wow_ctrl+0x28>
+  3a:	4b09      	ldr	r3, [pc, #36]	; (60 <rs8721d_check_wow_ctrl+0x60>)
+  3c:	6818      	ldr	r0, [r3, #0]
+  3e:	f410 3000 	ands.w	r0, r0, #131072	; 0x20000
+  42:	d0ef      	beq.n	24 <rs8721d_check_wow_ctrl+0x24>
+  44:	2400      	movs	r4, #0
+  46:	4632      	mov	r2, r6
+  48:	9400      	str	r4, [sp, #0]
+  4a:	4623      	mov	r3, r4
+  4c:	4905      	ldr	r1, [pc, #20]	; (64 <rs8721d_check_wow_ctrl+0x64>)
+  4e:	4806      	ldr	r0, [pc, #24]	; (68 <rs8721d_check_wow_ctrl+0x68>)
+  50:	f7ff fffe 	bl	0 <DiagPrintf>
+  54:	4620      	mov	r0, r4
+  56:	e7e5      	b.n	24 <rs8721d_check_wow_ctrl+0x24>
+  58:	40080690 	.word	0x40080690
+	...
+
+Disassembly of section .text.rs8721d_set_wow_related_cmd:
+
+00000000 <rs8721d_set_wow_related_cmd>:
+   0:	b538      	push	{r3, r4, r5, lr}
+   2:	460d      	mov	r5, r1
+   4:	2200      	movs	r2, #0
+   6:	4604      	mov	r4, r0
+   8:	f7ff fffe 	bl	0 <rs8721d_set_wowlan_ctrl_cmd>
+   c:	b92d      	cbnz	r5, 1a <rs8721d_set_wow_related_cmd+0x1a>
+   e:	4629      	mov	r1, r5
+  10:	4620      	mov	r0, r4
+  12:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
+  16:	f7ff bffe 	b.w	0 <rs8721d_set_remote_wake_ctrl_cmd>
+  1a:	f8d4 20e4 	ldr.w	r2, [r4, #228]	; 0xe4
+  1e:	f8d4 10e0 	ldr.w	r1, [r4, #224]	; 0xe0
+  22:	4620      	mov	r0, r4
+  24:	f7ff fffe 	bl	0 <rs8721d_set_global_info_cmd>
+  28:	4629      	mov	r1, r5
+  2a:	4620      	mov	r0, r4
+  2c:	f7ff fffe 	bl	0 <rs8721d_set_disconnect_decision_cmd>
+  30:	4629      	mov	r1, r5
+  32:	4620      	mov	r0, r4
+  34:	2200      	movs	r2, #0
+  36:	f7ff fffe 	bl	0 <rs8721d_set_keep_alive_cmd>
+  3a:	4629      	mov	r1, r5
+  3c:	4620      	mov	r0, r4
+  3e:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
+  42:	f7ff bffe 	b.w	0 <rs8721d_set_remote_wake_ctrl_cmd>
+  46:	bf00      	nop
+
+Disassembly of section .text.rs8721d_wlan_suspend:
+
+00000000 <rs8721d_wlan_suspend>:
+   0:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
+   4:	f9b1 3000 	ldrsh.w	r3, [r1]
+   8:	b083      	sub	sp, #12
+   a:	b123      	cbz	r3, 16 <rs8721d_wlan_suspend+0x16>
+   c:	2600      	movs	r6, #0
+   e:	4630      	mov	r0, r6
+  10:	b003      	add	sp, #12
+  12:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
+  16:	460c      	mov	r4, r1
+  18:	4619      	mov	r1, r3
+  1a:	4620      	mov	r0, r4
+  1c:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+  20:	2800      	cmp	r0, #0
+  22:	d0f3      	beq.n	c <rs8721d_wlan_suspend+0xc>
+  24:	4620      	mov	r0, r4
+  26:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+  2a:	4606      	mov	r6, r0
+  2c:	2800      	cmp	r0, #0
+  2e:	d1ed      	bne.n	c <rs8721d_wlan_suspend+0xc>
+  30:	f64f 71ff 	movw	r1, #65535	; 0xffff
+  34:	4a42      	ldr	r2, [pc, #264]	; (140 <rs8721d_wlan_suspend+0x140>)
+  36:	4b43      	ldr	r3, [pc, #268]	; (144 <rs8721d_wlan_suspend+0x144>)
+  38:	f8d2 9000 	ldr.w	r9, [r2]
+  3c:	8011      	strh	r1, [r2, #0]
+  3e:	681a      	ldr	r2, [r3, #0]
+  40:	f44f 75fa 	mov.w	r5, #500	; 0x1f4
+  44:	f442 2280 	orr.w	r2, r2, #262144	; 0x40000
+  48:	461f      	mov	r7, r3
+  4a:	f8df 8104 	ldr.w	r8, [pc, #260]	; 150 <rs8721d_wlan_suspend+0x150>
+  4e:	601a      	str	r2, [r3, #0]
+  50:	e004      	b.n	5c <rs8721d_wlan_suspend+0x5c>
+  52:	3d01      	subs	r5, #1
+  54:	200a      	movs	r0, #10
+  56:	b2ad      	uxth	r5, r5
+  58:	47c0      	blx	r8
+  5a:	b185      	cbz	r5, 7e <rs8721d_wlan_suspend+0x7e>
+  5c:	683b      	ldr	r3, [r7, #0]
+  5e:	039b      	lsls	r3, r3, #14
+  60:	d5f7      	bpl.n	52 <rs8721d_wlan_suspend+0x52>
+  62:	4b37      	ldr	r3, [pc, #220]	; (140 <rs8721d_wlan_suspend+0x140>)
+  64:	fa1f f989 	uxth.w	r9, r9
+  68:	f8a3 9000 	strh.w	r9, [r3]
+  6c:	4620      	mov	r0, r4
+  6e:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+  72:	b170      	cbz	r0, 92 <rs8721d_wlan_suspend+0x92>
+  74:	683b      	ldr	r3, [r7, #0]
+  76:	f423 2380 	bic.w	r3, r3, #262144	; 0x40000
+  7a:	603b      	str	r3, [r7, #0]
+  7c:	e7c7      	b.n	e <rs8721d_wlan_suspend+0xe>
+  7e:	683b      	ldr	r3, [r7, #0]
+  80:	4a2f      	ldr	r2, [pc, #188]	; (140 <rs8721d_wlan_suspend+0x140>)
+  82:	fa1f f989 	uxth.w	r9, r9
+  86:	f423 2380 	bic.w	r3, r3, #262144	; 0x40000
+  8a:	603b      	str	r3, [r7, #0]
+  8c:	f8a2 9000 	strh.w	r9, [r2]
+  90:	e7bd      	b.n	e <rs8721d_wlan_suspend+0xe>
+  92:	f8d4 30e4 	ldr.w	r3, [r4, #228]	; 0xe4
+  96:	b3b3      	cbz	r3, 106 <rs8721d_wlan_suspend+0x106>
+  98:	e9d4 673a 	ldrd	r6, r7, [r4, #232]	; 0xe8
+  9c:	2120      	movs	r1, #32
+  9e:	f64f 79ff 	movw	r9, #65535	; 0xffff
+  a2:	f04f 38ff 	mov.w	r8, #4294967295
+  a6:	f894 30e9 	ldrb.w	r3, [r4, #233]	; 0xe9
+  aa:	f88d 1003 	strb.w	r1, [sp, #3]
+  ae:	f88d 3001 	strb.w	r3, [sp, #1]
+  b2:	f894 10ea 	ldrb.w	r1, [r4, #234]	; 0xea
+  b6:	f894 30eb 	ldrb.w	r3, [r4, #235]	; 0xeb
+  ba:	f894 20e8 	ldrb.w	r2, [r4, #232]	; 0xe8
+  be:	f88d 1004 	strb.w	r1, [sp, #4]
+  c2:	f88d 3005 	strb.w	r3, [sp, #5]
+  c6:	f894 10ec 	ldrb.w	r1, [r4, #236]	; 0xec
+  ca:	f894 30ed 	ldrb.w	r3, [r4, #237]	; 0xed
+  ce:	454f      	cmp	r7, r9
+  d0:	bf08      	it	eq
+  d2:	4546      	cmpeq	r6, r8
+  d4:	f88d 0002 	strb.w	r0, [sp, #2]
+  d8:	f88d 2000 	strb.w	r2, [sp]
+  dc:	f88d 1006 	strb.w	r1, [sp, #6]
+  e0:	f88d 3007 	strb.w	r3, [sp, #7]
+  e4:	d028      	beq.n	138 <rs8721d_wlan_suspend+0x138>
+  e6:	3601      	adds	r6, #1
+  e8:	f147 0700 	adc.w	r7, r7, #0
+  ec:	e9c4 673a 	strd	r6, r7, [r4, #232]	; 0xe8
+  f0:	4b15      	ldr	r3, [pc, #84]	; (148 <rs8721d_wlan_suspend+0x148>)
+  f2:	4816      	ldr	r0, [pc, #88]	; (14c <rs8721d_wlan_suspend+0x14c>)
+  f4:	f10d 0101 	add.w	r1, sp, #1
+  f8:	e001      	b.n	fe <rs8721d_wlan_suspend+0xfe>
+  fa:	f811 2b01 	ldrb.w	r2, [r1], #1
+  fe:	f803 2b01 	strb.w	r2, [r3], #1
+ 102:	4283      	cmp	r3, r0
+ 104:	d1f9      	bne.n	fa <rs8721d_wlan_suspend+0xfa>
+ 106:	2101      	movs	r1, #1
+ 108:	4620      	mov	r0, r4
+ 10a:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+ 10e:	4620      	mov	r0, r4
+ 110:	f7ff fffe 	bl	0 <rs8721d_disable_int_butcpwm2>
+ 114:	2101      	movs	r1, #1
+ 116:	4620      	mov	r0, r4
+ 118:	f7ff fffe 	bl	0 <rs8721d_set_FwPwrMode_cmd>
+ 11c:	2101      	movs	r1, #1
+ 11e:	4620      	mov	r0, r4
+ 120:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+ 124:	2101      	movs	r1, #1
+ 126:	4620      	mov	r0, r4
+ 128:	f7ff fffe 	bl	0 <rs8721d_wlan_suspend>
+ 12c:	2101      	movs	r1, #1
+ 12e:	4608      	mov	r0, r1
+ 130:	f7ff fffe 	bl	0 <ROM_WIFI_32K_Cmd>
+ 134:	2601      	movs	r6, #1
+ 136:	e76a      	b.n	e <rs8721d_wlan_suspend+0xe>
+ 138:	2600      	movs	r6, #0
+ 13a:	2700      	movs	r7, #0
+ 13c:	e7d6      	b.n	ec <rs8721d_wlan_suspend+0xec>
+ 13e:	bf00      	nop
+ 140:	40080300 	.word	0x40080300
+ 144:	40080284 	.word	0x40080284
+ 148:	40080484 	.word	0x40080484
+ 14c:	4008048c 	.word	0x4008048c
+ 150:	00000000 	.word	0x00000000
+
+Disassembly of section .text.rs8721d_wlan_resume:
+
+00000000 <rs8721d_wlan_resume>:
+   0:	b510      	push	{r4, lr}
+   2:	460c      	mov	r4, r1
+   4:	2000      	movs	r0, #0
+   6:	2101      	movs	r1, #1
+   8:	f7ff fffe 	bl	0 <ROM_WIFI_32K_Cmd>
+   c:	4620      	mov	r0, r4
+   e:	2100      	movs	r1, #0
+  10:	f7ff fffe 	bl	0 <rs8721d_wlan_resume>
+  14:	4620      	mov	r0, r4
+  16:	f7ff fffe 	bl	0 <rs8721d_enable_interrupt>
+  1a:	4b1b      	ldr	r3, [pc, #108]	; (88 <rs8721d_wlan_resume+0x88>)
+  1c:	781b      	ldrb	r3, [r3, #0]
+  1e:	b2db      	uxtb	r3, r3
+  20:	f884 3110 	strb.w	r3, [r4, #272]	; 0x110
+  24:	bb63      	cbnz	r3, 80 <rs8721d_wlan_resume+0x80>
+  26:	2100      	movs	r1, #0
+  28:	4620      	mov	r0, r4
+  2a:	f7ff fffe 	bl	0 <rs8721d_wlan_resume>
+  2e:	2100      	movs	r1, #0
+  30:	4620      	mov	r0, r4
+  32:	f7ff fffe 	bl	0 <rs8721d_wlan_resume>
+  36:	4a15      	ldr	r2, [pc, #84]	; (8c <rs8721d_wlan_resume+0x8c>)
+  38:	6813      	ldr	r3, [r2, #0]
+  3a:	f423 2380 	bic.w	r3, r3, #262144	; 0x40000
+  3e:	6013      	str	r3, [r2, #0]
+  40:	f8d4 30e4 	ldr.w	r3, [r4, #228]	; 0xe4
+  44:	b19b      	cbz	r3, 6e <rs8721d_wlan_resume+0x6e>
+  46:	e9d4 013a 	ldrd	r0, r1, [r4, #232]	; 0xe8
+  4a:	f502 7200 	add.w	r2, r2, #512	; 0x200
+  4e:	4b10      	ldr	r3, [pc, #64]	; (90 <rs8721d_wlan_resume+0x90>)
+  50:	6812      	ldr	r2, [r2, #0]
+  52:	681b      	ldr	r3, [r3, #0]
+  54:	b292      	uxth	r2, r2
+  56:	ea42 4203 	orr.w	r2, r2, r3, lsl #16
+  5a:	2300      	movs	r3, #0
+  5c:	4299      	cmp	r1, r3
+  5e:	bf08      	it	eq
+  60:	4290      	cmpeq	r0, r2
+  62:	d306      	bcc.n	72 <rs8721d_wlan_resume+0x72>
+  64:	3002      	adds	r0, #2
+  66:	f141 0100 	adc.w	r1, r1, #0
+  6a:	e9c4 013a 	strd	r0, r1, [r4, #232]	; 0xe8
+  6e:	2001      	movs	r0, #1
+  70:	bd10      	pop	{r4, pc}
+  72:	3202      	adds	r2, #2
+  74:	f143 0300 	adc.w	r3, r3, #0
+  78:	e9c4 233a 	strd	r2, r3, [r4, #232]	; 0xe8
+  7c:	2001      	movs	r0, #1
+  7e:	bd10      	pop	{r4, pc}
+  80:	2032      	movs	r0, #50	; 0x32
+  82:	f7ff fffe 	bl	0 <rtw_wakelock_timeout>
+  86:	e7ce      	b.n	26 <rs8721d_wlan_resume+0x26>
+  88:	400801c7 	.word	0x400801c7
+  8c:	40080284 	.word	0x40080284
+  90:	40080488 	.word	0x40080488
