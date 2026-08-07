@@ -29,10 +29,6 @@ python scripts/iot_power_reader_skill/iot_power_reader.py --duration 10 -o power
   ```powershell
   python scripts/iot_power_reader_skill/iot_power_reader.py -d CC-1A60BA0B0 --duration 5
   ```
-- **指定串口号（如 COM4）**：
-  ```powershell
-  python scripts/iot_power_reader_skill/iot_power_reader.py -p 4 --duration 5
-  ```
 
 ### 自定义采样间隔（默认 1 秒）
 ```powershell

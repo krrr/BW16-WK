@@ -2,7 +2,7 @@
 IOT Power USB Current Meter Real-time Data Reader (Python + iot_parser.dll)
 -------------------------------------------------------------------------
 Reads real-time Voltage (V), Current (mA/A), and Power (W) from IOT Power USB meters.
-Supports both Standard Serial Ports (COMx) and USB Direct Devices (e.g., CC-1A60BA0B0).
+Supports USB Direct Devices (e.g., CC-1A60BA0B0).
 Automatically extracts `iot_parser.dll` from IOT Power.exe if not found.
 """
 
@@ -161,20 +161,6 @@ class IoTPowerReader:
             return True
         else:
             print(f"[Error] Failed to open USB device '{device_name}'.", flush=True)
-            return False
-
-    def open_com(self, com_port: int) -> bool:
-        """Opens standard Serial COM port by number (e.g. 3 for COM3)"""
-        print(f"[Info] Opening COM{com_port} via SerialPort...", flush=True)
-        res = self.dll.iot_uart_open(com_port)
-        if res != 0 or self.dll.iot_uart_is_open() != 0:
-            self._is_opened = True
-            print(f"[Success] COM{com_port} opened successfully!", flush=True)
-            self.dll.iot_uart_send_initial()
-            self._warmup()
-            return True
-        else:
-            print(f"[Error] Failed to open COM{com_port}.", flush=True)
             return False
 
     def close(self):
@@ -341,7 +327,6 @@ class PeakAnalyzer:
 
 def main():
     parser = argparse.ArgumentParser(description="IOT Power USB Current Meter Real-time Reader & Peak Analyzer")
-    parser.add_argument("-p", "--port", type=int, help="Serial COM port number (e.g. 4 for COM4)")
     parser.add_argument("-d", "--device", type=str, help="USB direct device name (e.g. CC-1A60BA0B0)")
     parser.add_argument("-i", "--interval", type=float, default=1.0, help="Polling interval in seconds (default: 1s)")
     parser.add_argument("--duration", type=float, default=None, help="Optional duration in seconds to run before stopping automatically")
@@ -381,20 +366,12 @@ def main():
 
     if args.device:
         connected = reader.open_usb(args.device)
-    elif args.port is not None:
-        connected = reader.open_com(args.port)
     else:
         # Auto-detection mode: Scan USB Direct Devices first!
         scanned_usb = reader.get_scanned_usb_devices()
         if scanned_usb:
             print(f"[Auto-Detect] Found USB Direct Device: {scanned_usb[0]}", flush=True)
             connected = reader.open_usb(scanned_usb[0])
-        else:
-            print("[Auto-Detect] No USB direct devices found, trying COM ports...", flush=True)
-            for try_port in [3, 4, 5, 6, 7, 8]:
-                if reader.open_com(try_port):
-                    connected = True
-                    break
 
     if not connected:
         print("[Fatal] Could not connect to any IOT Power device. Ensure device is plugged in and software is not occupying it.", flush=True)
