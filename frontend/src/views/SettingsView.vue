@@ -67,7 +67,7 @@
             <span style="font-weight: 600; font-size: 0.9rem">Beacon Time Auto-Restore</span>
           </label>
           <small style="display: block; font-size: 0.85rem; color: var(--pico-muted-color); margin-top: -0.5rem; margin-bottom: 0.75rem;">
-            When enabled, syncing time samples surrounding Wi-Fi Beacon timestamps to Flash. On power cycle, RTC time is automatically restored from nearby Beacons.
+            When enabled, syncing time button samples surrounding Wi-Fi Beacon timestamps to Flash. On boot, RTC time is automatically restored from nearby Beacons.
             <span v-if="enableBeaconTimeSync && beaconRecordCount > 0" style="color: var(--pico-ins-color, #27ae60);"> ({{ beaconRecordCount }} AP records saved)</span>
           </small>
 
@@ -156,10 +156,10 @@
           <span style="font-weight: 600; font-size: 0.9rem">Enable Hour Schedule</span>
         </label>
         <small style="display: block; font-size: 0.85rem; color: var(--pico-muted-color); margin-bottom: 0.75rem;">
-          The AP is only allowed to turn on during the selected hours. Requires a valid RTC time.
+          The AP is only turned on during the selected hours. Requires a valid RTC time.
         </small>
 
-        <div v-if="scheduleEnable" style="margin-bottom: 0.75rem;">
+        <div v-if="scheduleEnable" class="schedule-div flex-box-h">
           <div class="hour-grid">
             <button
               v-for="h in 24"
@@ -173,7 +173,7 @@
               {{ h - 1 }}
             </button>
           </div>
-          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <div style="" class="schedule-btns flex-box-v">
             <button type="button" class="outline btn-sm" :disabled="savingSettings" @click="selectAllHours">Select all</button>
             <button type="button" class="outline btn-sm" :disabled="savingSettings" @click="clearAllHours">Clear</button>
           </div>
@@ -244,9 +244,46 @@ const dutyPeriodSec = ref(120)
 const dutyOnSec = ref(10)
 const clientHoldSec = ref(15)
 const scheduleEnable = ref(false)
+// 固件按 UTC 小时解释掩码；UI 上的 localHoursMask 按浏览器本地时区换算，
+// 读取时 utc->local，保存时 local->utc
 const scheduleHoursMask = ref(0)
+const localHoursMask = ref(0)
 const rtcTime = ref(0)
 const savingSettings = ref(false)
+
+// 本地相对 UTC 的偏移（分钟），东正西负；getTimezoneOffset() 是 UTC-本地，取反
+const tzOffsetMinutes = -new Date().getTimezoneOffset()
+const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'local'
+const tzLabel = computed(() => {
+  const sign = tzOffsetMinutes >= 0 ? '+' : '-'
+  const abs = Math.abs(tzOffsetMinutes)
+  const h = Math.floor(abs / 60)
+  const m = abs % 60
+  return `${tzName} (UTC${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''})`
+})
+
+// 小时粒度掩码换算，时区偏移按四舍五入取整小时（非整点偏移时区有 ±30min 边界误差）
+const utcMaskToLocal = (mask: number): number => {
+  const shift = Math.round(tzOffsetMinutes / 60)
+  let out = 0
+  for (let h = 0; h < 24; h++) {
+    if ((mask >> h) & 1) {
+      out |= 1 << ((((h + shift) % 24) + 24) % 24)
+    }
+  }
+  return out
+}
+
+const localMaskToUtc = (mask: number): number => {
+  const shift = Math.round(tzOffsetMinutes / 60)
+  let out = 0
+  for (let h = 0; h < 24; h++) {
+    if ((mask >> h) & 1) {
+      out |= 1 << ((((h - shift) % 24) + 24) % 24)
+    }
+  }
+  return out
+}
 
 const rtcInvalid = computed(() => rtcTime.value <= 1600000000)
 
@@ -298,6 +335,7 @@ const fetchSettings = async () => {
       }
       if (typeof data.schedule_hours_mask === 'number') {
         scheduleHoursMask.value = data.schedule_hours_mask
+        localHoursMask.value = utcMaskToLocal(scheduleHoursMask.value)
       }
     }
   } catch (err) {
@@ -325,7 +363,7 @@ const saveWifiSettings = async () => {
     message.error('AP on time must be shorter than the cycle period')
     return
   }
-  if (apPowersaveEnable.value && scheduleEnable.value && scheduleHoursMask.value === 0) {
+  if (apPowersaveEnable.value && scheduleEnable.value && localHoursMask.value === 0) {
     message.error('Select at least one hour for the schedule')
     return
   }
@@ -346,7 +384,7 @@ const saveWifiSettings = async () => {
         duty_on_sec: dutyOnSec.value,
         client_hold_sec: clientHoldSec.value,
         schedule_enable: scheduleEnable.value,
-        schedule_hours_mask: scheduleHoursMask.value
+        schedule_hours_mask: localMaskToUtc(localHoursMask.value)
       })
     })
 
@@ -364,19 +402,19 @@ const saveWifiSettings = async () => {
 }
 
 const isHourSelected = (hour: number) => {
-  return (scheduleHoursMask.value >> hour) & 1
+  return (localHoursMask.value >> hour) & 1
 }
 
 const toggleHour = (hour: number) => {
-  scheduleHoursMask.value ^= 1 << hour
+  localHoursMask.value ^= 1 << hour
 }
 
 const selectAllHours = () => {
-  scheduleHoursMask.value = 0xffffff
+  localHoursMask.value = 0xffffff
 }
 
 const clearAllHours = () => {
-  scheduleHoursMask.value = 0
+  localHoursMask.value = 0
 }
 
 const rebootDevice = async () => {
@@ -473,22 +511,42 @@ const startOta = () => {
 </script>
 
 <style scoped>
-.hour-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
+.schedule-div {
+  .hour-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 0.2rem;
+    width: 420px;
+    border: var(--pico-border-width) solid var(--pico-muted-color);
+    padding: 6px;
+    border-radius: var(--pico-border-radius);
+  }
 
-.hour-chip {
-  width: 2.6rem;
-  padding: 0.3rem 0;
-  font-size: 0.85rem;
-  margin-bottom: 0;
-}
+  .hour-chip {
+    aspect-ratio: 1;
+    padding: 0;
+    font-size: 0.72rem;
+    line-height: 1;
+    min-width: 0;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.hour-chip-on {
-  background: var(--pico-primary);
-  border-color: var(--pico-primary);
-  color: var(--pico-primary-inverse, #fff);
+  .hour-chip-on {
+    background: var(--pico-primary);
+    border-color: var(--pico-primary);
+    color: var(--pico-primary-inverse, #fff);
+  }
+
+  .schedule-btns {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+    button {
+      margin-bottom: 0;
+    }
+  }
 }
 </style>

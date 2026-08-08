@@ -16,8 +16,7 @@ extern "C" {
 #define AP_PS_DEBUG 1
 
 // wext_suspend_softap 未在 SDK 头文件中声明，这里按 wifi_util.c 中的定义补声明
-extern "C" void wext_suspend_softap(const char *ifname);
-extern "C" void wext_suspend_softap_beacon(const char *ifname);
+extern "C" void wifi_suspend_softap();
 // rltk_resume_softap 未在 SDK 头文件中声明，由 lib_wlan.a 导出
 extern "C" int rltk_resume_softap(const char *ifname);
 
@@ -40,13 +39,19 @@ static uint32_t g_wake_at_ms = 0;          // DUTY_SLEEP 唤醒时刻（millis �
 static bool g_schedule_empty_warned = false; // 已提示"调度开启但未选小时"
 
 static const uint32_t CLIENT_POLL_INTERVAL_MS = 2000;
-static const uint32_t SLEEP_CHUNK_MS = 1000;
+static const uint32_t SLEEP_CHUNK_MS = 2000;
+
+// 开机后强制保持 AP 开启的时长（秒）：即使当前时间不在允许调度内，也不在此时间段内关闭 AP
+#define BOOT_AP_HOLD_SEC 15
 
 // 判断 RTC 时间是否有效（2020-09-13 之后才认为是设置过的时间）
 static bool rtcTimeValid() {
     return rtc_read() > 1600000000UL;
 }
 
+// 判断某 unix 秒所在小时是否在允许开启的时段内
+// 注意：schedule_hours_mask 按 UTC 小时解释（(unix_sec/3600)%24 即为 UTC 时区的小时），
+// 前端 Web 页面负责在浏览器本地时区与 UTC 之间换算后再上报
 static bool hourAllowed(uint32_t unix_sec) {
     if (g_appSettings.schedule_enable != 1) return true;
     int hour = (unix_sec / 3600) % 24;
@@ -91,18 +96,8 @@ static void printWakelockStatus(const char *tag) {
 static void suspendSoftAP() {
     if (g_suspended) return;
 
-    SoftApClientList client_info;
-    client_info.count = AP_STA_NUM;
-    if (wifi_get_associated_client_list(&client_info, sizeof(client_info)) == RTW_SUCCESS) {
-        int n = client_info.count;
-        if (n > AP_STA_NUM) n = AP_STA_NUM;
-        for (int i = 0; i < n; i++) {
-            wext_del_station(WLAN1_NAME, client_info.mac_list[i].octet);
-        }
-    }
-
     wifi_enable_powersave();
-    wext_suspend_softap(WLAN1_NAME);  // 就是rltk_suspend_softap
+    wifi_suspend_softap();  // 内部会踢掉所有客户端然后调用rltk_suspend_softap
     g_suspended = true;
 
     // printWakelockStatus("suspendSoftAP");
@@ -311,7 +306,17 @@ static void enterApOn() {
 static void tickActive() {
     uint32_t now = millis();
 
-    // 时段边界：当前小时不允许开启时进入 SCHEDULE_OFF
+    // 开机后 BOOT_AP_HOLD_SEC 秒内固定保持 AP 开启（即使时间不在调度内也不关闭）
+    if (now < (uint32_t)BOOT_AP_HOLD_SEC * 1000) return;
+
+    // 客户端轮询节流
+    if (now - g_last_poll_ms < CLIENT_POLL_INTERVAL_MS) return;
+    g_last_poll_ms = now;
+
+    int clients = apPowerSaveClientCount();
+
+    // 分时段开启AP：当前小时不允许开启时进入 SCHEDULE_OFF；
+    // 但仍有客户端连接时保持 AP 开启
     if (g_appSettings.schedule_enable == 1) {
         if (g_appSettings.schedule_hours_mask == 0) {
             // 无任何允许时段：视为未配置，保持常开并告警一次
@@ -320,16 +325,16 @@ static void tickActive() {
                 g_schedule_empty_warned = true;
             }
         } else if (rtcTimeValid() && !hourAllowed(rtc_read())) {
+            if (clients > 0) {
+                g_saw_client = true;
+                g_last_client_ms = now;
+                return;  // HOLD：时段不允许但仍有客户端连接，保持 AP 开启
+            }
             enterScheduleOff();
             return;
         }
     }
 
-    // 客户端轮询节流
-    if (now - g_last_poll_ms < CLIENT_POLL_INTERVAL_MS) return;
-    g_last_poll_ms = now;
-
-    int clients = apPowerSaveClientCount();
     if (clients > 0) {
         g_saw_client = true;
         g_last_client_ms = now;
@@ -371,13 +376,14 @@ static void tickDutySleep() {
 #if AP_PS_DEBUG
     if (sleep_ms >= SLEEP_CHUNK_MS) {
         Serial.print("[APPowerSave] SLEEP_CHUNK_MS wake at ");
-        Serial.print(now);
+        Serial.print(millis());
         Serial.println(", still alive");
         Serial.flush();
     }
 #endif
 }
 
+// 分时段关闭
 static void tickScheduleOff() {
     pmu_acquire_wakelock(PMU_OS);
     // 调度被关闭或 RTC 失效：直接恢复 AP（异常兜底）
@@ -406,8 +412,17 @@ static void tickScheduleOff() {
     delay(chunk_ms);
 
     pmu_acquire_wakelock(PMU_OS);
+#if AP_PS_DEBUG
+    if (chunk_ms >= SLEEP_CHUNK_MS) {
+        Serial.print("[APPowerSave] SLEEP_CHUNK_MS wake at ");
+        Serial.print(millis());
+        Serial.println(", still alive");
+        Serial.flush();
+    }
+#endif
 }
 
+// 主入口，由main调用
 void apPowerSaveTick() {
     // BUSY 抑制：beacon 抓取等异步任务占用射频期间不允许休眠
     if (g_busy_count > 0) {
