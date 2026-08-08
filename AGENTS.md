@@ -31,8 +31,13 @@
 ```
 
 ### 文档位置
-单片机SDK参考源码: `lib/ameba-arduino-d-feature-platformio-support/Arduino_package`
-单片机手册：`docs/extracted`
+- 单片机SDK参考源码: `lib/ameba-arduino-d-feature-platformio-support/Arduino_package`
+- 单片机手册：`docs/extracted`
 
+### 其他工具
+- ARM 反编译工具：
+  `C:\Users\krrr\.platformio\packages\toolchain-gccarmnoneeabi\bin\arm-none-eabi-objdump.exe`
+- 使用电流计测量单片机实时电流 `scripts\iot_power_reader_skill\SKILL.md`
+  
 ## 编码规范
 - 不要随意删除代码里的注释

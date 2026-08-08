@@ -7,7 +7,8 @@
  *
  * 实现思路（避免 wifi_off 的驱动级重建）：
  * - 暂停：wext_suspend_softap(WLAN1_NAME) 挂起 softAP（先断开已关联客户端）
- * - 恢复：rltk_resume_softap(WLAN1_NAME)
+ * - 恢复：rltk_resume_softap(WLAN1_NAME) + reattachSoftApConfig()
+ *   （重新下发 beacon 帧并重建 WPA2 上下文，详见 ap_powersave.cpp）
  * - 省电：初始化时调用一次 wifi_enable_powersave()（IPS+LPS），
  *   softAP 挂起后驱动会自动关 RF，空闲任务进入 tickless 浅睡眠（KM4/KM0）。
  */

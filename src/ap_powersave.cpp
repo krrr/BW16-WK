@@ -1,5 +1,6 @@
 #include "ap_powersave.h"
 #include "settings.h"
+#include "main.h"
 #include <wifi_conf.h>
 #include <wifi_util.h>
 #include <wifi_structures.h>
@@ -65,6 +66,7 @@ static uint32_t nextAllowedHourStart(uint32_t unix_sec) {
     return base + 24 * 3600;  // 兜底：无允许小时时顺延 24 小时
 }
 
+// debug用
 static void printWakelockStatus(const char *tag) {
     uint32_t lock_mask = pmu_get_wakelock_status();
     Serial.print("[APPowerSave] ");
@@ -106,11 +108,53 @@ static void suspendSoftAP() {
     // printWakelockStatus("suspendSoftAP");
 }
 
+// 重新挂载 softAP 的 beacon 与 WPA2 安全上下文。
+// 反汇编 lib_wlan.a 确认：rltk_resume_softap 只做驱动侧"取消挂起"——重开 beacon
+// 硬件开关（rtw_hal_set_hwreg(hwvar8)）、清挂起标志（adapter+0x2315）、上报事件，
+// 但不会把 beacon 帧重新下发给固件，也不会重建 AP 的 WPA2/PSK 上下文。
+// 因此恢复后表现为：能响应 probe/auth、能收 assoc 请求（rtw_ap_update_sta_ra_info
+// 正常执行），但固件不发 beacon、4 次握手无法开始，客户端最终 deauth reason code(4)。
+//
+// 挂载 beacon 的真正路径是驱动模式切换：
+//   wext_set_mode(MASTER) -> setopmode_hdl -> rtl8721d_var_set_opmode
+//   -> ROM_WIFI_SetOpmodeAP + ROM_WIFI_RESUME_TxBeacon + start_bss_network
+// 首次上电由 wifi_start_ap 的 wext_set_mode(WLAN1, MASTER) 触发；恢复后驱动已处于
+// "MASTER 模式"，直接再调 MASTER 会被当成无变化不重挂，所以先切走（INFRA）再切回。
+// 这里复用 wifi_start_ap() 的纯 ioctl 配置流程（跳过会长时间假死的 apActivate 轮询）：
+// 反汇编 rtw_wx_set_ap_essid 确认 wext_set_ap_ssid 内部会走
+// rtw_generate_bcn_ie -> rtw_check_beacon_data -> rtw_hal_set_hwreg(beacon) -> psk_init，
+// 把 beacon 内容重新推给固件并重建安全上下文。
+static void reattachSoftApConfig() {
+    const char* ssid = g_appSettings.ap_ssid;
+    const char* pass = g_appSettings.ap_pass;
+
+    wext_set_auth_param(WLAN1_NAME, RTW_AUTH_80211_AUTH_ALG, RTW_AUTH_ALG_OPEN_SYSTEM);
+    wext_set_key_ext(WLAN1_NAME, RTW_ENCODE_ALG_CCMP, NULL, 0, 0, 0, 0, NULL, 0);
+    wext_set_passphrase(WLAN1_NAME, (const u8*)pass, strlen(pass));
+    wext_set_ap_ssid(WLAN1_NAME, (const u8*)ssid, strlen(ssid));
+    wext_set_channel(WLAN1_NAME, ap_channel);
+}
+
+// 恢复 softAP 的 beacon 发射：模式翻转（INFRA->MASTER）重新挂载 beacon，
+// 再走一遍配置 ioctl 重建安全上下文，最后直清固件 beacon 停止位兜底
+static void remountSoftAPBeacon() {
+    int ret_infra = wext_set_mode(WLAN1_NAME, RTW_MODE_INFRA);
+    int ret_master = wext_set_mode(WLAN1_NAME, RTW_MODE_MASTER);
+#if AP_PS_DEBUG
+    Serial.print("[APPowerSave] remount: mode->INFRA ret=");
+    Serial.println(ret_infra);
+    Serial.print("[APPowerSave] remount: mode->MASTER ret=");
+    Serial.println(ret_master);
+#endif
+
+    reattachSoftApConfig();
+}
+
 static void resumeSoftAP() {
     if (!g_suspended) return;
 
 #if AP_PS_DEBUG
-    Serial.print("[APPowerSave] start resume SoftAP");
+    Serial.println("[APPowerSave] start resume SoftAP");
     uint32_t resume_t0 = millis();
 #endif
     //  - 方案（rltk_resume_softap + WiFi.apbegin）：apbegin 内部重复走 wext_set_mode
@@ -119,14 +163,24 @@ static void resumeSoftAP() {
     //    已打开接口会触发 _netdev_open/_netdev_if2_open 无限递归 → 栈溢出崩溃。
     //  - 方案 wext_suspend_softap_beacon加wifi_rf_off的组合也无效，无法进入省电。
     //  - 方案 wifi_disable_powersave加rltk_resume_softap的组合能正常进入和恢复省电，但是恢复后ap不发beacon，恢复过程也耗费100多ms
-    wifi_resume_powersave();
+    // 反汇编 rtw_pm_set 确认：wifi_resume_powersave(type8) 只是切回 IPS=3/LPS=9，
+    // 不会在 SoftAP 挂起后先做完整的 IPS leave；紧接着的 rltk_resume_softap H2C 会卡在
+    // 驱动唤醒流程。wifi_disable_powersave() 会走 _rtw_pwr_wakeup 把 RF 真正拉起，
+    // 恢复 AP 后再重新使能 powersave，避免卡死并恢复 beacon。
+    if (wifi_disable_powersave() != RTW_SUCCESS) {
+        Serial.println("[APPowerSave] disable powersave failed, skip softap resume");
+        return;
+    }
 #if AP_PS_DEBUG
-        Serial.print("[APPowerSave] called resume_powersave");
+    Serial.println("[APPowerSave] called disable_powersave");
 #endif
 
     int ret = rltk_resume_softap(WLAN1_NAME);
 
     if (ret == 0) {
+        // rltk_resume_softap 不会重新下发 beacon 帧/重建安全上下文，
+        // 模式翻转重新挂载 beacon + 重建 WPA2 上下文 + 直清固件 beacon 停止位
+        remountSoftAPBeacon();
         g_suspended = false;
 #if AP_PS_DEBUG
         Serial.print("[APPowerSave] AP resumed in ");
@@ -220,6 +274,9 @@ static void enterDutySleep(uint32_t now) {
     suspendSoftAP();
     uint32_t period_sec = g_appSettings.duty_period_sec;
     if (period_sec == 0) period_sec = 120; // 兜底保护，防止除以 0 导致 HardFault 死机
+    #if AP_PS_DEBUG
+    period_sec = 25;
+    #endif
 
     uint32_t elapsed = now - g_window_start_ms;
     uint32_t period_ms = period_sec * 1000;
