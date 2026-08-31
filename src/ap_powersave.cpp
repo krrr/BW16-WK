@@ -1,6 +1,7 @@
 #include "ap_powersave.h"
 #include "settings.h"
 #include "main.h"
+#include "attacker.h"
 #include <wifi_conf.h>
 #include <wifi_util.h>
 #include <wifi_structures.h>
@@ -42,7 +43,7 @@ static const uint32_t CLIENT_POLL_INTERVAL_MS = 2000;
 static const uint32_t SLEEP_CHUNK_MS = 2000;
 
 // 开机后强制保持 AP 开启的时长（秒）：即使当前时间不在允许调度内，也不在此时间段内关闭 AP
-#define BOOT_AP_HOLD_SEC 15
+#define BOOT_AP_HOLD_SEC 30
 
 // 判断 RTC 时间是否有效（2020-09-13 之后才认为是设置过的时间）
 static bool rtcTimeValid() {
@@ -366,7 +367,14 @@ static void tickDutySleep() {
     }
 
     // 按 SLEEP_CHUNK_MS 分块休眠，在 delay 期间释放 PMU_OS wakelock 让 CPU 进入 tickless 浅睡眠
+    // 攻击感知：分块不超过距下次攻击开火的时间，保证定时攻击准点醒开发包
     uint32_t sleep_ms = (remaining < SLEEP_CHUNK_MS) ? remaining : SLEEP_CHUNK_MS;
+    uint32_t attack_remain = attackerMsUntilNextFire();
+    if (attack_remain != UINT32_MAX && attack_remain < sleep_ms) {
+        sleep_ms = attack_remain;
+    }
+    if (sleep_ms == 0) return;  // 已到攻击时刻，立即交由 attackerTick 发包
+
     pmu_set_max_sleep_time(sleep_ms);
     pmu_release_wakelock(PMU_OS);
 
@@ -405,6 +413,13 @@ static void tickScheduleOff() {
     }
     uint32_t chunk_sec = (remaining_sec < 60) ? remaining_sec : 60;
     uint32_t chunk_ms = chunk_sec * 1000;
+
+    // 攻击感知：分块不超过距下次攻击开火的时间，保证定时攻击准点醒开发包
+    uint32_t attack_remain = attackerMsUntilNextFire();
+    if (attack_remain != UINT32_MAX && attack_remain < chunk_ms) {
+        chunk_ms = attack_remain;
+    }
+    if (chunk_ms == 0) return;  // 已到攻击时刻，立即交由 attackerTick 发包
 
     pmu_set_max_sleep_time(chunk_ms);
     pmu_release_wakelock(PMU_OS);

@@ -120,6 +120,24 @@
                             <td>{{ dev.lastSeen }}</td>
                             <td>
                               <button
+                                v-if="!isTargeted(ap.bssid, dev.mac)"
+                                @click="addToAttack(ap, dev)"
+                                title="Add to attack schedule"
+                                class="outline btn-sm"
+                                style="margin-right:0.25rem;"
+                              >
+                                Add
+                              </button>
+                              <button
+                                v-else
+                                disabled
+                                title="Already in attack schedule, can be removed in attack page"
+                                class="outline btn-sm"
+                                style="margin-right:0.25rem;color:var(--muted-color);border-color:var(--muted-color);"
+                              >
+                                ✓ Added
+                              </button>
+                              <button
                                 @click="deauthDevice(ap.bssid, dev.mac, ap.channel)"
                                 :aria-busy="!!deauthing[ap.bssid + '-' + dev.mac]"
                                 :class="{ 'pointer-ev-auto': !!deauthing[ap.bssid + '-' + dev.mac] }"
@@ -160,6 +178,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import Dropdown from '../components/Dropdown.vue'
 import { message } from '../utils/message'
+import { addTarget, loadPlan, type AttackTarget } from '../utils/attackPlan'
 
 interface ApAdvancedInfo {
   uptime?: number
@@ -227,6 +246,26 @@ const deviceResults = ref<Record<string, DeviceInfo[]>>({})
 const deviceEventSource = ref<EventSource | null>(null)
 
 const deauthing = ref<Record<string, boolean>>({})
+
+// 攻击计划草稿目标（sessionStorage）：设备 -> "已加入" 标记
+const targetedKeys = ref<Record<string, boolean>>({})
+const targetedKey = (bssid: string, mac: string) => mac + '|' + bssid
+const isTargeted = (bssid: string, mac: string) => targetedKeys.value[targetedKey(bssid, mac)] === true
+
+const addToAttack = (ap: NetworkInfo, dev: DeviceInfo) => {
+  if (isTargeted(ap.bssid, dev.mac)) return
+  const t: AttackTarget = {
+    mac: dev.mac,
+    bssid: ap.bssid,
+    ssid: ap.ssid || '(Hidden)',
+    channel: ap.channel,
+    rssi: dev.rssi || 0,
+    lastSeen: dev.lastSeen,
+  }
+  addTarget(t)
+  targetedKeys.value[targetedKey(ap.bssid, dev.mac)] = true
+  message.success(`Added to attack plan: ${dev.mac}`)
+}
 
 const expandedBssids = ref<Record<string, boolean>>({})
 
@@ -352,9 +391,9 @@ const deauthDevice = async (bssid: string, mac: string, channel: number) => {
         if (data.success) {
           if (data.detected) {
             const delaySec = (data.handshake_delay_ms / 1000).toFixed(1)
-            message.success(`Deauth attack on ${mac}: Handshake captured (${delaySec}s)`, 8000)
+            message.success(`Deauth attack on ${mac} Handshake captured (${delaySec}s)`, 8000)
           } else {
-            message.warning(`Deauth attack on ${mac}: Completed, no handshake captured`, 8000)
+            message.warning(`Deauth attack on ${mac} Completed, no handshake captured`, 8000)
           }
         } else {
           message.error(`Deauth attack on ${mac} failed`, 8000)
@@ -526,6 +565,10 @@ const isVirtualMac = (mac: string): boolean => {
 
 onMounted(() => {
   loadPersisted()
+  // 用攻击计划草稿同步"已加入"标记（同标签页内与攻击页共享 sessionStorage）
+  for (const t of loadPlan().targets) {
+    targetedKeys.value[targetedKey(t.bssid, t.mac)] = true
+  }
 })
 
 onUnmounted(() => {

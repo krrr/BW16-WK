@@ -13,3 +13,5 @@ void handleSettingsApi(HttpClient& client);
 void handleOtaApi(HttpClient& client);
 void handleRebootApi(HttpClient& client);
 void handleDeepSleepApi(HttpClient& client);
+void handleAttackStatusApi(HttpClient& client);
+void handleAttackPlanApi(HttpClient& client);

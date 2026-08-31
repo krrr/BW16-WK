@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "beacon_sync.h"
 #include "ap_powersave.h"
+#include "attacker.h"
 #include "wifi_drv.h"
 #include "lwip_netconf.h"
 #include "http/HttpServer.h"
@@ -60,6 +61,8 @@ static constexpr uint32_t HASH_API_OTA            = djb2_hash("/api/ota");
 static constexpr uint32_t HASH_API_REBOOT         = djb2_hash("/api/reboot");
 static constexpr uint32_t HASH_API_DEEPSLEEP      = djb2_hash("/api/deepsleep");
 static constexpr uint32_t HASH_API_SETTINGS       = djb2_hash("/api/settings");
+static constexpr uint32_t HASH_API_ATTACK         = djb2_hash("/api/attack");
+static constexpr uint32_t HASH_API_ATTACK_PLAN    = djb2_hash("/api/attack/plan");
 
 static void dispatchRequest(HttpClient& client) {
     String path = client.path();
@@ -101,6 +104,12 @@ static void dispatchRequest(HttpClient& client) {
             break;
         case HASH_API_SETTINGS:
             handleSettingsApi(client);
+            break;
+        case HASH_API_ATTACK:
+            handleAttackStatusApi(client);
+            break;
+        case HASH_API_ATTACK_PLAN:
+            handleAttackPlanApi(client);
             break;
         default:
             handleNotFound(client);
@@ -155,6 +164,9 @@ void setup() {
     // 初始化 powersave（IPS+LPS）：softAP 挂起期间驱动自动关 RF，
     // 配合 FreeRTOS tickless 让主 CPU 进入浅睡眠
     apPowerSaveInit();
+
+    // 恢复闪存中的定时攻击计划
+    attackerInit();
 }
 
 void loop() {
@@ -165,6 +177,9 @@ void loop() {
         }
         client.stop();
     }
+
+    // 定时攻击引擎（powersave 模式下间隔期分块浅睡眠）
+    attackerTick();
 
     // 占空比省电状态机（睡眠期间内部会分块阻塞等待唤醒）
     apPowerSaveTick();

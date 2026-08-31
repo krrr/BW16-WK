@@ -196,7 +196,7 @@
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <input type="file" ref="otaFileInput" accept=".bin" style="margin-bottom: 0; flex: 1" :disabled="otaUploading" />
-          <button @click="startOta" :disabled="otaUploading" :aria-busy="otaUploading" class="" style="width: auto; margin-bottom: 0">
+          <button @click="startOta" :disabled="otaUploading" :aria-busy="otaUploading" class="outline" style="margin-bottom: 0">
             {{ otaUploading ? 'Uploading...' : 'Start Update' }}
           </button>
         </div>

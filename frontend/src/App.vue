@@ -11,6 +11,9 @@
         <router-link to="/scan">
           <li>Scan</li>
         </router-link>
+        <router-link to="/attack">
+          <li>Attack</li>
+        </router-link>
         <router-link to="/settings">
           <li>Settings</li>
         </router-link>

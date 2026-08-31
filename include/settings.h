@@ -5,6 +5,16 @@
 #define FLASH_MEMORY_APP_BASE 0x00200000  // 4MB flash
 
 #pragma pack(push, 4)
+// 定时攻击目标（闪存持久化，加入时快照）
+struct AttackTargetRecord {
+    uint8_t mac[6];       // 目标客户端 MAC
+    uint8_t bssid[6];     // 所属热点 BSSID
+    uint8_t channel;      // 热点信道
+    uint8_t pad;          // 对齐
+    char ssid[33];        // 热点名（页面显示）
+    int8_t rssi;          // 加入计划时 RSSI 快照
+};
+
 struct BeaconTimeRecord {
     uint8_t bssid[6];        // AP MAC address
     uint8_t channel;         // AP Wi-Fi channel
@@ -32,6 +42,17 @@ struct AppSettings {
     uint16_t client_hold_sec;    // 客户端全部断开后的保持宽限（秒），默认 15
     uint32_t schedule_hours_mask;// bit0..23 = 0..23 点是否允许开启 AP
     uint8_t reserved2[4];        // Alignment padding
+
+    // === 定时攻击（前端"开始/停止"时一次性提交完整计划落盘） ===
+    uint8_t attack_enabled;      // 1 = 攻击运行中（重启后自动恢复）
+    uint8_t attack_type;         // 0 = deauth（预留扩展）
+    uint8_t attack_ps_enable;    // 攻击省电模式（仅 ap_powersave_enable==1 时允许）
+    uint8_t attack_reserved;     // Alignment padding
+    uint8_t attack_target_count; // 有效目标数量
+    uint8_t attack_reserved2[3]; // Alignment padding
+    AttackTargetRecord attack_targets[16];
+    uint32_t attack_interval_ms; // 攻击间隔（毫秒），支持小数秒，1000..3600000
+
     uint32_t checksum;      // CRC-32 checksum at the end
 };
 #pragma pack(pop)

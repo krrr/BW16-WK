@@ -28,7 +28,7 @@
         <span v-if="timeDiff !== null && timeDiff > 30" style="color:var(--del-color,#c0392b);font-size:0.9em;">
           (Offset <span>{{ Math.round(timeDiff) }}</span> s)
         </span>
-        <button v-if="timeDiff !== null && timeDiff > 3" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">Sync Time</button>
+        <button v-if="timeDiff !== null && timeDiff > 1" @click="syncTime" class="outline contrast btn-sm" style="margin-left:0.4rem">Sync Time</button>
       </p>
       <footer>
         <small v-if="compileDate">Firmware Build: {{ compileDate }}</small>
