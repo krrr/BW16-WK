@@ -21,10 +21,10 @@ HttpClient::HttpClient():
 {
 }
 
-HttpClient::HttpClient(uint8_t sock):
+HttpClient::HttpClient(int8_t sock):
     _sock(sock), recvTimeout(3000), _contentLength(0)
 {
-    _is_connected = ((sock >= 0) && (sock != 0xFF));
+    _is_connected = (sock >= 0);
 }
 
 HttpClient::~HttpClient()
@@ -34,7 +34,7 @@ HttpClient::~HttpClient()
 
 uint8_t HttpClient::connected()
 {
-    if ((_sock < 0) || (_sock == 0xFF)) {
+    if (_sock < 0) {
         _is_connected = false;
         return 0;
     }
@@ -123,12 +123,20 @@ size_t HttpClient::write(const uint8_t *buf, size_t size)
         return 0;
     }
 
-    if (!clientdrv.sendData(_sock, buf, size)) {
-        setWriteError();
-        _is_connected = false;
-        return 0;
+    size_t totalSent = 0;
+    while (totalSent < size) {
+        size_t chunkSize = size - totalSent;
+        if (chunkSize > 4096) {
+            chunkSize = 4096;
+        }
+        if (!clientdrv.sendData(_sock, buf + totalSent, (uint16_t)chunkSize)) {
+            setWriteError();
+            _is_connected = false;
+            return totalSent;
+        }
+        totalSent += chunkSize;
     }
-    return size;
+    return totalSent;
 }
 
 HttpClient::operator bool()

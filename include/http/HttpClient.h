@@ -7,7 +7,7 @@
 class HttpClient: public Client {
 public:
     HttpClient();
-    HttpClient(uint8_t sock);
+    HttpClient(int8_t sock);
     ~HttpClient();
 
     // Client / Stream implementation
